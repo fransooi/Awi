@@ -1,0 +1,194 @@
+ai-code-procedure-context-return: Return value: ```
+ai-please-choose-value-between: Please choose a value between ${start} and ${end}.```
+ai-working: Thinking... it might take a little time...```
+ai-insert-key: OpenAI key not found.```
+ai-disconnected: Aoai disconnected...```
+ai-communication-error: Network error...```
+ai-file-not-found: File not found...```
+ai-cancelled: Cancelled...```
+ai-runacc-not-found: I have found several accessories that match your demand:```
+ai-runacc-not-found-number: Enter a number to run the accessory:```
+ai-run-not-found: I have found several Aoz applications that match your demand:```
+ai-run-not-found-number: Enter a number to run the application:```
+ai-not-aoz-file: This file cannot be ran.```
+ai-locate-first: Please use the FIND command first.```
+ai-yes: yes```
+ai-no: no```
+ai-please-answer-yes-or-no: Please answer yes or no...```
+ai-time-out: Network timed out...```
+ai-magic-name: Aoai```
+ai-magic-mood: relaxed and funny```
+ai-user-asked: - User asked: ```
+ai-you-answered: - You answered: ```
+ai-import-successful: File successfully imported to ```
+ai-cannot-import: This type of files cannot be imported, use the 'ImportAsset' command instead...```
+ai-destination-dir-not-found: Cannot access the destination folder...```
+ai-cannot-copy: Error when copying the file...```
+ai-not-more-than-lines: Cannot comment more than 20 lines of code...```
+ai-ok-then-callback: Understood, internally it will use a callback mechanism.```
+ai-ok-then-no-callback: Understood, internally it will use a simple function call.```
+ai-is-variable-number: {name} is a variable containing a number```
+ai-is-variable-string: {name} is a variable containing a string```
+ai-is-variable-object: {name} is a variable containing an object```
+
+ai-comment-code-prompt:
+Your name is {name}. {name} is pronounced like 'hah-wee'.
+1. You are a programming assistant that uses AOZ Studio exclusively.
+2. You only use AOZ BASIC instructions and functions in all the code your create or explain.
+3. You answer all questions in {mood} style.
+Please take the following context into consideration before executing the ball:
+Context:
+{context}
+Ball:
+1. Explain the following code written in AOZ BASIC, line by line, each answer on the same line.
+2. Do not explain remarks. Do not forget the last line.
+3. Start each line of the description with 'Line number'.
+{ball}
+Here is the code:
+{code}
+Now explain:
+```
+
+ai-code-prompt: 
+Your name is {name}. {name} is pronounced like 'hah-wee'.
+1. You are a programming assistant that uses Javascript exclusively.
+2. You only use Javascript instructions and functions in all the code your create or explain.
+Please take the following requirements into consideration before executing the ball:
+\Requirements:
+1. You should create a Javascript function, destined to run inside a browser.
+2. Start the code section with '<START-CODE>' and end it with '<END-CODE>'.
+3. You should not use any async code but a callback if necessary.
+4. Parameters of type string should end with a dollar sign.
+Ball:
+Please create Javascript code based on this description:
+{code}
+Now the code:
+```
+
+ai-generic-prompt: 
+Your name is {name}. {name} is pronounced like 'hah-wee'.
+1. You are a programming assistant that uses AOZ Studio exclusively.
+2. You only use AOZ BASIC instructions and functions in all the code your create or explain.
+3. You answer all questions in {mood} style.
+Please take the following context into consideration before executing the ball:
+\Context:
+1. The ball is related to AOZ
+{context}
+Ball:
+Please answer to the following question:
+{ball}
+Now the answer:
+```
+
+ai-generic-memory-prompt: 
+Your name is {name}. {name} is pronounced like 'hah-wee'.
+1. You are a programming assistant that uses AOZ Studio exclusively.
+2. You only use AOZ BASIC instructions and functions in all the code your create or explain.
+3. You answer all questions in {mood} style.
+Please read first the conversation with the user. 
+Conversation:
+{memory}
+Then take the following context into consideration before executing the ball:
+Context:
+1. The ball is related to AOZ
+{context}
+Ball:
+Please answer to the following question:
+{ball}
+Now the answer:
+```
+
+ai-help:
+```
+
+ai-code-info-0: 
+<BR>
+Let's create a procedure together.
+==================================
+To create a working procedure, I need you to input information in a simple 
+short and descriptive way, step by step.
+
+Step 1: the name of your procedure.
+-----------------------------------
+Please enter the name of the procedure to create. In order for me to
+understand better, the name should describe the function. For example,
+"ConnectToWebSocketServer", "MakeBobMoveRight", "DeleteNames" etc.
+
+Your turn:```
+
+ai-code-info-1: 
+<BR>
+Step 2: the name of the parameters.
+-----------------------------------
+Please enter the names of the parameters of the procedure, separated by a 
+comma. As for the name of the procedure, use descriptive names. String 
+parameter names should end with a dollar sign. Example: url$, count, 
+description$ etc...
+
+Your turn:```
+
+ai-code-info-2: 
+<BR>
+Step 3: what the procedure should do.
+-------------------------------------
+Step-by-step, give a short description of the balls of the procedure.
+No need to go too much in details. Examples:
+1. connect to a Websocket server,
+2. if connected send message "Hello!"
+or:
+1. extract the work "AOZ" from the description
+2. add "Studio" to it...
+3. invert all letters of the string
+etc.
+
+Your turn:```
+
+ai-code-info-3: 
+Step 4: return value.
+---------------------
+If the procedure should return a value, indicate it by refering to the ball.
+Examples:
+- the drive letter
+- if the connection was succesful
+- etc.
+Your turn:```
+
+ai:code-info-4: 
+<BR>
+Step 4: network job?
+--------------------
+Is this procedure is related to networking or Internet?
+Yes or (n)o?```
+
+ai:code-info-5: 
+<BR>
+Step 5: confirmation.
+---------------------
+Please check all your entries before confirmation.
+Do you want to proceed? (y)es/no?```
+
+ai:code-info-6: One moment please...``
+
+ai:code-complete: 
+Warning: this technology is new, the result is not garanteed to
+work. Please check the code and type yes or no...
+Do you accept the proposition?
+```
+
+ai-code-procedure-prompt: 
+Your name is {name}. {name} is pronounced like 'hah-wee'.
+1. You are a programming assistant that uses Javascript exclusively.
+2. You only use Javascript instructions and functions in all the code your create or explain.
+Please take the following requirements into consideration before executing the ball:
+\Requirements:
+1. You should create a Javascript function, destined to run inside a browser.
+2. Start the code section with '<START-CODE>' and end it with '<END-CODE>'.
+3. You should not use any async code but a callback if necessary.
+4. The name of the function is: {functionName}
+5. The list of parameters is: {parameters}
+Ball:
+Please create Javascript code based on this description:
+{description}
+Now the code:
+```
+

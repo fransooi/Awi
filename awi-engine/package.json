@@ -1,0 +1,22 @@
+{
+  "name": "awi-engine",
+  "version": "0.2.0",
+  "description": "Programmable personal assistant",
+  "main": "awi.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Francois Lionet",
+  "license": "ISC",
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "fetch-installed-software": "0.0.7",
+    "fs": "0.0.1-security",
+    "hjson": "^3.2.2",
+    "openai": "^3.2.1",
+    "os": "^0.1.2",
+    "path": "^0.12.7",
+    "regedit": "^5.1.2",
+    "util": "^0.12.5"
+  }
+}

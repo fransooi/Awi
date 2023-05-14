@@ -1,0 +1,22 @@
+{
+  "name": "tree-engine",
+  "version": "0.0.1",
+  "description": "Awi Runtime",
+  "main": "plant.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "game-engine",
+    "awi",
+    "runtime",
+    "openai",
+    "ai",
+    "assistant",
+    "programmable",
+    "Norway",
+    "Friend"
+  ],
+  "author": "Francois Lionet",
+  "license": "UNLICENSED"
+}

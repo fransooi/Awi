@@ -1,0 +1,67 @@
+/*@****************************************************************************
+*
+*         / \
+*        / _ \               (°°)      Intelligent
+*       / ___ \ [ \ [ \ [  ][    ]     Programmable
+*     _/ /   \ \_\ \/\ \/ /  |  |      Personal Assistant
+* (_)|____| |____|\__/\__/  [_||_]     https://patreon.com/francoislionet
+*
+****************************************************************************@*/
+
+Awi-Engine Open Source License v1.0
+
+Copyright (c) 2023 Francois Lionet
+
+Permission is hereby granted, free of charge, to any person obtaining a copy 
+of this software and associated documentation files (the "Software"), 
+to deal in the Software without restriction, including without limitation 
+the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+and/or sell copies of the Software, subject to the following conditions:
+
+1. Any use, modification, or distribution of the Software, or any modified 
+versions derived from the Software, must adhere to the conditions 
+outlined in this license.
+
+2. If the Software, or any modified versions derived from the original 
+Software, is used for commercial purposes, the following copyright notice 
+must be included in all copies or substantial portions of the Software: 
+"Original Awi-Engine Copyright (c) 2023 Francois Lionet". 
+In addition, the Software may only be used for commercial purposes if 
+a separate commercial license is obtained from the copyright holder.
+
+3. The Software is free for use by educational institutions, organizations 
+focused on supporting people with disabilities, organizations focused on 
+supporting homeless individuals, and other organizations or associations 
+promoting good causes, as determined by the copyright holder.
+
+4. The Software is free for use by individuals or families for 
+non-commercial purposes.
+
+5. This licence stays intact in its intent and constraints, with modifications
+authorized for sub-licencing the new branch of modified code.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OF 
+THE SOFTWARE.
+
+Which means (this is not legal text, just the intention when writing it)...
+
+If it is a for a good cause, you can make money from it and your work.
+
+The licence will pass to others using your branch of modifications, so
+it will be free as well for them for good causes, and you will be 
+able to exploit the licence of your modifications without owning 
+royalties to me. 
+
+The licence will grow from branch to branch, only for good causes, 
+it is not a ponzi scheme as the flow of money is cut at every new branch. 
+Profits can only go up, except for the FIRST and ONLY creator of the branch.
+A simple tree structure.
+
+If you are using this code for other purposes then it is subject to 
+royalties to be negociated, please contact me: fl@helloawi.com
+

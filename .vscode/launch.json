@@ -12,7 +12,8 @@
 			"skipFiles": [
 				"<node_internals>/**"
 			],
-			"program": "${workspaceFolder}/simple-node-prompt.js"
+			"program": "${workspaceFolder}/simple-node-prompt.js",
+            "args": [  "" ]
 		}
 	]
 }

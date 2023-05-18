@@ -205,23 +205,27 @@ class Awi
 				var connector = this.systemConfig.connectors[ c ];
 				var dot = connector.name.indexOf( '.' );
 				var classname = connector.name.substring( 0, dot );
-				var name = connector.name.substring( dot + 1 );
-				if ( name.indexOf( '*' ) >= 0 || name.indexOf( '?' ) >= 0 )
+				var filter = connector.name.substring( dot + 1 );
+				if ( filter.indexOf( '*' ) >= 0 || filter.indexOf( '?' ) >= 0 )
 				{
 					var answer = await this.system.getDirectory( this.config.getEnginePath() + '/connectors/' + classname, { recursive: true, filters: [ '*.js' ] } );					
 					var files = this.utilities.getFileArrayFromTree( answer.data );
 					for ( var f = 0; f < files.length; f++ )
 					{
-						var filename = this.utilities.parse( files[ f ].name ).name;
-						var exports = require( './connectors/' + classname + '/' + filename );
+						var name = this.utilities.parse( files[ f ].name ).name;
+						var namepos = name.lastIndexOf( '-' );
+						var classpos = name.lastIndexOf( '-', namepos - 1 );
+						var classname = name.substring( classpos + 1, namepos );
+						var cName = name.substring( namepos + 1 );
+						var exports = require( './connectors/' + classname + '/' + name );
 						this.connectors[ classname ] = ( typeof this.connectors[ classname ] == 'undefined' ? {} : this.connectors[ classname ] );
 						this.newConnectors[ classname ] = ( typeof this.newConnectors[ classname ] == 'undefined' ? {} : this.newConnectors[ classname ] );
 						var instance = new exports.Connector( this, {} );
-						this.connectors[ classname ][ instance.name ] = instance;
-						this.newConnectors[ classname ][ instance.name ] = exports.Connector;
+						this.connectors[ classname ][ cName ] = instance;
+						this.newConnectors[ classname ][ cName ] = exports.Connector;
 						var answer = await instance.connect( connector.options );
-						answers[ answer.data.classname ] = typeof answers[ answer.data.classname ] == 'undefined' ? [] : answers[ answer.data.classname ];
-						answers[ answer.data.classname ] = { success: answer.success, data: answer.data };
+						answers[ cName ] = typeof answers[ answer.data.classname ] == 'undefined' ? [] : answers[ answer.data.classname ];
+						answers[ cName ] = { success: answer.success, data: answer.data };
 					}	
 				}
 			}
@@ -298,11 +302,11 @@ class Awi
 				{
 					if ( !answers[ d ][ dd ].nonFatal )
 					{
-					this.connected = false;
-					break;
+						this.connected = false;
+						break;
+					}
 				}
 			}
-		}
 		}
 		var answer = {};
 		var prompt = '\nThe Awi-Engine version ' + this.version + '\n';
@@ -343,6 +347,10 @@ class Awi
 	getPersonality( name )
 	{
 		return this.config.getPersonality( name );
+	}
+	getConnector( classname, name, options = {} )
+	{
+		return this.connectors[ classname ][ name ];
 	}
 	cleanResponse( text )
 	{

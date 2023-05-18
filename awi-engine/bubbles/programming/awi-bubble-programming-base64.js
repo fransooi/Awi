@@ -21,36 +21,23 @@
 */
 var awibubbles = require( '../awi-bubbles' )
 
-class BubbleAwiBin extends awibubbles.Bubble
+class BubbleProgrammingBase64 extends awibubbles.Bubble
 {
 	constructor( awi, options = {} )
 	{
 		super( awi, options );
-		this.name = 'Bin';
-		this.token = 'bin';
-		this.classname = 'awi';
-		this.properties.action = 'converts an expression to a binary number';
-		this.properties.inputs = [ { userInput: 'the expression to convert to binary', type: 'string' } ];
-		this.properties.outputs = [ { bin: 'the expression converted to binary', type: 'number' } ];
+		this.name = 'Base64';
+		this.token = 'base64';
+		this.classname = 'programming';
+		this.properties.action = 'converts an image to Base 64 Ascii code';
+		this.properties.inputs = [ { userInput: 'the path or filter to the image', type: 'string' } ];
+		this.properties.outputs = [ { base64: 'the image converted to base64', type: 'string' } ];
 		this.properties.brackets = true;
-		this.properties.tags = [ 'conversions', 'mathematics', 'education', 'programming' ];
+		this.properties.tags = [ 'programming' ];
 	}
 	async play( line, parameters, control )
 	{
-		await super.play( line, parameters, control );
-		
-		var answer = await this.awi.language.doEval( parameters.userInput, {} );
-		if ( answer.success )
-		{
-			var result = '%' + this.awi.utilities.toBin( answer.data, 16 );
-			this.awi.editor.print( this, [ result ], { user: 'result' } );
-			answer.data = result;
-		}
-		else
-		{
-			this.awi.editor.print( this, [ answer.error ], { user: 'error' } );
-		}
-		return answer;
+		return await super.play( line, parameters, control );		
 	}
 	async playback( line, parameters, control )
 	{
@@ -61,4 +48,4 @@ class BubbleAwiBin extends awibubbles.Bubble
 		super.transpile( line, data, control );
 	}
 }
-module.exports.Bubble = BubbleAwiBin;
+module.exports.Bubble = BubbleProgrammingBase64;

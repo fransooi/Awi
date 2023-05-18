@@ -30,7 +30,7 @@ class MemoryAwiError extends awimemory.Memory
 		this.token = 'error';
 		this.classname = 'awi';
 		this.properties.action = "handle Alzheinmer?";
-		this.properties.inputs = [ { lastError: 'the error', type: 'error' } ],
+		this.properties.inputs = [ ],
 		this.properties.outputs = [ ];
 		this.properties.subTopics.push( ...[ 'memory', 'error' ] );
 		this.properties.tags = [ 'memory', 'error' ];

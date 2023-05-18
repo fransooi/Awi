@@ -120,7 +120,7 @@ class Memory extends awibulbs.Bulb
 		}
 		else
 		{
-			command.errorClass = 'newSouvenirs';
+			command.errorClass = 'newMemories';
 			command.parentClass = 'newMemories';
 			return super.addBubble( command, parameters, {} );
 		}

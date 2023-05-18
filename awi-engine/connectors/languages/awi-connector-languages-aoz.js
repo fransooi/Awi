@@ -4,7 +4,7 @@
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
 *     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
-* (_)|____| |____|\__/\__/  [_||_]  \     Assistant
+* (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
 * This file is open-source under the conditions contained in the 
 * license file located at the root of this project.
@@ -216,6 +216,7 @@ class ConnectorLangageAoz extends awiconnector.Connector
 			{ name: 'tan', token: 'Math.tan', inType: 'self.awi.config.degreeToRadian' },
 		];
 		line = line.split( ' ' ).join( '' );
+		var self = this;
 		function getWord( name )
 		{
 			for ( var w = 0; w < mathWords.length; w++ )
@@ -228,7 +229,6 @@ class ConnectorLangageAoz extends awiconnector.Connector
 		}
 		function scan( line )
 		{
-			var word = getWord
 			for ( var w = 0; w < mathWords.length; w++ )
 			{
 				var word = mathWords[ w ];
@@ -263,7 +263,7 @@ class ConnectorLangageAoz extends awiconnector.Connector
 								currentName = '';
 							}
 						}
-						else if ( this.awi.utilities.getCharacterType( c ) == 'letter' )
+						else if ( self.awi.utilities.getCharacterType( c ) == 'letter' )
 						{
 							if ( currentName == '' )
 								startName = end;

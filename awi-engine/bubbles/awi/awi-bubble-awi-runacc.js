@@ -4,7 +4,7 @@
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
 *     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
-* (_)|____| |____|\__/\__/  [_||_]  \     Assistant
+* (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
 * This file is open-source under the conditions contained in the 
 * license file located at the root of this project.
@@ -75,17 +75,13 @@ class BubbleAwiRunacc extends awibubbles.Bubble
 		}
 		return { success: false, data: data, error: 'awi:cancelled:iwa' };
 	}
+	async playback( line, parameters, control )
+	{
+		return await super.playback( line, parameters, control );		
+	}
 	async transpile( line, data, control )
 	{
 		super.transpile( line, data, control );
-	}
-	async undo( options )
-	{
-		super.undo( options );
-	}
-	async redo( options )
-	{
-		super.redo( options );
 	}
 }
 module.exports.Bubble = BubbleAwiRunacc;

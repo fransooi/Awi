@@ -4,7 +4,7 @@
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
 *     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
-* (_)|____| |____|\__/\__/  [_||_]  \     Assistant
+* (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
 * This file is open-source under the conditions contained in the 
 * license file located at the root of this project.
@@ -83,8 +83,8 @@ class ConnectorEditorCommandline extends awiconnector.Connector
 					self.inputEnabled = true;
 					self.inputHandle = null;
 				}, 250 );
-		if ( line )
-			this.readline.write( line );
+			if ( line )
+				this.readline.write( line );
 			return;
 		}
 		if ( options.toPrint )

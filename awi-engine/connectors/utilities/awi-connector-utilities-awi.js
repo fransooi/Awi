@@ -369,7 +369,8 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		{
 			if ( !tree )
 			{
-				if ( this.awi.system.exists( destinationPath ).success )
+				var answer = await this.awi.system.exists( destinationPath );
+				if ( answer.success )
 				{
 					tree = await this.awi.system.getDirectory( destinationPath, options );
 					tree = tree.data;
@@ -382,7 +383,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			{
 				var file = tree[ f ];
 				if ( !file.isDirectory )
-					this.awi.system.unlink( file.path );
+					await this.awi.system.unlink( file.path );
 				else
 				{
 					if ( options.recursive )
@@ -394,7 +395,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 				}
 			}
 			if ( count > 0 || !options.keepRoot )
-				this.awi.system.rmdir( destinationPath );
+				await this.awi.system.rmdir( destinationPath );
 			return true;
 		}
 		catch( error )
@@ -422,7 +423,8 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 	}
 	async statsIfExists( path )
 	{
-		if ( this.awi.system.exists( path ).success )
+		var answer = await this.awi.system.exists( path );
+		if ( answer.success )
 			return await this.awi.system.stat( path );
 		return { success: false, data: null };
 	}
@@ -527,7 +529,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		{
 			var answer = await this.loadFile( path, { encoding: 'utf8' } );
 			if ( !answer.success )
-			return answer;
+				return answer;
 			return this.awi.system.hJsonParse( answer.data );
 		}
 		catch( e )
@@ -648,6 +650,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 				var pos = line.indexOf( 'href=', start );
 				result.links.push( this.extractString( line, pos ) );
 				result.found = true;
+				line = line.substring( 0, start ) + line.substring( end + 1 );
 			}
 		}
 		if ( ( start = line.indexOf( '<video ', position ) ) >= 0 )
@@ -658,6 +661,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 				var pos = line.indexOf( 'src=', start );
 				result.videos.push( this.extractString( line, pos ) );
 				result.found = true;
+				line = line.substring( 0, start ) + line.substring( end + 1 );
 			}
 		}
 		if ( ( start = line.indexOf( '<audio ', position ) ) >= 0 )
@@ -668,6 +672,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 				var pos = line.indexOf( 'src=', start );
 				result.audios.push( this.extractString( line, pos ) );
 				result.found = true;
+				line = line.substring( 0, start ) + line.substring( end + 1 );
 			}
 		}
 		if ( ( start = line.indexOf( '<img ', position ) ) >= 0 )
@@ -678,9 +683,44 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 				var pos = line.indexOf( 'src=', start );
 				result.images.push( this.extractString( line, pos ) );
 				result.found = true;
+				line = line.substring( 0, start ) + line.substring( end + 1 );
 			}
 		}
+		if ( ( start = line.indexOf( '<', position ) ) >= 0 )
+		{
+			var end = line.indexOf( '>' );
+			if ( end >= 0 )
+			{
+				var pos = line.indexOf( 'src=', start );
+				result.images.push( this.extractString( line, pos ) );
+				result.found = true;
+				line = line.substring( 0, start ) + line.substring( end + 1 );
+			}
+		}
+		result.line = line;
 		return result;
+	}
+	cleanLinks( line )
+	{
+		var start = line.indexOf( '<' );
+		while( start >= 0 )
+		{
+			var end = line.indexOf( '>', start );
+			line = line.substring( 0, start ) + line.substring( end + 1 );
+			start = line.indexOf( '<' );
+		}
+		/*
+		var regex = [ /([a-zA-Z]{3})\s(\d{1,2}),\s(\d{4})\s(\d{1,2}):(\d{2}):(\d{2})(am|pm|AM|PM)?/ ];
+		var found = this.matchRegex( line, regex );
+		while ( found )
+		{
+			var start = line.indexOf( found[ 0 ] );
+			var end = start + found[ 0 ].length;
+			line = line.substring( 0, start ) + line.substring( end );
+			found = this.matchRegex( line, regex );
+		}
+		*/
+		return line.trim();
 	}
 	getFinalHtmlData( structure )
 	{
@@ -888,6 +928,8 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 	}
 	matchRegex( text, regex )
 	{
+		if ( !this.isArray( regex ) )
+			regex = [ regex ];
 		for ( var r = 0; r < regex.length; r++ )
 		{
 			var matches = text.match( regex[ r ] ); 
@@ -948,15 +990,19 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		[
 			"JanuFebrMarsApriMay JuneJulyAuguSeptOctoNoveDece",
 			"JanvFevrMarsAvriMai JuinJuilAoutSeptOctoNoveDece",
-			"JanvFevrMarsAvriMai JuinJuilAoûtSeptOctoNoveDece",
+			"JanvFévrMarsAvriMai JuinJuilAoûtSeptOctoNoveDéce",
 		]
 		var nMonth;
 		month = month.substring( 0, 4 ).toLowerCase();
 		for ( var n = 0; n < monthList.length; n++ )
 		{		
-			nMonth = monthList[ n ].toLowerCase().indexOf( month ) / 4 + 1;
-			if ( nMonth >= 1 )
+			var nMonth = monthList[ n ].toLowerCase().indexOf( month );
+			if ( nMonth >= 0 )
+			{
+				nMonth /= 4;
+				nMonth++;
 				break;
+			}
 		}
 		if ( nMonth < 1 )
 			nMonth = monthReplacement;
@@ -1068,8 +1114,57 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 				else
 					result.name = path.substring( 0, lastDot )
 			}
+			if ( result.name == '' && result.ext == '' )
+			{
+				result.dir += '/' + result.base;
+				result.base = '';
+			}
 		}
 		return result;
+	}
+	matchTwoStrings( string1, string2, options = {} )
+	{
+		if ( this.isArray( string1 ) )
+			string1 = string1.join( ' ' );
+		if ( this.isArray( string2 ) )
+			string2 = string2.join( ' ' );
+		string1 = string1.split( '\n' ).join( ' ' );
+		string2 = string2.split( '\n' ).join( ' ' );
+		if ( options.caseInsensitive )
+		{
+			string1 = string1.toLowerCase();
+			string2 = string2.toLowerCase();
+		}
+		var words1 = string1.split( ' ' );
+		var words2 = string2.split( ' ' );
+		if ( words1.length == 0 )
+			return { result: 0, count: 0 };
+		var count = 0;
+		for ( var w1 = 0; w1 < words1.length; w1++ )
+		{
+			for ( var w2 = 0; w2 < words2.length; w2++ )
+			{
+				if ( words1[ w1 ].indexOf( words2[ w2 ] ) >= 0 )
+					count++;
+			}
+		}
+		return { result: count / words1.length, score: count / words2.length, count: count };
+	}
+	removeDuplicatedLines( text )
+	{
+		var lines = text.split( '\n' );
+		for ( var l1 = 0; l1 < lines.length; l1++ )
+		{
+			var l3 = l1 + 1;
+			var line1 = lines[ l1 ];
+			for ( var l2 = l3; l2 < lines.length; l2++ )
+			{
+				if ( lines[ l2 ].length > 0 && lines[ l2 ] != line1 )
+					lines[ l3++ ] = lines[ l2 ];
+			}
+			lines.length = l3;
+		}
+		return lines.join( '\n' );
 	}
 }
 module.exports.Connector = ConnectorUtilitieAwi

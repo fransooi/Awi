@@ -4,7 +4,7 @@
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
 *     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
-* (_)|____| |____|\__/\__/  [_||_]  \     Assistant
+* (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
 * This file is open-source under the conditions contained in the 
 * license file located at the root of this project.
@@ -90,17 +90,13 @@ class BubbleAwiImport extends awibubbles.Bubble
 			return await importFile( files[ param.data.userInput - 1 ].path );
 		return { success: false, error: 'awi:cancelled:iwa', data: {} };
 	}
+	async playback( line, parameters, control )
+	{
+		return await super.playback( line, parameters, control );		
+	}
 	async transpile( line, data, control )
 	{
 		super.transpile( line, data, control );
-	}
-	async undo( options )
-	{
-		super.undo( options );
-	}
-	async redo( options )
-	{
-		super.redo( options );
 	}
 }
 module.exports.Bubble = BubbleAwiImport;

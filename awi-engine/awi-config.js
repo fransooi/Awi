@@ -41,6 +41,7 @@ class Config
 			this.getDataPath = config.data;
 		this.user = '';
 		this.configs = {};
+		this.systemName = 'win32';
 	}
 	isUserLogged()
 	{
@@ -151,25 +152,25 @@ class Config
 		return { success: true, data: '' };
 	}
 	async loadConfigs()
-		{
+	{
 		var answer = await this.awi.system.getDirectory( this.getConfigurationPath(), { recursive: false, filters: [ '*.hjson' ] } );					
 		if ( answer.success )
-			{
+		{
 			var files = this.awi.utilities.getFileArrayFromTree( answer.data );
 			for ( var f = 0; f < files.length; f++ )
-				{ 
+			{
 				answer = await this.awi.utilities.loadHJSON( files[ f ].path );
 				if ( !answer.success )
 					break;
 				var name = this.awi.utilities.parse( files[ f ].name ).name.toLowerCase();
 				this.configs[ name ] = answer.data;
-				}
 			}
+		}
 		if ( !this.configs[ 'user' ] )
-					{								
+		{
 			await this.loadConfig( 'system' );
 			await this.loadConfig( 'user' );
-			}
+		}
 		return answer;
 	}
 	async loadConfig( type, callback )
@@ -190,7 +191,7 @@ class Config
 						serverUrl: 'ws://194.110.192.59:8765',
 						prompts:
 						{
-							user: '.',
+							user: '. ',
 							awi: '.. ',
 							result: '.: ',
 							root: '.....',
@@ -203,6 +204,78 @@ class Config
 							debug1: 'debug1: ',
 							debug2: 'debug2: ',
 							debug3: 'debug3: ',
+							verbose1: '. ',
+							verbose2: '. ',
+							verbose3: '. ',
+						},
+						configs: 
+						{
+							win32:
+							{
+								paths:
+								{
+									image: { 
+										libraries: [ 'D:/Pictures' ], 
+										view: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
+										edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
+										run: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
+										filters: [ '*.png', '*.jpg', '*.jpeg', '*.gif', '*.psd' ] 
+									},
+									video: { 
+										libraries: [ 'D:/Videos' ], 
+										view: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
+										edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
+										run: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
+										filters: [ '*.mp4', '*.avi', '*.mpeg', '*.ogg' ] 
+									},
+									audio: { 
+										libraries: [ 'D:/Music' ], 
+										view: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
+										edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
+										run: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
+										filters: [ '*.mp3', '*.wav', '*.ogg' ] 
+									},
+									document: { 
+										libraries: [ 'D:/Documents' ], 
+										view: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
+										edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
+										run: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
+										filters: [ '*.txt', '*.pdf', '*.docx', '*.doc', '*.xls', '*.xsls', '*.ppt', '*.odf' ] 
+									},
+									source: { 
+										libraries: [ 'C:/Awi', 'C:/AOZ_Studio' ], 
+										view: { command: 'code "{file}"', cwd: '', type: 'exec' }, 
+										edit: { command: 'code "{file}"', cwd: '', type: 'exec' }, 
+										run: { command: 'code "{file}"', cwd: '', type: 'exec' }, 
+										filters: [ '*.js', '*.c', '*.cpp', '*.h', '*.hh', '*.py' ] 
+									},
+									html: { 
+										libraries: [], 
+										view: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
+										edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
+										run: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
+										filters: [ '*.html' ] 
+									},
+									executable: { 
+										libraries: [ 'C:/Program Files', 'C:/Program Files (x86)'], 
+										view: { command: 'start {file}', cwd: '"{dir}"', type: 'exec' }, 
+										edit: { command: 'start {file}', cwd: '"{dir}"', type: 'exec' }, 
+										run: { command: 'start {file}', cwd: '"{dir}"', type: 'exec' }, 
+										filters: [ '*.exe' ] 
+									},
+									any: { 
+										libraries: [], 
+										view: { command: 'explorer {file}', cwd: '', type: 'exec' }, 
+										edit: { command: 'explorer {file}', cwd: '', type: 'exec' }, 
+										run: { command: 'explorer {file}', cwd: '', type: 'exec' }, 
+										filters: [ '*.*' ] 
+									}
+								}
+							},
+							macOS: {},
+							linux: {},
+							android: {},
+							iPhone: {}
 						},
 					}
 					break;
@@ -228,6 +301,13 @@ class Config
 						system: 'node',
 						debug: 0,
 						developperMode: true,
+						verbose: 1,
+						verbosePrompts: 
+						{
+							verbose1: [ 'importer1', 'memory1' ],
+							verbose2: [ 'importer2', 'memory2' ],
+							verbose3: [ 'importer3', 'memory3' ]
+						},
 						debugPrompts: 
 						{
 							debug1: [ 'prompt' ],
@@ -279,6 +359,9 @@ class Config
 							debug1: '.[debug1] ',
 							debug2: '.[debug2] ',
 							debug3: '.[debug3] ',
+							verbose1: '.(oo) ',
+							verbose2: '.(oo) ',
+							verbose3: '.[oo] ',
 						}
 					};
 					break;
@@ -324,6 +407,17 @@ class Config
 		var userConfig = this.configs[ this.user ];
 		if ( !this.configs[ type ] )
 		{
+			for ( var v = userConfig.verbose; v >= 1; v-- )
+			{
+				var found = userConfig.verbosePrompts[ 'verbose' + v ].find( 
+					function( element )
+					{								
+						return element == type;
+					} );
+				if ( found )
+					return config.prompts[ 'verbose' + v ];
+			}
+
 			if ( userConfig.debug > 0 )
 			{
 				var found = userConfig.debugPrompts[ 'debug' + userConfig.debug ].find( 
@@ -382,6 +476,10 @@ class Config
 			return config.aiKey;
 		return '';
 	}
+	setVerbose( verbose )
+	{
+		this.getConfig( 'user' ).verbose = Math.max( Math.min( 3, verbose ), 1 );
+	}
 	getServerUrl()
 	{
 		if ( this.getConfig( 'system' ).directConnection )
@@ -389,6 +487,10 @@ class Config
 		if ( this.getConfig( 'user' ).localServer )
 			return 'ws://localhost:8765';
 		return this.configs[ 'system' ].serverUrl;
+	}
+	getCurrentSystem()
+	{
+		return this.configs.system.configs[ this.systemName ];
 	}
 	degreeToRadian( angle )
 	{

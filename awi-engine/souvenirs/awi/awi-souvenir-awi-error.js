@@ -30,7 +30,7 @@ class SouvenirAwiError extends awisouvenir.Souvenir
 		this.token = 'error';
 		this.klass = 'awi';
 		this.properties.action = "handle Alzheinmer?";
-		this.properties.inputs = [ { lastError: 'the error', type: 'error' } ],
+		this.properties.inputs = [ ],
 		this.properties.outputs = [ ];
 		this.properties.subTopics.push( ...[ 'souvenir', 'error' ] );
 		this.properties.tags = [ 'memory', 'souvenir', 'document' ];

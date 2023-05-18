@@ -4,7 +4,7 @@
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
 *     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
-* (_)|____| |____|\__/\__/  [_||_]  \     Assistant
+* (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
 * This file is open-source under the conditions contained in the 
 * license file located at the root of this project.
@@ -49,13 +49,13 @@ class Bulb extends awitree.Tree
 			brackets: false,
 			tags: [],
 			editables: [],
-			exits: { success: 'end' }
+			exits: { success: '' }
 		}
 		if ( options.exits )		
 		{
 			for ( var s in options.exits )
 				this.properties.exits[ s ] = options.exits[ s ];
-		}
+		}		
 	}
 	reset()
 	{
@@ -71,12 +71,12 @@ class Bulb extends awitree.Tree
 		var parent = command.parent ? command.parent : this.currentBubble;
 		var parentClass = ( typeof command.parentClass == 'undefined' ? 'newBubbles' : command.parentClass );
 		var classname =  ( typeof command.classname == 'undefined' ? 'awi' : command.classname );
-		var exits =  ( typeof command.exits == 'undefined' ? { success: 'end' } : command.exits );
+		var exits =  ( typeof command.exits == 'undefined' ? { success: '' } : command.exits );
 		var newBubble = new this.awi[ parentClass ][ classname ][ command.token ]( this.awi, { id: id, bulb: this, parent: parent, exits: exits, parameters: parameters } );
 		if ( typeof parent != 'string' )
-			{
+		{
 			parent.properties.exits.success = newBubble;
-			}
+		}
 		return newBubble;
 	}
 	addBubbles( commandList, control = {} )
@@ -89,8 +89,12 @@ class Bulb extends awitree.Tree
 	addBubble( command, parameters = [], control = {} )
 	{
 		var bubble, parentId;
-		if ( typeof command.exits == 'undefined' )
+		var doNew = true;
+		if ( typeof command.properties != 'undefined' && typeof command.properties.exits != 'undefined' )
+		{
 			bubble = command;
+			doNew = false;
+		}
 		if ( this.currentBubble )
 		{
 			command.parent = this.currentBubble;
@@ -103,16 +107,12 @@ class Bulb extends awitree.Tree
 			command.id = command.token;
 			parentId = 'treeroot';
 		}
+		if ( doNew )
 			bubble = this.newBubble( command, parameters, control );
 		bubble.previous = bubble.parent;
 		this.insert( parentId, bubble.id, bubble );		
 		if ( bubble.previous && typeof bubble.previous != 'string' )
-		{
-			if ( typeof command.exit != 'undefined' )
-		{
-				bubble.previous.exits[ command.exit ] = bubble;
-			}
-		}
+			bubble.previous.properties.exits.success = bubble;
 		this.currentBubble = bubble;
 		return bubble.id;
 	}
@@ -229,7 +229,6 @@ class Bulb extends awitree.Tree
 		control.start = null;
 
 		var answer;
-		var next;
 		this.working++;
 		do
 		{
@@ -238,62 +237,40 @@ class Bulb extends awitree.Tree
 			answer = await bubble.play( line, parameters, control );
 			if ( answer.success )
 			{
-				// Store parameters
-				if ( bubble.properties.outputs.length == 1 )
-				{
-					var output = this.awi.utilities.getBubbleParams( bubble.properties.outputs[ 0 ] );
-					bubble.data = answer.data;
-				}
-				else
-				{
-					for ( var o = 0; o < bubble.properties.length; o++ )
-					{
-						var output = this.awi.utilities.getBubbleParams( bubble.properties.outputs[ o ] );
-						bubble.data[ output.name ] = answer.data[ output.name ];
-					}
-				}
-
 				// Goto next
 				var exit;
-				next = answer.success;
+				var next = answer.success;
 				if ( next === true )
 					next = 'success';
 				if ( next != 'end' )
+					exit = bubble.properties.exits[ next ];
+				
+				// Store parameters
+				if ( answer.dataCallback )
 				{
-					switch ( bubble.properties.exits[ next ] )
+					answer.dataCallback( parameters );
+				}
+				else
+				{
+					if ( bubble.properties.outputs.length == 1 )
 					{
-						case 'self':
-							exit = bubble;
-							break;
-						case 'start':
-						case 'root':
-							exit = this.getBubble( 'root' );
-							break;
-						case 'previous':
-							debugger;
-							break;
-						case 'skip':
-							debugger;
-							break;
-						case 'end':
-							break;
-						default:
-							if ( next.indexOf( 'goto:' ) == 0 )
-							{
-								debugger;
-							}
-							else
-							{
-								exit = this.getBubble( exit );
-							}
-							break;
-					}		
+						var output = this.awi.utilities.getBubbleParams( bubble.properties.outputs[ 0 ] );
+						bubble.data = answer.data;
+					}
+					else
+					{
+						for ( var o = 0; o < bubble.properties.length; o++ )
+						{
+							var output = this.awi.utilities.getBubbleParams( bubble.properties.outputs[ o ] );
+							bubble.data[ output.name ] = answer.data[ output.name ];
+						}
+					}
 				}
 			}
 			else if ( answer.error )
 			{
 				this.awi.editor.print( this, answer.error.split( '\n' ), { user: 'error' } );
-				exit = this.getBubble( 'error' );
+				exit = null;
 			}
 			bubble = exit;
 		} while ( bubble );

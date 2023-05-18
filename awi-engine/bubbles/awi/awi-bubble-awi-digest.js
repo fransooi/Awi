@@ -4,7 +4,7 @@
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
 *     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
-* (_)|____| |____|\__/\__/  [_||_]  \     Assistant
+* (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
 * This file is open-source under the conditions contained in the 
 * license file located at the root of this project.
@@ -45,16 +45,14 @@ class BubbleAwiDigest extends awibubbles.Bubble
 		// Import one message list
 		async function importMessages( todo, options )
 		{
-			var answer = await self.awi.connectors.importers.messenger.import( todo.htmlPath, parameters.senderName, todo.contactNameCompressed, { result: todo, from: todo.from } ); 
+			var importer = self.awi.getConnector( 'importers', 'messenger', {} );
+			var answer = await importer.import( todo.htmlPath, parameters.senderName, todo.contactNameCompressed, { result: todo, from: todo.from } ); 
 			if ( answer.success )
-			{
+			{				
 				todo.done = true;
 				todo.error = false;
-				todo.directMemories = answer.data.directMemories;
-				todo.videoMemories = answer.data.videoMemories;
-				todo.audioMemories = answer.data.audioMemories;
-				todo.directMemories = answer.data.directMemories;
-				todo.directMemories = answer.data.directMemories;
+				todo.numberOfSouvenirs = answer.numberOfSouvenirs;
+				todo.memories = answer.data.memories;
 				todo.contactName = answer.data.contactName;
 			}
 			else
@@ -138,7 +136,7 @@ class BubbleAwiDigest extends awibubbles.Bubble
 			}		
 		}
 
-		var addedDirect = 0;		
+		var numberOfSouvenirs = 0;		
 		var invalid = [];
 		var valid = [];
 		for ( var td = 0; td < todo.length; td++ )
@@ -146,22 +144,17 @@ class BubbleAwiDigest extends awibubbles.Bubble
 			var tobedone = await importMessages( todo[ td ], {} );
 			if ( !tobedone.error )
 			{
-				var done = false;
-				var number = tobedone.directMemories.getNumberOfBubbles();
-				if ( number > 0 )
+				if ( tobedone.numberOfSouvenirs > 0 )
 				{
-					var parameters =
+					var params =
 					{
-						topic: tobedone.contactName,
-						subTopics: [ 'messenger', 'conversation' ],
+						contactName: tobedone.contactName,
 						referencePath: tobedone.htmlPath
 					}
-					self.awi.memories.awi.messenger.addMemory( tobedone.directMemories, parameters );
-					addedDirect += number;
-					done = true;
-				}
-				if ( done )
+					self.awi.memories.awi.messenger.addMemory( tobedone.memories, params );
+					numberOfSouvenirs += tobedone.numberOfSouvenirs;
 					valid.push( tobedone );
+				}
 			}
 			else
 			{
@@ -169,8 +162,8 @@ class BubbleAwiDigest extends awibubbles.Bubble
 			}
 		}
 		return {
-			addedConversations: todo.length,
-			addedDirect: addedDirect,
+			numberOfMemories: todo.length,
+			numberOfSouvenirs: numberOfSouvenirs,
 			invalid: invalid,
 			valid: valid
 		}
@@ -184,14 +177,14 @@ class BubbleAwiDigest extends awibubbles.Bubble
 		{
 			var result = 
 			{
-				addedConversations: 0,
-				addedDirect: 0,
+				numberOfMemories: 0,
+				numberOfSouvenirs: 0,
 				valid: [],
 				invalid: []
 			}	
 			parameters.contactName = parameters.userInput;
 	
-			var path = this.awi.utilities.normalize ( this.awi.config.getDataPath() );
+			var path = this.awi.utilities.normalize( this.awi.config.getDataPath() + '/todigest' );
 			var answer = await this.awi.system.getDirectory( path, { recursive: false } );
 			var tree = answer.data;
 			if ( tree )
@@ -202,16 +195,16 @@ class BubbleAwiDigest extends awibubbles.Bubble
 					if ( this[ dir.name ] )
 					{
 						var info = await this[ dir.name ]( dir.path, parameters );
-						result.addedConversations += info.addedConversations;
-						result.addedDirect += info.addedDirect;
+						result.numberOfMemories += info.numberOfMemories;
+						result.numberOfSouvenirs += info.numberOfSouvenirs;
 						result.valid.push( ...info.valid );
 						result.invalid.push( ...info.invalid );
 					}
 				}
 			}
 	
-			this.awi.editor.print( this, result.addedConversations + ' conversation(s) imported!', { user: 'information' } );
-			this.awi.editor.print( this, 'Number of direct memories: ' + result.addedDirect + '.', { user: 'information' } );
+			this.awi.editor.print( this, result.numberOfMemories + ' conversation(s) imported!', { user: 'information' } );
+			this.awi.editor.print( this, result.numberOfSouvenirs + ' souvenirs added.', { user: 'information' } );
 			if ( result.invalid.length > 0 )
 			{
 				this.awi.editor.print( self, 'These conversations could not be imported...', { user: 'warning' } );
@@ -224,17 +217,13 @@ class BubbleAwiDigest extends awibubbles.Bubble
 		}
 		return answer;
 	}
+	async playback( line, parameters, control )
+	{
+		return await super.playback( line, parameters, control );		
+	}
 	async transpile( line, data, control )
 	{
 		super.transpile( line, data, control );
-	}
-	async undo( options )
-	{
-		super.undo( options );
-	}
-	async redo( options )
-	{
-		super.redo( options );
 	}
 }
 module.exports.Bubble = BubbleAwiDigest;

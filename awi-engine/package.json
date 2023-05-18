@@ -12,6 +12,7 @@
     "child_process": "^1.0.2",
     "fetch-installed-software": "0.0.7",
     "fs": "0.0.1-security",
+    "he": "^1.2.0",
     "hjson": "^3.2.2",
     "openai": "^3.2.1",
     "os": "^0.1.2",

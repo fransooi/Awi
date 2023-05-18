@@ -1,3 +1,12 @@
+20230518 First source/folder of the Tree Engine, Awi runtime.
+20230518 Debugging/made work of "Digest/Messenger" and all system of memory
+20230518 "PlayWelcome" bubble that asks for user name an open-ai key
+20230518 Bubbles to make: "Diaporama" and "base64"
+20230518 "View", "Edit" and "Run" bubbles
+20230518 "Find" bubblke renamed to "List"
+20230518 New "Verbose" bubble: set the level of verbosity of the engine to 1, 2, or 3
+20230518 Implementation of verbose management
+
 20230514 First source of the Tree Engine: plant!(.js)
 20230514 Implementation of "Clients" connectors
 20230514 Correction of link to exits

@@ -30,7 +30,7 @@ class SouvenirAwiRoot extends awisouvenir.Souvenir
 		this.token = 'root';
 		this.klass = 'awi';
 		this.properties.action = "root of a branch of souvenirs";
-		this.properties.inputs = [ { lastError: 'the error', type: 'error' } ],
+		this.properties.inputs = [ ],
 		this.properties.outputs = [ ];
 		this.properties.subTopics.push( ...[ 'souvenir', 'error' ] );
 		this.properties.tags = [ 'memory', 'souvenir', 'document' ];

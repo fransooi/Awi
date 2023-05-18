@@ -4,7 +4,7 @@
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
 *     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
-* (_)|____| |____|\__/\__/  [_||_]  \     Assistant
+* (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
 * This file is open-source under the conditions contained in the 
 * license file located at the root of this project.
@@ -32,8 +32,9 @@ class BubbleAwiRemember extends awibubbles.Bubble
 		this.properties.action = 'recall all memories about a subject';
 		this.properties.inputs = [ 
 			{ userInput: 'the subject or person to remember', type: 'string', optional: true, default: '' },
-			{ kind: 'what kind of things to remember', type: 'string', optional: true, default: 'all' },
+			{ kind: 'what kind of things to remember', type: 'string', optional: true, default: 'messenger' },
 			{ brain: 'brain to take memories from', type: 'string', optional: true, default: 'awi' },
+			{ scanLevel: 'depth of the search, 1: direct souvenirs only, 2: indirect souvenirs, 3: deep search', type: 'number', interval: { start: 1, end: 3 }, optional: true, default: '2' },
 		];
 		this.properties.outputs = [ { memories: 'the list of memories', type: 'string.array' } ];
 		this.properties.brackets = false;
@@ -41,53 +42,67 @@ class BubbleAwiRemember extends awibubbles.Bubble
 	}
 	async play( line, parameters, control )
 	{
+		var previousLine = line;
 		await super.play( line, parameters, control );
 
-		var memories = [];
+		var directSouvenirs = [];
+		var indirectSouvenirs = [];
 		if ( parameters.kind == 'all' )
 		{
 			for ( var k in this.awi.memories[ parameters.brain ] )
 			{
 				if ( k != 'root' && k != 'current' && k != 'error' )
 				{
-					var answer = await this.awi.memories[ parameters.brain ][ k ].play( parameters.userInput, parameters );
-					if ( answer.success )
+					var answer = await this.awi.memories[ parameters.brain ][ k ].play( previousLine, parameters, { start: 'root', memory: { command: 'findSouvenirs', scanLevel: parameters.scanLevel } } );
+					if ( answer.success == 'found' )
 					{
-						memories.push( ...answer.data );
+						directSouvenirs.push( ...answer.data.indirectSouvenirs );
+						indirectSouvenirs.push( ...answer.data.directSouvenirs );
 					}
 				}
 			}
 		}
 		else
 		{
-			var answer = await this.awi.memories[ parameters.brain ][ parameters.kind ].play( parameters.userInput, parameters );
-			if ( answer.success )
+			var answer = await this.awi.memories[ parameters.brain ][ parameters.kind ].play( previousLine, parameters, { start: 'root', memory: { command: 'findSouvenirs', scanLevel: parameters.scanLevel } } );
+			if ( answer.success == 'found' )
 			{
-				memories.push( ...answer.data );
+				directSouvenirs.push( ...answer.data.indirectSouvenirs );
+				indirectSouvenirs.push( ...answer.data.directSouvenirs );
 			}
 		}
-		if ( memories.length > 0 )
+		var self = this;
+		async function printSouvenirs( memories )
 		{
-			this.awi.editor.print( this, 'I have found ' + memories.length + ' memories(s).', { user: 'information' } );
-			this.awi.editor.print( this, 'Memorizing...', { user: 'information' } );
-			return { success: true, data: data }
+			for ( var l = 0; l < memories.length; l++ )
+			{
+				var memory = memories[ l ];
+				await memory.play( '', {}, { start: 'root', memory: { command: 'printData', scanLevel: parameters.scanLevel } } );
+			}
 		}
-		this.awi.editor.print( this, [ 'I have no memories about this topic...' ], { user: 'information' } );
-		this.awi.editor.print( this, [ 'Please type "help digest" for information on how to import your own data into Awi...' ], { user: 'information' } );
-		this.awi.editor.print( this, [ 'Help digest' ], { user: 'command' } );
-		return { success: false, error: 'awi:no-memories:iwa' }
+		if ( directSouvenirs.length > 0 )
+		{
+			this.awi.editor.print( this, 'Found ' + answer.data.directSouvenirs.length + ' direct souvenir(s).', { user: 'information' } );
+			printSouvenirs( answer.data.directSouvenirs );
+		}
+		else 
+			this.awi.editor.print( this, 'No direct souvenir found.', { user: 'information' } );
+		if ( parameters.scanLevel > 1 && indirectSouvenirs.length > 0 )
+			this.awi.editor.print( this, 'Found ' + answer.data.indirectSouvenirs.length + ' indirect souvenir(s).', { user: 'information' } );
+		else 
+		{
+			this.awi.editor.print( this, 'No indirect souvenir found.', { user: 'information' } );
+			printSouvenirs( answer.data.indirectSouvenirs );
+		}
+		return { success: 'success', data: answer.data }
+	}
+	async playback( line, parameters, control )
+	{
+		return await super.playback( line, parameters, control );		
 	}
 	async transpile( line, data, control )
 	{
 		super.transpile( line, data, control );
-	}
-	async undo( options )
-	{
-		super.undo( options );
-	}
-	async redo( options )
-	{
-		super.redo( options );
 	}
 }
 module.exports.Bubble = BubbleAwiRemember;

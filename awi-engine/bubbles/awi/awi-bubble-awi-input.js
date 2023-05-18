@@ -4,7 +4,7 @@
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
 *     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
-* (_)|____| |____|\__/\__/  [_||_]  \     Assistant
+* (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
 * This file is open-source under the conditions contained in the 
 * license file located at the root of this project.
@@ -51,6 +51,9 @@ class BubbleAwiInput extends awibubbles.Bubble
 	async play( line, parameters, control )
 	{
 		await super.play( line, parameters, control );
+		if ( !parameters.inputInfo )
+			return { success: false, error: 'awi:cancelled:iwa' };
+			
 		var self = this;
 		var description = parameters.inputInfo.description.charAt( 0 ).toLowerCase() + parameters.inputInfo.description.substring( 1 );
 		this.properties.outputs[ 0 ] = {};
@@ -65,35 +68,40 @@ class BubbleAwiInput extends awibubbles.Bubble
 			{
 				var start = 0;
 				var c = self.awi.utilities.getCharacterType( line.charAt( start ) );
-				while( c != 'letter' && c != 'number' )
+				while( c != 'letter' && c != 'number' && start < line.length )
 				{
 					start++;
 					c = self.awi.utilities.getCharacterType( line.charAt( start ) );
 				}
 				line = line.substring( start );
-				if ( parameters.inputInfo.type == 'number' )
+				if ( line == '' )
 				{
-					var number = parseInt( line );
-					if ( !isNaN( number ) )
-					{
-						var interval = parameters.inputInfo.interval;
-						if ( interval )
-						{
-							if ( number < interval.start || number < interval.end )
-							{
-								self.awi.editor.print( this, [ 'Please enter a number between ' + interval.start + ' and ' + interval.end + '...' ], { user: 'information' } );
-								return;
-							}
-						}
-						result = number;
-					}
+					result = '<___cancel___>';
 				}
 				else
 				{
-					result = line;
+					if ( parameters.inputInfo.type == 'number' )
+					{
+						var number = parseInt( line );
+						if ( !isNaN( number ) )
+						{
+							var interval = parameters.inputInfo.interval;
+							if ( interval )
+							{
+								if ( number < interval.start || number < interval.end )
+								{
+									self.awi.editor.print( this, [ 'Please enter a number between ' + interval.start + ' and ' + interval.end + '...' ], { user: 'information' } );
+									return;
+								}
+							}
+							result = number;
+						}
+					}
+					else
+					{
+						result = line;
+					}
 				}
-				//;
-				//self.awi.editor.waitForInput( prompt, { toPrint: prompt } );
 				self.awi.editor.rerouteInput();
 			} );
 
@@ -110,26 +118,27 @@ class BubbleAwiInput extends awibubbles.Bubble
 						if ( typeof result != 'undefined' ) 
 						{
 							clearInterval( handle );
-							var data = {};
-							data[ parameters.inputInfo.name ] = result;
-							resolve( { success: true, data: data } );
+							if ( result == '<___cancel___>' )
+								resolve( { success: false, error: 'awi:cancelled:iwa' } );
+							else
+							{
+								var data = {};
+								data[ parameters.inputInfo.name ] = result;
+								resolve( { success: true, data: data } );
+							}
 						} 
 					} );
 			};
 			checkPaused();
 		} );
 	}
+	async playback( line, parameters, control )
+	{
+		return await super.playback( line, parameters, control );		
+	}
 	async transpile( line, data, control )
 	{
-		super.transpile( control );
-	}
-	async undo( options )
-	{
-		super.undo( options );
-	}
-	async redo( options )
-	{
-		super.redo( options );
+		super.transpile( line, data, control );
 	}
 }
 module.exports.Bubble = BubbleAwiInput;

@@ -7,7 +7,7 @@
 *          .       (°°) O-O-O                                              
 *     .          .[   ]]||||      The Tree Engine, Awi runtime             .
 *                 |  |  ||||      Awi, Programmable Personal Assistant 
-*   o.       (_)|_| |_| ||||      Turns conversations into execution. Fast.
+*   o.       (_)|_| |_| ||||      Turns conversations into execution.                         Fast.
 *
 * This file is open-source under the conditions contained in the 
 * licence file located at the root of this project.

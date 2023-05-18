@@ -21,19 +21,18 @@
 */
 var awibubbles = require( '../awi-bubbles' )
 
-class BubbleAwiBin extends awibubbles.Bubble
+class BubbleAwiVerbose extends awibubbles.Bubble
 {
 	constructor( awi, options = {} )
 	{
 		super( awi, options );
-		this.name = 'Bin';
-		this.token = 'bin';
+		this.name = 'verbose';
+		this.token = 'verbose';
 		this.classname = 'awi';
-		this.properties.action = 'converts an expression to a binary number';
-		this.properties.inputs = [ { userInput: 'the expression to convert to binary', type: 'string' } ];
-		this.properties.outputs = [ { bin: 'the expression converted to binary', type: 'number' } ];
-		this.properties.brackets = true;
-		this.properties.tags = [ 'conversions', 'mathematics', 'education', 'programming' ];
+		this.properties.action = 'sets the level of verbosity of awi';
+		this.properties.inputs = [ { userInput: 'the level of verbosity, from 1 to 3', type: 'number', interval: { start: 1, end: 3 }, optional: false } ];
+		this.properties.outputs = [];
+		this.properties.tags = [ 'system', '', '', '' ];
 	}
 	async play( line, parameters, control )
 	{
@@ -42,9 +41,16 @@ class BubbleAwiBin extends awibubbles.Bubble
 		var answer = await this.awi.language.doEval( parameters.userInput, {} );
 		if ( answer.success )
 		{
-			var result = '%' + this.awi.utilities.toBin( answer.data, 16 );
-			this.awi.editor.print( this, [ result ], { user: 'result' } );
-			answer.data = result;
+			var verbose = Math.floor( answer.data );
+			var oldVerbose = this.awi.getConfig( 'user' ).verbose;
+			if ( verbose != oldVerbose )
+			{
+				if ( verbose <= oldVerbose )
+					this.awi.editor.print( this, 'OK I will talk less from now on...', { user: 'root' } );		
+				else
+					this.awi.editor.print( this, 'OK I will talk more from now on...', { user: 'root' } );		
+				this.awi.config.setVerbose( verbose );
+			}
 		}
 		else
 		{
@@ -61,4 +67,4 @@ class BubbleAwiBin extends awibubbles.Bubble
 		super.transpile( line, data, control );
 	}
 }
-module.exports.Bubble = BubbleAwiBin;
+module.exports.Bubble = BubbleAwiVerbose;

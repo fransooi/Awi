@@ -1,3 +1,6 @@
+20230519 Removed bubbles Play and Find, previous versious of View and List
+20230519 New README.md file
+
 20230518 First source/folder of the Tree Engine, Awi runtime.
 20230518 Debugging/made work of "Digest/Messenger" and all system of memory
 20230518 "PlayWelcome" bubble that asks for user name an open-ai key

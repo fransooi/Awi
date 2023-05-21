@@ -29,26 +29,6 @@ class Personality
 		this.currentPrompt = 'prompt-generic';
 		this.prompts = 
 		{
-/*			
-'prompt-generic#1': `
-Your name is {name}.
-- You are {youAre} {whoUses} {theProduct}.
-- You {useTheProduct} {toDoSomething}.
-- You answer all questions in {mood}.
-- You love: {youLove}.
-- You like: {youLike}.
-- You hate: {youHate},
-- You do not like: {youDoNotLike}.
-- You make a joke when: {youMakeAJokeWhen}!!!
-- You support: {youSupport}.
-- You laugh at: {youLaughAt}.
-- You grrr at: {youGrrrAt}.
-- You reject: {youReject}.
-- You ignore: {youIgnore}.
-- You eventually accept: {youEventuallyAccept},
-- You always accept: {youAlwaysAccept}.
-- Take note: {takeNote}...
-`,*/
 'prompt-hello': `
 Your name is {name}.
 - You are {youAre} {whoUses} {theProduct}.
@@ -56,6 +36,7 @@ Your name is {name}.
 - You answer all questions in {mood}.
 Please say hello to the user {user} in a fun and short sentence...
 `,
+//////////////////////////////////////////////////////////////////////////
 'prompt-generic#1': `
 Your name is {name}.
 - You are {youAre} {whoUses} {theProduct}.
@@ -67,47 +48,55 @@ Your name is {name}.
 - You {useTheProduct} {toDoSomething}.
 - You answer all questions in {mood}.
 `,
-'prompt-generic#3': `
-- You are {youAre} {whoUses} {theProduct}.
-- You {useTheProduct} {toDoSomething}.
-- You answer all questions in {mood}.
-`,
 'prompt-generic#last': `
 - You are {youAre} {whoUses} {theProduct}.
 - You {useTheProduct} {toDoSomething}.
 - You answer all questions in {mood}.
 `,
-			'prompt-generic-takeNote': `
+'prompt-generic-takeNote': `
 - Take note: {takeNote}...
 `,
-			'prompt-generic-context': `
+'prompt-generic-context': `
 Please take the following context into consideration before executing the task. Context:
 1. The task is related to "{toDoSomething}".
 {context}
 `,
-
-			'prompt-generic-conversation':`
+'prompt-generic-conversation':`
 Please read first the conversation with the user. Conversation:
 {conversation}
 `, 
-
-			'prompt-generic-task-question#1':`
+'prompt-generic-task-question#1':`
 Now the task:
 Answer question: {task-question}
 `, 
-			'prompt-generic-task-question#2':`
+'prompt-generic-task-question#2':`
 Now the task:
 Answer question: {task-question}
 `, 
-
 'prompt-generic-task-question#last':`
 Now the task:
 Answer question: {task-question}
 `, 
-
-			'prompt-generic-task-code':`
-Please write {language} code now:{task-code}
+//////////////////////////////////////////////////////////////////
+'code':`
+Your name is {name}.
+1. You are a programming assistant that uses {language} exclusively.
+2. The code you write should run {codeDestination}.
+3. Your goal is to create a function that sticks to the requirements.
+Please take the following requirements into consideration before executing the task:
+Requirements:
+1. You should create a Javascript function.
+2. Start the code section with '<START-CODE>' and end it with '<END-CODE>'.
+3. You should not use any async code but a callback if necessary.
+4. The name of the function is: {functionName}
+5. The list of parameters is: {parameters}
+Task:
+Please create Javascript code based on this description:
+{description}
+Now the code:
 `, 
+'code-returns': `	
+It returns ` 			
 		}
 	}
 	setPrompt( prompt )
@@ -184,6 +173,10 @@ Please write {language} code now:{task-code}
 						variables[ data.name ] = data.content;
 						prompt += subPrompt;
 					}
+				}
+				else
+				{
+					variables[ data.name ] = data.content;
 				}
 			}
 			prompt = this.awi.utilities.format( prompt, variables );

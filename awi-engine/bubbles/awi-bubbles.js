@@ -56,7 +56,7 @@ class Bubble extends awitrees.TreeNode
 		this.value = {};
 		this.useCount = 0;
 	}
-	findEditable( name )
+	getEditable( name )
 	{
 		for ( var e = 0; e < this.properties.editables.length; e++ )
 		{
@@ -105,7 +105,7 @@ class Bubble extends awitrees.TreeNode
 			var parameter = this.awi.utilities.getBubbleParams( this.properties.inputs[ p ] );
 			if ( typeof parameters[ parameter.name ] == 'undefined' || parameters[ parameter.name ] == '' )
 			{
-				if ( typeof lineDatas[ parameter.name ] == 'undefined' )
+				if ( parameter.name != 'userInput' && typeof lineDatas[ parameter.name ] == 'undefined' )
 				{
 					if ( !parameter.optional )
 						todo.push( { token: 'input', classname: 'awi', parameters: [ parameter ], options: {}, exits: {} } );
@@ -138,17 +138,11 @@ class Bubble extends awitrees.TreeNode
 		this.userInput = line;
 		return { success: true };
 	}
-	exit( answer )
+	async playback( line, parameter, control )
 	{
-		return answer;
+		super.playback( line, parameter, control );
 	}
 	async transpile( /*data, control*/ )
-	{
-	}
-	undo( /*options*/ )
-	{
-	}
-	redo( /*options*/ )
 	{
 	}
 }

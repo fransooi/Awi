@@ -21,13 +21,13 @@
 */
 var awiconnector = require( '../awi-connector' );
 
-class ConnectorLangageAoz extends awiconnector.Connector
+class ConnectorLangageAozBasic extends awiconnector.Connector
 {
 	constructor( awi, options = {} )
 	{
 		super( awi, options );
 		this.name = 'Aoz Basic';
-		this.token = 'aoz';
+		this.token = 'aozbasic';
 		this.classname = 'language';
 		this.version = '0.2.1';
 		this.atom = options.atom;
@@ -413,4 +413,4 @@ class ConnectorLangageAoz extends awiconnector.Connector
 		return context;
 	}
 }
-module.exports.Connector = ConnectorLangageAoz;
+module.exports.Connector = ConnectorLangageAozBasic;

@@ -36,12 +36,12 @@ class SouvenirAwiRoot extends awisouvenir.Souvenir
 		this.properties.tags = [ 'memory', 'souvenir', 'document' ];
 		this.properties.content = [ 'text' ];
 	}
-	play( line, parameter, control )
+	async play( line, parameter, control )
 	{
 		super.play( line, parameter, control );
 		return { success: true, data: {} }
 	}
-	transpile( line, parameter, control )
+	async transpile( line, parameter, control )
 	{
 		return super.transpile( line, parameter, control );
 	}

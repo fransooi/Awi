@@ -822,10 +822,13 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 	}
 	getBubbleParams( props )
 	{
+		if ( typeof props.parameters != 'undefined' )
+			return props.parameters[ 0 ];
+
 		var param = {};
 		for ( var p in props )
 		{
-			if ( p == 'type' || p == 'interval' || p == 'default' || p == 'optional' )
+			if ( p == 'type' || p == 'interval' || p == 'default' || p == 'optional' || p == 'clear' || p == 'choices' )
 				param[ p ] = props[ p ];
 			else
 			{
@@ -958,29 +961,160 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		}
 		return text;
 	}	
-	compareTimestamps( timestamp1, timestamp2 )
+	getNumericValue( text )
 	{
-		var list = [ 'time', 'year', 'month', 'day', 'hours', 'minutes', 'seconds' ];
-		function checkIt( type )
+		var numbers = [ 'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
+						'ten', 'eleven', 'twelve', 'forteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 
+						'twenty', 'twenty-one', 'twenty-two', 'twenty-three', 'twenty-four', 'twenty-five', 'twenty-six', 'twenty-seven', 'twenty-eight', 'twenty-nine', 
+						'thirty', 'thirty-one', 'thirty-two', 'thirty-three', 'thirty-four', 'thirty-five', 'thirty-six', 'thirty-seven', 'thirty-eight', 'thirty-nine', 
+						'fourty', 'fourty-one', 'fourty-two', 'fourty-three', 'fourty-four', 'fourty-five', 'fourty-six', 'fourty-seven', 'fourty-eight', 'fourty-nine', 
+						'fifty', 'fifty-one', 'fifty-two', 'fifty-three', 'fifty-four', 'fifty-five', 'fifty-six', 'fifty-seven', 'fifty-eight', 'fifty-nine', 
+						'sixty', 'sixty-one', 'sixty-two', 'sixty-three', 'sixty-four', 'sixty-five', 'sixty-six', 'sixty-seven', 'sixty-eight', 'sixty-nine', 
+						'seventy', 'seventy-one', 'seventy-two', 'seventy-three', 'seventy-four', 'seventy-five', 'seventy-six', 'seventy-seven', 'seventy-eight', 'seventy-nine', 
+						'eighty', 'eighty-one', 'eighty-two', 'eighty-three', 'eighty-four', 'eighty-five', 'eighty-six', 'eighty-seven', 'eighty-eight', 'eighty-nine', 
+						'ninety', 'ninety-one', 'ninety-two', 'ninety-three', 'ninety-four', 'ninety-five', 'ninety-six', 'ninety-seven', 'ninety-eight', 'ninety-nine', 
+						]
+		text = text.trim().toLowerCase().split( ' ' ).join( '-' );
+		if ( this.getCharacterType( text.charAt( 0 ) ) == 'number' )
 		{
-			if ( timestamp1[ type ] && timestamp2[ type ] )
+			var value = parseInt( text );
+			if ( !isNaN( value ) )
+				return value;
+			return -1;
+		}
+		var index = numbers.findIndex( 
+			function( element )
 			{
-				if ( timestamp1[ type ] < timestamp2[ type ] )
-					return -1;
-				if ( timestamp1[ type ] > timestamp2[ type ] )
-					return 1;
-				return 0;
-			}					
-		}
-		var check;
-		for ( var l = 0; l < list.length; l++ )
-		{
-			check = checkIt( list[ l ] );
-			if ( check < 0 )
-				return -1;
-		}
-		return check;
+				return element == text;
+			}
+		)
+		return index;
 	}
+	getInterval( interval )
+	{
+		var start = new Date();
+		var end = new Date();
+		if ( interval == 'yesterday' )
+		{
+			start.setDay( start.getDay() - 1 );
+			end.setDay( end.getDay() - 1 );
+			start.setHours( 0, 0, 0, 0 );
+			end.setHours( 23, 59, 59, 999 );
+		}
+		if ( interval.indexOf( 'last' ) == 0 )
+		{
+			var words = interval.split( ' ' );
+			var day = words.find( function( element ) { return element == 'day'; } );
+			var month = words.find( function( element ) { return element == 'month'; } );
+			var year = words.find( function( element ) { return element == 'year'; } );
+			if ( day )
+			{
+				start.setDay( start.getDay() - 1 );
+				end.setDay( end.getDay() - 1 );
+				start.setHours( 0, 0, 0, 0 );
+				end.setHours( 23, 59, 59, 999 );
+			}
+			else if ( month )
+			{
+				var m = start.getMonth() - 1;
+				if ( m > 0 )
+				{
+					start.setMonth( m, 1 );
+					end.setMonth( m, 1 );
+				}
+				else
+				{
+					start.setFullYear( start.getYear() - 1, 0, 1 );
+					end.setFullYear( start.getYear() - 1, 0, 1 );
+				}
+				start.setHours( 0, 0, 0, 0 );
+				end.setHours( 23, 59, 59, 999 );
+			}
+			else if ( year )
+			{
+				start.setFullYear( start.getYear() - 1, 0, 1 );
+				end.setFullYear( end.getYear() - 1, 0, 1 );
+				start.setHours( 0, 0, 0, 0 );
+				end.setHours( 23, 59, 59, 999 );
+			}
+		}
+		if ( interval.indexOf( 'ago' ) >= 0 )
+		{
+			var day = words.find( function( element ) { return element == 'day' || element == 'days'; } );
+			var month = words.find( function( element ) { return element == 'month' || element == 'months'; } );
+			var year = words.find( function( element ) { return element == 'month' || element == 'months'; } );
+			var number = words.find(
+				function( element ) 
+				{ 
+					return self.getNumericValue( element ) >= 0;
+				} );
+			if ( number )
+				number = this.getNumericValue( number );
+			if ( day )
+			{
+				var year = start.getYear();
+				var month = start.getMonth();
+				for ( var n = 0; n < number; n++ )
+				{
+					start.setDay( start.getDay() - 1 );
+					end.setDay( end.getDay() - 1 );
+				}
+				start.setHours( 0, 0, 0, 0 );
+				end.setHours( 23, 59, 59, 999 );
+			}
+			else if ( month )
+			{
+				for ( var n = 0; n < number; n++ )
+		{
+					var m = start.getMonth() - 1;
+					if ( m > 0 )
+			{
+						start.setMonth( m, 1 );
+						end.setMonth( m, 1 );
+			}					
+					else
+					{
+						start.setFullYear( start.getYear() - 1, 0, 1 );
+						end.setFullYear( end.getYear() - 1, 0, 1 );
+					}
+				}
+				start.setHours( 0, 0, 0, 0 );
+				end.setHours( 23, 59, 59, 999 );
+		}
+			else if ( year )
+		{
+				start.setFullYear( start.getYear() - 1, 0, 1 );
+				end.setFullYear( end.getYear() - 1, 0, 1 );
+				start.setHours( 0, 0, 0, 0 );
+				end.setHours( 23, 59, 59, 999 );
+		}
+	}
+		return { start: start, end: end }
+	}
+	isStatsWithinInterval( stats, interval )
+	{
+		if ( interval == 'any' )
+			return true;
+		interval = this.getInterval( interval );
+		if ( stats.mtime >= interval.start.time && stats.mtime < interval.end.time )
+			return true;
+		return false;
+	}
+	getTimestampFromDate( date )
+	{
+		var timeInfo =
+		{
+			year: this.fillString( '' + date.getYear(), '0', 2, 'start' ),
+			month: this.fillString( '' + date.getMonth(), '0', 2, 'start' ),
+			day: this.fillString( '' + date.getDay(), '0', 2, 'start' ),
+			hours: this.fillString( '' + date.getHours(), '0', 2, 'start' ),
+			minutes: this.fillString( '' + date.getMinutes(), '0', 2, 'start' ),
+			seconds: this.fillString( '' + date.getSeconds(), '0', 2, 'start' ),
+			milliseconds: this.fillString( '' + date.getMilliseconds(), '0', 3, 'start' ),
+		};
+		var timeString = this.format( '{year}-{month}-{day}.{hours}:{minutes}:{seconds},{milliseconds}', timeInfo );
+		return { time: date.getTime(), text: timeString, info: timeInfo };	
+	};
 	getTimestamp( matches, monthReplacement )
 	{
 		var [ _, month, day, year, hours, minutes, seconds, ampm ] = matches;
@@ -1029,6 +1163,22 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		{		
 		}
 		return { time: time, text: timeString, info: timeInfo };	
+	}
+	getMediaTimestamp( matches )
+	{
+		var [ _, hours, minutes, seconds, milliseconds ] = matches;
+		hours = this.checkUndefined( hours, '00' );
+		minutes = this.checkUndefined( minutes, '00' );
+		seconds = this.checkUndefined( seconds, '00' );
+		milliseconds = this.checkUndefined( milliseconds, '000' );
+	
+		var date = new Date();
+		date.setFullYear( 2000, 1 );
+		date.setHours( parseInt( hours ) );
+		date.setMinutes( parseInt( minutes ) );
+		date.setSeconds( parseInt( seconds ) );
+		date.setMilliseconds( parseInt( milliseconds ) );
+		return this.getTimestampFromDate( date );
 	}
 	normalize( path )
 	{
@@ -1165,6 +1315,90 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			lines.length = l3;
 		}
 		return lines.join( '\n' );
+	}
+	isLowerCase( c )
+	{ 
+		return c >= 'a' && c <= 'z';
+	}
+	isUpperCase( c )
+	{ 
+		return c >= 'A' && c <= 'Z';
+	}
+	getMimeType( path, type )
+	{
+		var ext = this.extname( path ).toLowerCase();
+		if ( ext == '.mp4' || ext == '.ogg' )
+			type = ( typeof type == 'undefined' ? 'audio' : type );
+		switch ( ext )
+		{
+			case '.png':
+				return 'image/png';
+			case '.jpg':
+			case '.jpeg':
+				return 'image/jpeg';
+			case '.tiff':
+				return 'image/tiff';
+			case '.gif':
+				return 'image/gif';
+			case '.webp':
+				return 'image/webp';
+			case '.bmp':
+				return 'image/bmp';
+
+			case '.pdf':
+				return 'application/pdf';
+			case '.gzip':
+				return 'application/gzip';
+			case '.zip':
+				return 'application/zip';
+			case '.json':
+				return 'application/json';
+			case '.sql':
+				return 'application/sql';
+			case '.':
+				return 'application/rtf';
+
+			case '.3mf':
+				return 'model/3mf';
+			case '.mesh':
+				return 'model/mesh';
+			case '.obj':
+				return 'model/obj';
+			case '.stl':
+				return 'model/stl';
+			case '.vrml':
+				return 'model/vrml';
+			case '.rtf':
+				return 'text/rtf';
+	
+			case '.mp4':
+				return type + '/mp4';
+			case '.ogg':
+				return type + '/ogg';
+			case '.mpeg':
+				return 'video/mpeg';
+
+			case '.aac':
+				return 'audio/aac';
+			case '.wav':
+				return 'audio/wav';
+			case '.mp3':
+				return 'audio/mp3';
+
+			case '.js':
+				return 'text/jaavscript';
+			case '.html':
+				return 'text/html';
+			case '.md':
+				return 'text/markdown';
+			case '.txt':
+				return 'text/plain';
+			case '.xml':
+				return 'text/xml';
+					
+			default:
+				return 
+		}
 	}
 }
 module.exports.Connector = ConnectorUtilitieAwi

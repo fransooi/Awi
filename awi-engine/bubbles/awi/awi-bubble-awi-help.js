@@ -110,17 +110,13 @@ Commands may or may not call Awi for a response.
 		this.awi.editor.print( this, text, { user: 'awi' } );		
 		return { success: true, data: text };
 	}
+	async playback( line, parameter, control )
+	{
+		super.playback( line, parameter, control );
+	}
 	transpile( line, data, control )
 	{
 		super.transpile( line, data, control );
-	}
-	undo( options )
-	{
-		super.undo( options );
-	}
-	redo( options )
-	{
-		super.redo( options );
 	}
 }
 module.exports.Bubble = BubbleAwiHelp;

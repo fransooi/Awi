@@ -26,8 +26,8 @@ class ConnectorLanguagePython extends awiconnector.Connector
 	constructor( awi, options = {} )
 	{
 		super( awi, options );
-		this.name = 'python';
-		this.token = 'Python';
+		this.name = 'Python';
+		this.token = 'python';
 		this.classname = 'language';
 		this.version = '0.2';
 	}

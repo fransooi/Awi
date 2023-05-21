@@ -16,7 +16,7 @@
 * @date first pushed on 10/11/2019
 * @version 0.2
 *
-* @short Parent class for souvenir bubbles
+* @short Souvenir bubbles: stores and recall informations
 *
 */
 var awibubbles = require( '../bubbles/awi-bubbles' )
@@ -43,6 +43,10 @@ class Souvenir extends awibubbles.Bubble
 	async play( line, parameter, control )
 	{
 		super.play( line, parameter, control );
+	}
+	async playback( line, parameter, control )
+	{
+		super.playback( line, parameter, control );
 	}
 	async transpile( line, parameter, control )
 	{

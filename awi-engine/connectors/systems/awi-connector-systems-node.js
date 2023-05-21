@@ -28,6 +28,7 @@ const { promisify } = require( 'util' );
 const regedit = require( 'regedit' );
 const os = require( 'os' );
 const he = require( 'he' );
+const extractaudio = require( 'ffmpeg-extract-audio' );
 
 class ConnectorSystemNode extends awiconnector.Connector
 {
@@ -424,6 +425,20 @@ class ConnectorSystemNode extends awiconnector.Connector
 	isFileOfType( path, type )
 	{
 		return type = this.getFileType( path );
+	}
+	async extractAudio( sourcePath, destinationPath, options = {} )
+	{
+		try
+		{
+			options.input = sourcePath;
+			options.output = destinationPath;
+			await extractaudio( options );
+			return { success: true, data: destinationPath };		
+		}
+		catch( e )
+		{
+			return { success: false, data: 'awi:error-while-extracting-audio:iwa' };
+		}
 	}
 	async runAccessory( path, options )
 	{

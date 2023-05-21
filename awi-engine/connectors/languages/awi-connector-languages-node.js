@@ -26,8 +26,8 @@ class ConnectorLanguageNode extends awiconnector.Connector
 	constructor( awi, options = {} )
 	{
 		super( awi, options );
-		this.name = 'node';
-		this.token = 'Node';
+		this.name = 'Node';
+		this.token = 'node';
 		this.classname = 'language';
 		this.version = '0.2';
 	}

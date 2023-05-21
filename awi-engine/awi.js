@@ -230,7 +230,8 @@ class Awi
 				}
 			}
 
-			// Bubbles tree
+			// Make the list of bubbles to load
+			var classList = [ 'awi', 'audio', 'filesystem', 'user', 'vision', this.connectors.languages.current.token ];
 			var answer = await this.system.getDirectory( this.config.getEnginePath() + '/bubbles', { recursive: true, filters: [ 'awi-bubble-*.js' ] } );
 			var files = this.utilities.getFileArrayFromTree( answer.data );
 			for ( var f = 0; f < files.length; f++ )
@@ -242,10 +243,19 @@ class Awi
 				var classpos = name.lastIndexOf( '-', namepos - 1 );
 				var classname = name.substring( classpos + 1, namepos );
 				name = name.substring( namepos + 1 );
+				var found = classList.find( 
+					function( element )
+					{
+						return element == classname;
+					}
+				)
+				if ( found )
+				{
 				this.bubbles[ classname ] = ( typeof this.bubbles[ classname ] == 'undefined' ? {} : this.bubbles[ classname ] );
 				this.bubbles[ classname ][ name ] = new exports.Bubble( this, {} );
 				this.newBubbles[ classname ] = ( typeof this.newBubbles[ classname ] == 'undefined' ? {} : this.newBubbles[ classname ] );
 				this.newBubbles[ classname ][ name ] = exports.Bubble;
+				}
 			}
 
 			// Gather souvenirs

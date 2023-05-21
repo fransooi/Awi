@@ -32,7 +32,7 @@ class BubbleAwiRemember extends awibubbles.Bubble
 		this.properties.action = 'recall all memories about a subject';
 		this.properties.inputs = [ 
 			{ userInput: 'the subject or person to remember', type: 'string', optional: true, default: '' },
-			{ kind: 'what kind of things to remember', type: 'string', optional: true, default: 'messenger' },
+			{ kind: 'what kind of things to remember', type: 'string', optional: true, default: 'all' },
 			{ brain: 'brain to take memories from', type: 'string', optional: true, default: 'awi' },
 			{ scanLevel: 'depth of the search, 1: direct souvenirs only, 2: indirect souvenirs, 3: deep search', type: 'number', interval: { start: 1, end: 3 }, optional: true, default: '2' },
 		];
@@ -56,8 +56,10 @@ class BubbleAwiRemember extends awibubbles.Bubble
 					var answer = await this.awi.memories[ parameters.brain ][ k ].play( previousLine, parameters, { start: 'root', memory: { command: 'findSouvenirs', scanLevel: parameters.scanLevel } } );
 					if ( answer.success == 'found' )
 					{
-						directSouvenirs.push( ...answer.data.indirectSouvenirs );
-						indirectSouvenirs.push( ...answer.data.directSouvenirs );
+						if ( answer.data.directSouvenirs )
+							directSouvenirs.push( ...answer.data.directSouvenirs );
+						if ( answer.data.indirectSouvenirs )
+							indirectSouvenirs.push( ...answer.data.indirectSouvenirs );
 					}
 				}
 			}
@@ -67,11 +69,12 @@ class BubbleAwiRemember extends awibubbles.Bubble
 			var answer = await this.awi.memories[ parameters.brain ][ parameters.kind ].play( previousLine, parameters, { start: 'root', memory: { command: 'findSouvenirs', scanLevel: parameters.scanLevel } } );
 			if ( answer.success == 'found' )
 			{
-				directSouvenirs.push( ...answer.data.indirectSouvenirs );
-				indirectSouvenirs.push( ...answer.data.directSouvenirs );
+				if ( answer.data.directSouvenirs )
+					directSouvenirs.push( ...answer.data.directSouvenirs );
+				if ( answer.data.indirectSouvenirs )
+					indirectSouvenirs.push( ...answer.data.indirectSouvenirs );
 			}
 		}
-		var self = this;
 		async function printSouvenirs( memories )
 		{
 			for ( var l = 0; l < memories.length; l++ )
@@ -82,18 +85,20 @@ class BubbleAwiRemember extends awibubbles.Bubble
 		}
 		if ( directSouvenirs.length > 0 )
 		{
-			this.awi.editor.print( this, 'Found ' + answer.data.directSouvenirs.length + ' direct souvenir(s).', { user: 'information' } );
-			printSouvenirs( answer.data.directSouvenirs );
+			this.awi.editor.print( this, 'Found ' + directSouvenirs.length + ' direct souvenir(s).', { user: 'information' } );
+			printSouvenirs( directSouvenirs );
 		}
 		else 
 			this.awi.editor.print( this, 'No direct souvenir found.', { user: 'information' } );
+
 		if ( parameters.scanLevel > 1 && indirectSouvenirs.length > 0 )
-			this.awi.editor.print( this, 'Found ' + answer.data.indirectSouvenirs.length + ' indirect souvenir(s).', { user: 'information' } );
-		else 
 		{
-			this.awi.editor.print( this, 'No indirect souvenir found.', { user: 'information' } );
-			printSouvenirs( answer.data.indirectSouvenirs );
+			this.awi.editor.print( this, 'Found ' + indirectSouvenirs.length + ' indirect souvenir(s).', { user: 'information' } );
+			printSouvenirs( indirectSouvenirs );
 		}
+		else 
+			this.awi.editor.print( this, 'No indirect souvenir found.', { user: 'information' } );
+
 		return { success: 'success', data: answer.data }
 	}
 	async playback( line, parameters, control )

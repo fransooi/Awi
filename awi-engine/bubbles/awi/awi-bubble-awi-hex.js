@@ -48,17 +48,13 @@ class BubbleAwiHex extends awibubbles.Bubble
 		this.awi.editor.print( this, [ answer.error ], { user: 'awi' } );
 		return answer;
 	}
+	async playback( line, parameter, control )
+	{
+		super.playback( line, parameter, control );
+	}
 	async transpile( line, data, control )
 	{
 		super.transpile( line, data, control );
-	}
-	undo( options )
-	{
-		super.undo( options );
-	}
-	redo( options )
-	{
-		super.redo( options );
 	}
 }
 module.exports.Bubble = BubbleAwiHex;

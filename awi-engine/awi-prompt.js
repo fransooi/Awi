@@ -117,6 +117,10 @@ class Prompt extends awimemoryconversation.Memory
 	{
 		super.play( line, data, control );
 	}
+	async playback( line, parameter, control )
+	{
+		super.playback( line, parameter, control );
+	}
 	async prompt( line, data, control )
 	{
 		if ( this.working || this.noCommand )
@@ -175,7 +179,7 @@ class Prompt extends awimemoryconversation.Memory
 					if ( answer.success )
 					{						
 						logged = true;
-						line = '';	//'Please say hello to ' + userName + ' with a short joke...';
+						line = 'Please say hello to ' + userName + ' with a short joke...';
 						this.awi.editor.print( this, 'User changed to ' + userName + '\n', { user: 'information' } );
 					}
 					else

@@ -55,14 +55,51 @@ class BubbleAwiInput extends awibubbles.Bubble
 			return { success: false, error: 'awi:cancelled:iwa' };
 			
 		var self = this;
-		var description = parameters.inputInfo.description.charAt( 0 ).toLowerCase() + parameters.inputInfo.description.substring( 1 );
+		var result;
+		var firstResult;
+		var firstType = '';
+		var type = parameters.inputInfo.type;
+		var dot = type.indexOf( '.' );
+		if ( dot > 0 )
+		{
+			firstType = type.substring( 0, dot );
+			type = type.substring( dot + 1 );
+			if ( firstType == 'array' )
+				firstResult = [];				
+		}
+
 		this.properties.outputs[ 0 ] = {};
 		this.properties.outputs[ 0 ][ parameters.inputInfo.name ] = description;
 		this.properties.outputs[ 0 ].type = parameters.inputInfo.type;
-		this.awi.editor.print( this, [ this.awi.utilities.capitalize( description ) ], { user: 'question' } );
-		
-		var result;
+		var text;
+		var description = parameters.inputInfo.description;
+		switch ( firstType )
+		{
+			case 'array':
+				text = '\nPlease enter, line by line, ' + description + '.\nPress <return> to exit...', { user: 'awi' };
+				break;
+			case 'choices':
+				text = '\n' + description + '\n';
+				for ( var c = 0; c < parameters.inputInfo.choices.length; c++ )
+				{
+					var t = parameters.inputInfo.choices[ c ];
+					if ( t == parameters.inputInfo.default )
+						t += ' (default)';
+					text += ' ' + ( c + 1 ) + '. ' + t + '\n';
+				}
+				text += 'Or press <return> for default.';			
+				break;
+			case 'yesno':
+				text = '\n' + description;
+				break;
+			default:
+				text = '\nPlease enter ' + description
+				break;
+		}
+		this.awi.editor.print( this, text.split( '\n' ), { user: 'question' } );			
+				
 		var self = this;
+		var finished = false;
 		this.awi.editor.rerouteInput( 
 			function( line )
 			{
@@ -80,7 +117,7 @@ class BubbleAwiInput extends awibubbles.Bubble
 				}
 				else
 				{
-					if ( parameters.inputInfo.type == 'number' )
+					if ( type == 'number' )
 					{
 						var number = parseInt( line );
 						if ( !isNaN( number ) )
@@ -102,11 +139,82 @@ class BubbleAwiInput extends awibubbles.Bubble
 						result = line;
 					}
 				}
+				if ( result != '<___cancel___>' )
+				{
+					var prompt = self.awi.config.getPrompt( 'question' );
+					switch ( firstType )
+					{
+						case 'array':
+							var dot = result.indexOf( '.' );
+							if ( dot >= 0 && dot < 8 )
+								result = result.substring( dot + 1 ).trim();
+							if ( result.length == '' )
+							{
+								result = firstResult;
+								break;
+							}
+							firstResult.push( result );
+							var p = prompt + ( firstResult.length+ 1 ) + '. ';
+							self.awi.editor.waitForInput( p, { toPrint: p } );
+							return;
+						case 'choices':
+							result = parseInt( result );
+							var found;
+							if ( !isNaN( result ) && result >= 0 && result <= parameters.inputInfo.choices.length )
+								found = parameters.inputInfo.choices[ result - 1 ];
+							if ( !found )
+							{
+								text.push(  + parameters.inputInfo.default + '.' );
+								self.awi.editor.print( this, 'Please enter a number between 1 and ' + parameters.inputInfo.choices.length, { user: 'awi' } );
+								self.awi.editor.waitForInput( prompt, { toPrint: prompt } );
+								return;
+							}
+							else
+							{
+								result = found;
+							}
+							break;
+						case 'yesno':
+							if ( result == '<___cancel___>' )
+							{
+								result = parameters.inputInfo.default;
+							}
+							else
+							{
+								if ( result.charAt( 0 ).toLowerCase() == 'y' )
+									result = 'yes';
+								else
+								{
+									text.push( 'Please answer yes or no...' );
+									self.awi.editor.print( this, text, { user: 'awi' } );
+									self.awi.editor.waitForInput( prompt, { toPrint: prompt } );
+									return;
+								}
+							}
+							break;
+					}
+				}
+				else 
+				{
+					switch ( firstType )
+					{
+						case 'array':
+							result = firstResult;
+							break;
+						case 'choices':
+						case 'yesno':
+							result = parameters.inputInfo.default;
+							break;
+					}
+				}
 				self.awi.editor.rerouteInput();
+				finished = true;
 			} );
 
 		// Wait for input
 		var prompt = this.awi.config.getPrompt( 'question' );
+		if ( firstType == 'array' )
+			prompt += '1. ';
 		this.awi.editor.waitForInput( prompt, { toPrint: prompt } );
 		return new Promise( ( resolve ) => 
 		{
@@ -115,7 +223,7 @@ class BubbleAwiInput extends awibubbles.Bubble
 				var handle = setInterval( 
 					function()
 					{
-						if ( typeof result != 'undefined' ) 
+						if ( finished ) 
 						{
 							clearInterval( handle );
 							if ( result == '<___cancel___>' )

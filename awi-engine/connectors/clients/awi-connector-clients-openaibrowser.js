@@ -47,7 +47,6 @@ class ConnectorClientOpenAiBrowser extends awiconnector.Connector
 	}	
 	async sendCompletion( prompt, stream, control )
 	{
-		debugger;
 		prompt = prompt.trim();
 		var parameters = this.awi.utilities.getControlParameters( control,
 		{

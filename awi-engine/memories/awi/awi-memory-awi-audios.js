@@ -11,37 +11,38 @@
 * Please support the project: https://patreon.com/francoislionet
 *
 * ----------------------------------------------------------------------------
-* @file awi-memory-awi-messenger.js
+* @file awi-memory-awi-videos.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
 * @version 0.2
 *
-* @short Messenger memory bulb
+* @short Video memory bulb
 *
 */
 var awimemory = require( '../awi-memory' );
 
-class MemoryAwiMessenger extends awimemory.Memory
+class MemoryAwiAudios extends awimemory.Memory
 {
 	constructor( awi, options = {} )
 	{
 		super( awi, options );
-		this.token = 'messenger';
+		this.token = 'audios';	
 		this.classname = 'awi';
-		this.name = 'Messages Souvenir Chain';
-		this.properties.action = 'stores a thread of messages with one person';
+		this.name = 'Audio Souvenir Chain';	
+		this.properties.action = 'stores information about audio files';
 		this.properties.inputs = [
-			{ userInput: 'what to find in the messages', type: 'string' },
-			{ interval: 'interval of time when the message was sent', type: 'string', optional: true, default: 'all' },
-			{ memoryContent: 'what kind of content to remember', type: 'string', optional: true, default: 'all' },
+			{ userInput: 'what to find in the audio file', type: 'string' },
+			{ interval: 'interval of time when the audio file was recorded', type: 'string', optional: false, default: 'any' },
 		];
 		this.properties.outputs = [ { memoryList: 'list of memories found', type: 'string.array' } ];
-		this.properties.tags = [ 'memory', 'mails' ];
-		this.properties.content = [ 'text', 'images', 'photos', 'audio', 'video' ];
-		this.properties.subTopics.push( ... [ 'memory', 'messenger', 'conversation' ] );
+		this.properties.tags = [ 'memory', 'audio' ];
+		this.properties.content = [ 'audio' ];
+		this.properties.subTopics.push( ... [ 'memory', 'audioss' ] );
 	}
 	async play( line, parameters, control, nested )
 	{		
+		if ( !parameters.interval )
+			parameters.interval = 'any';
 		if ( !nested )
 			control.memory.level = 1;
 		else
@@ -49,23 +50,23 @@ class MemoryAwiMessenger extends awimemory.Memory
 		return await this[ control.memory.command ]( line, parameters, control );
 	}
 	async playback( line, parameter, control )
-		{
+	{
 		super.playback( line, parameter, control );
 	}
 	async printData( line, parameters, control )
 	{
 		if ( control.memory.scanLevel > 0 && control.memory.level == 1 )
 		{	
-			var text = 'Conversation between ' + this.parameters.senderName + ' and ' + this.parameters.contactName;
+			var text = 'Audio file recorded on the XXX:XXX';
 			this.awi.editor.print( this, text, { user: 'memory2' } );
 
-			var souvenir = this.getBubble( 'root' );
-			do
+			var souvenir = this.getBubble( 'root' ).properties.exits[ 'success' ];
+			while( souvenir )
 			{
-				if ( souvenir.parameters && souvenir.parameters.contactName )
+				if ( souvenir.parameters )
 					await souvenir.play( line, {}, control );
 				souvenir = souvenir.properties.exits[ 'success' ];
-			} while ( souvenir );
+			};
 		}
 	}
 	async findSouvenirs( line, parameters, control )
@@ -79,15 +80,14 @@ class MemoryAwiMessenger extends awimemory.Memory
 			{
 				if ( bubble.parameters )
 				{
-					var info1 = this.awi.utilities.matchTwoStrings( bubble.parameters.contactName, parameters.userInput, { caseInsensitive: true } );
 					var info2 = this.awi.utilities.matchTwoStrings( bubble.parameters.senderName, parameters.senderName, { caseInsensitive: true } );
-					if ( info2.result == 1 && info1.score >= 1 )
+					if ( info2.result == 1 /*&& info1.score >= 1*/ )
 					{
 						directSouvenirs.push( bubble );
 					}
 				}
 				bubble = bubble.properties.exits[ 'success' ];
-			};
+			} while ( bubble );
 
 			if ( control.memory.scanLevel > 1 )
 			{	
@@ -99,7 +99,7 @@ class MemoryAwiMessenger extends awimemory.Memory
 						{
 							return element === bubble;
 						} );
-					if ( found < 0 && bubble.parameters && bubble.parameters.contactName )
+					if ( found < 0 && bubble.parameters )
 					{
 						control.start = 'root';
 						control.caseInsensitive = true;
@@ -134,4 +134,4 @@ class MemoryAwiMessenger extends awimemory.Memory
 		return { success: 'notfound', data: { directSouvenirs: [], indirectSouvenirs: [] } };
 	}
 }
-module.exports.Memory = MemoryAwiMessenger;
+module.exports.Memory = MemoryAwiAudios;

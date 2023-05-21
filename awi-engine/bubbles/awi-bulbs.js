@@ -145,38 +145,42 @@ class Bulb extends awitree.Tree
 		}
 		line = line.substring( start ).trim();
 
-		var classname = typeof control.classname == 'undefined' ? 'awi' : control.classname;
+		var classname;
 		if ( !command )
 		{
-			var token;
-			var space = -1, column, start;
-			var count = 2;
-			do
+			for ( classname in this.awi.bubbles )
 			{
-				start = space + 1;
-				space = line.indexOf( ' ', start );
-				column = line.indexOf( ':', start );
-				if ( space >= 0 && column >= 0 )
-					space = Math.min( space, column );
-				else if ( space < 0 && column >= 0 )
-					space = column;
-				else if ( space < 0 )
-					space = line.length;
-				token = line.substring( start, space ).toLowerCase();
-			} while ( !this.awi.newBubbles[ classname ][ token ] && space < line.length && count-- > 0 )
+				var token;
+				var space = -1, column, start;
+				var count = 2;
+				do
+				{
+					start = space + 1;
+					space = line.indexOf( ' ', start );
+					column = line.indexOf( ':', start );
+					if ( space >= 0 && column >= 0 )
+						space = Math.min( space, column );
+					else if ( space < 0 && column >= 0 )
+						space = column;
+					else if ( space < 0 )
+						space = line.length;
+					token = line.substring( start, space ).toLowerCase();
+				} while ( !this.awi.newBubbles[ classname ][ token ] && space < line.length && count-- > 0 )
 
-			if ( this.awi.bubbles[ classname ][ token ] )
-			{
-				command = 
-				{ 
-					token: token, 
-					classname: classname,
-					parameters: parameters, 
-					options: {}, 
-					exits: {}
-				};
-				line = line.substring( space ).trim();
-			}
+				if ( this.awi.bubbles[ classname ][ token ] )
+				{
+					command = 
+					{ 
+						token: token, 
+						classname: classname,
+						parameters: parameters, 
+						options: {}, 
+						exits: {}
+					};
+					line = line.substring( space ).trim();
+					break;
+				}
+			}			
 		}
 		if ( !command )
 		{
@@ -278,6 +282,10 @@ class Bulb extends awitree.Tree
 			answer.success = 'end';
 		this.working--;
 		return answer;
+	}
+	async playback( line, parameter, control )
+	{
+		super.playback( line, parameter, control );
 	}
 	pause( onOff )
 	{

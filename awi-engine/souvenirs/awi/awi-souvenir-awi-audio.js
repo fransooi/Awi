@@ -36,12 +36,52 @@ class SouvenirAwiAudio extends awisouvenir.Souvenir
 		this.properties.tags = [ 'memory', 'souvenir', 'audio' ];
 		this.properties.content = [ 'audio' ];
 	}
-	play( line, parameter, control )
+	async play( line, parameters, control )
 	{
-		super.play( line, parameter, control );
-		return { success: true, data: [] }
+		super.play( line, parameters, control );
+		return await this[ control.memory.command ]( line, parameters, control );
 	}
-	transpile( line, parameter, control )
+	async printData( line, parameters, control )
+	{
+		this.awi.editor.print( this, this.parameters.json, { user: 'memory3' } );
+		this.awi.editor.print( this, '------------------------------------------------------------', { user: 'memory3' } );
+	}	
+	async findSouvenirs( line, parameters, control )
+	{
+		var content = true;
+		var found = false;
+		if ( control.souvenir.quick )
+		{
+			if ( parameters.userInput )
+			{
+				var match = this.awi.utilities.matchTwoStrings( this.parameters.json, parameters.userInput, { caseInsensitive: true } );
+				console.log( 'scanning: ' + this.parameters.contactText );
+				if ( match > 0 )
+					found = true;
+			}
+			if ( typeof parameters.rememberContent != 'undefined' )
+			{
+				var match = this.awi.utilities.matchTwoStrings( this.properties.content, parameters.rememberContent, { lowercase: true } );
+				if ( match == 0 )
+					content = false;
+			}
+
+			var self = this;
+			if ( content & found )
+			{				
+				return { success: true, dataCallback: 
+					function( destinationData )
+					{
+						if ( !self.data.quickMemories )
+							destinationData.quickMemories = [];
+						var text = self.parameters.contactName + ' said: ' + self.parameters.contactText;
+						destinationData.quickMemories.push( text );
+					} };
+			}
+			return { success: true, dataCallback: function(){} };
+		}
+	}
+	async transpile( line, parameter, control )
 	{
 		return super.transpile( line, parameter, control );
 	}

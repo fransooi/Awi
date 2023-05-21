@@ -1,3 +1,11 @@
+20230521 personality: debugging / cleaning
+20230521 editor commandline connector: now uses real terminal commands (fixes backspace/cursor)
+20230521 openai client connector: createTranscription function
+20230521 Javascript bubble "code" works
+20230521 Javascript bubble "base64"
+20230521 Video and Audio importer
+20230521 Digest bubble corrected to take into account the type of data to retreive
+20230521 Fixed Input bubble for multiple lines, arrays, yesno, choices
 20230519 Removed bubbles Play and Find, previous versious of View and List
 20230519 New README.md file
 

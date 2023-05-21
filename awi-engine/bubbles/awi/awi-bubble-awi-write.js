@@ -22,15 +22,15 @@
 var awibubbles = require( '../awi-bubbles' )
 var awimessages = require( '../../awi-messages' )
 
-class BubbleAwiCode extends awibubbles.Bubble
+class BubbleAwiWrite extends awibubbles.Bubble
 {
 	constructor( awi, options = {} )
 	{
 		super( awi, options );
-		this.name = 'Code';
-		this.token = 'code';
+		this.name = 'Write';
+		this.token = 'write';
 		this.classname = 'awi';
-		this.properties.action = 'code a function or procedure';
+		this.properties.action = 'write a text, code, resume, synthesis';
 		this.properties.inputs = [ 
 			{ codeName: 'the name of the procedure to create.\n The name should contain the function.', type: 'string', clear: true },
 			{ codeParameters: 'the list of parameters, separated by a comma.\n The name should indicate the content.', type: 'string', clear: true },
@@ -64,7 +64,7 @@ Now the code:
 	}
 	async play( line, parameters, control )
 	{
-		var answer = await super.execute( line, parameters, control );
+		var answer = await super.play( line, parameters, control );
 		if ( !answer.success )
 			return { success: false, data: {}, error: 'awi:cancelled:iwa' };
 
@@ -219,5 +219,9 @@ Now the code:
 			return { success: false, data: result, error: 'awi:no-code-produced:iwa' };
 		}
 	}
+	async playback( line, parameter, control )
+	{
+		super.playback( line, parameter, control );
+	}
 }
-module.exports.Bubble = BubbleAwiCode;
+module.exports.Bubble = BubbleAwiWrite;

@@ -36,12 +36,12 @@ class SouvenirAwiPhoto extends awisouvenir.Souvenir
 		this.properties.outputs = [ { memories: 'memories about the photo', type: 'object', default: false } ];
 		this.properties.tags = [ 'memory', 'souvenir', 'photo' ];
 	}
-	play( line, parameter, control )
+	async play( line, parameter, control )
 	{
 		super.play( line, parameter, control );
 		return { success: true, data: [] }
 	}
-	transpile( line, parameter, control )
+	async transpile( line, parameter, control )
 	{
 		return super.transpile( line, parameter, control );
 	}

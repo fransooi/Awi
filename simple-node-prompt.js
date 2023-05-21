@@ -50,9 +50,9 @@ function getArguments()
 	[
 		{ name: 'systems.node', options: {}, default: true },
 		{ name: 'utilities.awi', options: {}, default: true },
-				{ name: 'clients.openainode', options: {}, default: true },
+		{ name: 'clients.openainode', options: {}, default: true },
 		{ name: 'editors.commandline', options: {}, default: true },
-		{ name: 'languages.aoz', options: {}, default: true },
+		{ name: 'languages.javascript', options: {}, default: true },
 		{ name: 'importers.*', options: {} },
 	],
 		},

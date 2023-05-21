@@ -38,7 +38,7 @@ class BubbleAwiDigest extends awibubbles.Bubble
 		this.properties.brackets = false;
 		this.properties.tags = [ 'awi', 'memory', 'souvenirs' ];
 	}
-	async messenger( dirPath, parameters )
+	async messenger( path, parameters )
 	{
 		var self = this;
 
@@ -71,16 +71,16 @@ class BubbleAwiDigest extends awibubbles.Bubble
 		];		
 		for ( var d = 0; d < directoriesToScan.length; d++ )
 		{
-			var path = this.awi.utilities.normalize( dirPath + '/messages/' + directoriesToScan[ d ] );
-			var answer = await this.awi.system.getDirectory( path, { recursive: true } );
-			var tree = answer.data;
-			if ( tree )
+			var dirPath = this.awi.utilities.normalize( path + '/messages/' + directoriesToScan[ d ] );
+			var answer = await this.awi.system.getDirectory( dirPath, { recursive: true } );
+			if ( answer )
 			{
+				var files = answer.data;
 				if ( !parameters.contactName )
 				{
-					for ( var f = 0; f < tree.length; f++ )
+					for ( var f = 0; f < files.length; f++ )
 					{
-						var dirContact = tree[ f ];
+						var dirContact = files[ f ];
 						if ( dirContact.isDirectory )
 						{
 							var pos = dirContact.name.indexOf( '_' );
@@ -110,9 +110,9 @@ class BubbleAwiDigest extends awibubbles.Bubble
 				else
 				{
 					var contactNameCompressed = parameters.contactName.split( ' ' ).join( '' ).toLowerCase();
-					for ( var f = 0; f < tree.length; f++ )
+					for ( var f = 0; f < files.length; f++ )
 					{
-						var dirContact = tree[ f ];
+						var dirContact = files[ f ];
 						if ( dirContact.isDirectory && dirContact.name.indexOf( contactNameCompressed ) == 0 )
 						{
 							for ( var ff = 0; ff < dirContact.files.length; ff++ )
@@ -168,10 +168,97 @@ class BubbleAwiDigest extends awibubbles.Bubble
 			valid: valid
 		}
 	}
+	async videos( path, parameters )
+	{
+		var invalid = [];
+		var valid = [];
+		var numberOfSouvenirs = 0;		
+		var importer = this.awi.getConnector( 'importers', 'video', {} );
+
+		var answer = await this.awi.system.getDirectory( this.awi.config.getDataPath() + '/todigest/videos', { recursive: true, filters: [ '*.mp4', '*.ogg' ] } );
+		if ( answer.success )
+		{
+			var files = this.awi.utilities.getFileArrayFromTree( answer.data );
+			for ( var f = 0; f < files.length; f++ )
+			{
+				var file = files[ f ];
+				answer = await importer.import( file.path, parameters.senderName, { type: 'videos' } ); 
+				if ( answer.success )
+				{				
+					valid.push( answer.data.memories );
+					numberOfSouvenirs += answer.data.numberOfSouvenirs;
+				}
+				else
+				{
+					invalid.push( file.path );
+				}
+			}	
+		}
+		if ( valid.length > 0 )
+		{
+			var params =
+			{
+				senderName: parameters.senderName,
+				contactName: parameters.contactName,
+				referencePath: path
+			}
+			this.awi.memories.awi.videos.addMemory( valid, params );
+		}
+		return {
+			numberOfMemories: valid.length,
+			numberOfSouvenirs: numberOfSouvenirs,
+			invalid: invalid,
+			valid: valid
+		}
+	}
+	async audios( path, parameters )
+	{
+		var invalid = [];
+		var valid = [];
+		var numberOfSouvenirs = 0;		
+		var importer = this.awi.getConnector( 'importers', 'audio', {} );
+
+		var answer = await this.awi.system.getDirectory( this.awi.config.getDataPath() + '/todigest/audios', { recursive: true, filters: [ '*.wav', '*.mp3', '*.ogg' ] } );
+		if ( answer.success )
+		{
+			var files = this.awi.utilities.getFileArrayFromTree( answer.data );
+			for ( var f = 0; f < files.length; f++ )
+			{
+				var file = files[ f ];
+				answer = await importer.import( file.path, parameters.senderName, {} ); 
+				if ( answer.success )
+				{				
+					valid.push( answer.data.memories );
+					numberOfSouvenirs += answer.data.numberOfSouvenirs;
+				}
+				else
+				{
+					invalid.push( file.path );
+				}
+			}	
+		}
+		if ( valid.length > 0 )
+		{
+			var params =
+			{
+				senderName: parameters.senderName,
+				contactName: parameters.contactName,
+				referencePath: path
+			}
+			this.awi.memories.awi.audios.addMemory( valid, params );
+		}
+		return {
+			numberOfMemories: valid.length,
+			numberOfSouvenirs: numberOfSouvenirs,
+			invalid: invalid,
+			valid: valid
+		}
+	}
 	async play( line, parameters, control )
 	{
 		if ( typeof parameters.senderName == 'undefined' )
 			parameters.senderName = this.awi.getConfig( 'user' ).fullName;
+
 		var answer = await super.play( line, parameters, control );
 		if ( answer.success )		
 		{
@@ -181,36 +268,64 @@ class BubbleAwiDigest extends awibubbles.Bubble
 				numberOfSouvenirs: 0,
 				valid: [],
 				invalid: []
-			}	
-			parameters.contactName = parameters.userInput;
-	
-			var path = this.awi.utilities.normalize( this.awi.config.getDataPath() + '/todigest' );
-			var answer = await this.awi.system.getDirectory( path, { recursive: false } );
-			var tree = answer.data;
-			if ( tree )
-			{
-				for ( var d = 0; d < tree.length; d++ )
+			};	
+			var type = parameters.userInput;
+			if ( type )
+			{			
+				var path = this.awi.utilities.normalize( this.awi.config.getDataPath() + '/todigest/' + type );
+				var exist = await this.awi.system.exists( path );
+				if ( !exist.success )
 				{
-					var dir = tree[ d ];
-					if ( this[ dir.name ] )
+					path = this.awi.utilities.normalize( this.awi.config.getDataPath() + '/todigest/' + type + 's' );
+					exist = await this.awi.system.exists( path );
+				}
+				if ( !exist.success )
+				{
+					this.awi.editor.print( this, 'Cannot import files of type "' + type + '".', { user: 'error' } );
+					this.awi.editor.print( this, 'Supported import types: audio, video, messenger, and more to come!', { user: 'awi' } );
+					return { success: false, data: 'awi:cannot-import:iwa' };
+				}
+				if ( this[ type ] )
+				{
+					var info = await this[ type ]( path, parameters );
+					result.numberOfMemories += info.numberOfMemories;
+					result.numberOfSouvenirs += info.numberOfSouvenirs;
+					result.valid.push( ...info.valid );
+					result.invalid.push( ...info.invalid );
+				}
+			}
+			else
+			{
+				var path = this.awi.config.getDataPath() + '/todigest';
+				var answer = await this.awi.system.getDirectory( path, { recursive: false } );
+				if ( answer.success )
+				{
+					var files = answer.data;
+					for ( var d = 0; d < files.length; d++ )
 					{
-						var info = await this[ dir.name ]( dir.path, parameters );
-						result.numberOfMemories += info.numberOfMemories;
-						result.numberOfSouvenirs += info.numberOfSouvenirs;
-						result.valid.push( ...info.valid );
-						result.invalid.push( ...info.invalid );
+						var file = files[ d ];
+						if ( file.isDirectory )
+						{
+							if ( this[ file.name ] )
+							{
+								var info = await this[ file.name ]( file.path, parameters );
+								result.numberOfMemories += info.numberOfMemories;
+								result.numberOfSouvenirs += info.numberOfSouvenirs;
+								result.valid.push( ...info.valid );
+								result.invalid.push( ...info.invalid );
+							}
+						}
 					}
 				}
 			}
-	
-			this.awi.editor.print( this, result.numberOfMemories + ' conversation(s) imported!', { user: 'information' } );
-			this.awi.editor.print( this, result.numberOfSouvenirs + ' souvenirs added.', { user: 'information' } );
+			this.awi.editor.print( this, result.numberOfMemories + ( result.numberOfMemories <= 1 ? ' memory' : ' memories' ) + ' imported.', { user: 'information' } );
+			this.awi.editor.print( this, result.numberOfSouvenirs + ( result.numberOfSouvenirs <= 1 ? ' souvenir' : ' souvenirs' ) +' added.', { user: 'information' } );
 			if ( result.invalid.length > 0 )
 			{
-				this.awi.editor.print( self, 'These conversations could not be imported...', { user: 'warning' } );
+				this.awi.editor.print( self, 'These items could not be imported...', { user: 'warning' } );
 				for ( var i = 0; i < result.invalid.length; i++ )
 				{
-					this.awi.editor.print( this, ' - ' +  result.invalid[ i ].contactNameCompressed, { user: 'warning' } );
+					this.awi.editor.print( this, ' - ' +  result.invalid[ i ], { user: 'warning' } );
 				}
 			}
 			return { success: true, data: { name: parameters.receiverName, result: result } };

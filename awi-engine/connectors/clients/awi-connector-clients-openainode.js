@@ -20,6 +20,7 @@
 *
 */
 var awiconnector = require( '../awi-connector' );
+const fs = require( 'fs' );
 const { Configuration, OpenAIApi } = require( 'openai' );
 
 class ConnectorClientOpenAiNode extends awiconnector.Connector
@@ -55,6 +56,65 @@ class ConnectorClientOpenAiNode extends awiconnector.Connector
 		this.connectAnswer.nonFatal = true;
 		return this.connectAnswer;
 	}
+	async createTranscription( prompt, path, control )
+	{
+		var answer = {};
+		if ( this.configuration )
+		{
+			prompt = prompt.trim();
+			var parameters = this.awi.utilities.getControlParameters( control,
+			{
+				model: 'whisper-1',
+				response_format: 'json', 
+				temperature: 0,
+				language: 'en'
+			} );
+
+			var debug = this.awi.utilities.format( `
+prompt: {prompt}
+model: {model}
+temperature: {temperature}
+response_format: {response_format}
+language: {language}`, parameters );
+			this.awi.editor.print( this, debug.split( '\n' ), { user: 'completion' } );
+
+			var response;
+			try
+			{
+				response = await this.openai.createTranscription
+				(
+					fs.createReadStream( path ),
+					"whisper-1",
+					prompt,
+					parameters.response_format,
+					parameters.temperature,
+					parameters.language
+				);
+			}
+			catch( e )
+			{
+				answer.success = false;
+				answer.error = e;
+				return answer;
+			}
+
+			if ( !response.error )
+			{
+				answer.success = true;
+				if ( typeof response.data.text != 'undefined' )
+					answer.data = response.data.text;
+				else
+					answer.data = response.data;
+			}
+			else
+			{
+				answer.success = false;
+				answer.data = response;
+				answer.error = 'awi:openai-error:iwa';
+			}
+		}
+		return answer;
+	}
 	async sendCompletion( prompt, stream, control )
 	{
 		var answer = {};
@@ -73,15 +133,17 @@ class ConnectorClientOpenAiNode extends awiconnector.Connector
 			if ( this.awi.connectors.editors.current )
 			{
 				var debug = this.awi.utilities.format( `
-	prompt: {prompt}
-	model: {model}
-	max_tokens: {max_tokens}
-	temperature: {temperature}
-	top_p: {top_p}
-	n: {n}`, parameters );
+model: {model}
+max_tokens: {max_tokens}
+temperature: {temperature}
+top_p: {top_p}
+n: {n}`, parameters );
 				this.awi.editor.print( this, debug.split( '\n' ), { user: 'completion' } );
 			}
-			var response = await this.openai.createCompletion(
+			var response;
+			try
+			{
+				response = await this.openai.createCompletion(
 			{
 				prompt: prompt,
 				model: "text-davinci-003",
@@ -90,6 +152,13 @@ class ConnectorClientOpenAiNode extends awiconnector.Connector
 				top_p: 1,
 				n: parameters.n
 			} );		
+			}
+			catch( e )
+			{
+				answer.success = false;
+				answer.error = e;
+				return answer;
+			}
 	
 			if ( !response.error )
 			{

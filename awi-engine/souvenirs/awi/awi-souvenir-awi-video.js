@@ -36,12 +36,35 @@ class SouvenirAwiVideo extends awisouvenir.Souvenir
 		this.properties.outputs = [ { memories: 'video found', type: 'object', default: false } ];
 		this.properties.tags = [ 'memory', 'souvenir', 'video' ];
 	}
-	play( line, parameter, control )
+	async printData( line, parameters, control )
 	{
-		super.play( line, parameter, control );
-		return { success: true, data: [] }
+		if ( control.memory.scanLevel > 0 && control.memory.level == 1 )
+		{	
+			this.awi.editor.print( this, this.parameters.text, { user: 'memory3' } );
+			this.awi.editor.print( this, '-----------------------------------------------------------------------------', { user: 'memory3' } );
+		}
 	}
-	transpile( line, parameter, control )
+	async findSouvenirs( line, parameters, control )
+	{
+		if ( control.memory.scanLevel > 0 && control.memory.level == 1 )
+		{	
+			var info = this.awi.utilities.matchTwoStrings( this.parameters.text, line, { caseInsensitive: true } );
+			if ( info.result > 0 )
+				return { success: 'found', data: [ this ] };
+		}
+		return { success: 'notfound' };
+	}
+	async play( line, parameters, control, nested )
+	{
+		if ( !nested )
+			control.memory.level = 1;
+		else
+			control.memory.level++;			
+		var answer = await this[ control.memory.command ]( line, parameters, control );
+		control.memory.level--;			
+		return answer;
+	}
+	async transpile( line, parameter, control )
 	{
 		return super.transpile( line, parameter, control );
 	}

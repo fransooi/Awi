@@ -69,11 +69,13 @@ class ConnectorEditorCommandline extends awiconnector.Connector
 	disableInput()
 	{
 		this.inputEnabled = false;
+		this.readline.pause();
 	}
 	waitForInput( line, options = {} ) 
 	{
-		if ( !this.inputEnabled )		
+		//if ( !this.inputEnabled )		
 		{
+			/*
 			var self = this;
 			if ( this.inputHandle )
 				clearTimeout( this.inputHandle );
@@ -83,12 +85,15 @@ class ConnectorEditorCommandline extends awiconnector.Connector
 					self.inputEnabled = true;
 					self.inputHandle = null;
 				}, 250 );
+			*/
+			this.inputEnabled = true;
 			if ( line )
-				this.readline.write( line );
+				this.readline.setPrompt( line );
+			this.readline.prompt( true );
 			return;
 		}
-		if ( options.toPrint )
-			this.readline.write( options.toPrint );
+		//if ( options.toPrint )
+		//	this.readline.setPrompt( options.toPrint );
 	}
 	close()
 	{
@@ -129,6 +134,7 @@ class ConnectorEditorCommandline extends awiconnector.Connector
 		var row = 0;
 		if ( typeof text == 'string' )
 			text = text.split( '\n' );
+		var justify = this.awi.getConfig( 'user' ).justify;
 		var self = this;
 		function printLinesDown( lines )
 		{
@@ -143,7 +149,7 @@ class ConnectorEditorCommandline extends awiconnector.Connector
 		{
 			var line = this.interpretLine( text[ t ] );
 			if ( !options.noJustify )
-				printLinesDown( this.awi.utilities.justifyText( line, 80 ) );
+				printLinesDown( this.awi.utilities.justifyText( line, justify ) );
 			else
 			{
 				this.readline.write( prompt + line + '\n' );

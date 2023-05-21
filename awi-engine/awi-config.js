@@ -302,6 +302,7 @@ class Config
 						debug: 0,
 						developperMode: true,
 						verbose: 1,
+						justify: 160,
 						verbosePrompts: 
 						{
 							verbose1: [ 'importer1', 'memory1' ],
@@ -355,7 +356,7 @@ class Config
 							root: '.[oo] ',
 							warning: '.(OO) ',
 							error: '.(**) ',
-							code: '.{code} ',
+							code: '.{..} ',
 							debug1: '.[debug1] ',
 							debug2: '.[debug2] ',
 							debug3: '.[debug3] ',

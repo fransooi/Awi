@@ -11,6 +11,7 @@
   "dependencies": {
     "child_process": "^1.0.2",
     "fetch-installed-software": "0.0.7",
+    "ffmpeg-extract-audio": "^1.0.2",
     "fs": "0.0.1-security",
     "he": "^1.2.0",
     "hjson": "^3.2.2",

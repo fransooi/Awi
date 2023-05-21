@@ -35,12 +35,12 @@ class MemoryAwiError extends awimemory.Memory
 		this.properties.subTopics.push( ...[ 'memory', 'error' ] );
 		this.properties.tags = [ 'memory', 'error' ];
 	}
-	play( line, parameter, control )
+	async play( line, parameter, control )
 	{
 		super.play( line, parameter, control );
 		return { success: true, data: [] }
 	}
-	transpile( line, parameter, control )
+	async transpile( line, parameter, control )
 	{
 		return super.transpile( line, parameter, control );
 	}

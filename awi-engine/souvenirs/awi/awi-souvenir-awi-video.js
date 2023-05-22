@@ -28,7 +28,7 @@ class SouvenirAwiVideo extends awisouvenir.Souvenir
 		super( awi, options );
 		this.name = 'Video Souvenir Bubble';
 		this.token = 'video';
-		this.klass = 'awi';
+		this.classname = 'awi';
 		this.properties.action = 'remembers one video';
 		this.properties.subTopics.push( ...[ 'video' ] );
 		this.properties.content = [ 'video' ];

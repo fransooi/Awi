@@ -28,7 +28,7 @@ class SouvenirAwiError extends awisouvenir.Souvenir
 		super( awi, options );
 		this.name = 'Souvenir Error Handling';
 		this.token = 'error';
-		this.klass = 'awi';
+		this.classname = 'awi';
 		this.properties.action = "handle Alzheinmer?";
 		this.properties.inputs = [ ],
 		this.properties.outputs = [ ];

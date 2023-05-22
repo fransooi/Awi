@@ -28,7 +28,7 @@ class SouvenirAwiRoot extends awisouvenir.Souvenir
 		super( awi, options );
 		this.name = 'Root';
 		this.token = 'root';
-		this.klass = 'awi';
+		this.classname = 'awi';
 		this.properties.action = "root of a branch of souvenirs";
 		this.properties.inputs = [ ],
 		this.properties.outputs = [ ];

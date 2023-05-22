@@ -26,7 +26,7 @@ class MemoryAwiDocuments extends awimemory.Memory
 	constructor( awi, options = {} )
 	{
 		super( awi, options );
-		this.token = 'document';	
+		this.token = 'documents';	
 		this.classname = 'awi';
 		this.name = 'Documents Souvenir Chain';	
 		this.properties.action = 'stores a list of documents';

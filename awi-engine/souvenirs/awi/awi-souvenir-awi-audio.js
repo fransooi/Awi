@@ -28,7 +28,7 @@ class SouvenirAwiAudio extends awisouvenir.Souvenir
 		super( awi, options );
 		this.name = 'Audio Souvenir Bubble';
 		this.token = 'audio';
-		this.klass = 'awi';
+		this.classname = 'awi';
 		this.properties.action = "remembers one audio file and it's content";
 		this.properties.inputs = [ { userInput: 'what to find in the audio', type: 'string' } ],
 		this.properties.outputs = [ { memoryList: 'list of memories found', type: 'string.array' } ];

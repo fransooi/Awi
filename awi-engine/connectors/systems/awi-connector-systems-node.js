@@ -59,9 +59,9 @@ class ConnectorSystemNode extends awiconnector.Connector
 			}			
 		};		
 	}
-	close()
+	quit()
 	{
-
+		process.exit( 0 );
 	}
 	async connect( options )
 	{

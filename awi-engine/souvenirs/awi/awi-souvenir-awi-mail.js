@@ -28,7 +28,7 @@ class SouvenirAwiMail extends awisouvenir.Souvenir
 		super( awi, options );
 		this.name = 'Mail Souvenir Bubble';
 		this.token = 'mail';
-		this.klass = 'awi';
+		this.classname = 'awi';
 		this.properties.action = "remembers one mail exchange and it's content";
 		this.properties.inputs = [ { userInput: 'what to find in the mails', type: 'string' } ],
 		this.properties.outputs = [ { memoryList: 'list of memories found', type: 'string.array' } ];

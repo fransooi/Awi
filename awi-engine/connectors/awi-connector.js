@@ -26,6 +26,7 @@ class Connector
 		this.awi = awi;
 		this.options = options;
 		this.version = '0.1';
+		this.oClass = 'connector';
 	}
 	async connect( /*options*/ )
 	{

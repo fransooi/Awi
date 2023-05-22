@@ -63,8 +63,8 @@ class ConnectorImporterMessenger extends awiconnector.Connector
 		var souvenirCount = 0;
 		if ( options.result )
 			result = options.result;
-		result.memories = new this.awi.newMemories.awi.messenger( this.awi, [], {} );
-		result.memories.parameters = { senderName: senderName, contactName: '', contactNameCompressed: receiverNameCompressed };
+		var id = this.awi.utilities.getUniqueIdentifier( {}, 'messenger', Math.floor( Math.random() * 100 ) );
+		result.memories = new this.awi.newMemories.awi.messenger( this.awi, [], { id: id, parent: '', parameters: { senderName: senderName, contactName: '', contactNameCompressed: receiverNameCompressed } } );
 		if ( html )
 		{
 			var bodies = this.awi.utilities.explodeHtml( 'body', html, {} );

@@ -1,3 +1,10 @@
+20230522 various debugging
+20230522 implemented serialization of bubbles (not complete)
+20230522 changed bubble ID to underscores
+20230522 bulbs now store the direct pathway and history of pathways
+20230522 removed bubble "SaveConfig"
+20230522 new bubble: "Quit", saves memories and conversations and quits
+
 20230521 personality: debugging / cleaning
 20230521 editor commandline connector: now uses real terminal commands (fixes backspace/cursor)
 20230521 openai client connector: createTranscription function

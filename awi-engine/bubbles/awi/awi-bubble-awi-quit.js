@@ -16,21 +16,21 @@
 * @date first pushed on 10/11/2019
 * @version 0.2
 *
-* @short Saveconfig: force save all configuration files
+* @short Quit: save conversations and memories and quits Awi.
 *
 */
 var awibubbles = require( '../awi-bubbles' )
 
-class BubbleAwiSaveConfig extends awibubbles.Bubble
+class BubbleAwiQuit extends awibubbles.Bubble
 {
 	constructor( awi, options = {} )
 	{
 		super( awi, options );
-		this.name = 'SaveConfig';
-		this.token = 'saveconfig';
+		this.name = 'Quit';
+		this.token = 'quit';
 		this.classname = 'awi';
-		this.properties.action = 'save configuration files to the config folder';
-		this.properties.inputs = [ { userInput: 'the name of the user or personality to save', type: 'string', optional: true, default: '' } ];
+		this.properties.action = 'save conversations and memories and quits Awi';
+		this.properties.inputs = [ ];
 		this.properties.outputs = [ ];
 		this.properties.brackets = false;
 		this.properties.tags = [ 'system', 'config' ];
@@ -38,7 +38,11 @@ class BubbleAwiSaveConfig extends awibubbles.Bubble
 	async play( line, parameters, control )
 	{
 		await super.play( line, parameters, control );		
-		return this.awi.config.saveConfigs( parameters.userInput );
+		var answer = await this.awi.save( this.awi.config.user );
+		if ( answer.success )
+			this.awi.system.quit();
+		this.awi.editor.print( this, 'Cannot save memories and conversations. Please check your setup.' );
+		return answer;
 	}
 	async playback( line, parameters, control )
 	{
@@ -49,4 +53,4 @@ class BubbleAwiSaveConfig extends awibubbles.Bubble
 		super.transpile( line, data, control );
 	}
 }
-module.exports.Bubble = BubbleAwiSaveConfig;
+module.exports.Bubble = BubbleAwiQuit;

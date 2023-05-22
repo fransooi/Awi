@@ -24,6 +24,7 @@ class Config
 	constructor( awi, config )
 	{
 		this.awi = awi;
+		this.oClass = 'config'
 		this.systemConfig = config;
 		if ( typeof config.configurations == 'string' )
 			this.getConfigurationPath = function(){ return awi.utilities.normalize( config.configurations ) };
@@ -132,13 +133,13 @@ class Config
 				return { success: false, error: 'awi:user-unknow:iwa' };
 			if ( this.configs[ 'personality-' + name ] )
 				personalities.push( this.configs[ 'personality-' + name ] );
-			await this.awi.utilities.saveHJSON( this.systemConfig.configurations + '/' + name + '.hjson', this.configs[ name ] );
-			await this.awi.utilities.saveJSON( this.systemConfig.configurations + '/' + name + '.json', this.configs[ name ] );
+			await this.awi.utilities.saveHJSON( this.getConfigurationPath() + '/' + name + '.hjson', this.configs[ name ] );
+			await this.awi.utilities.saveJSON( this.getConfigurationPath() + '/' + name + '.json', this.configs[ name ] );
 			personalities.forEach( 
-				async function( element, index )
+				async function( element )
 				{
-					await self.awi.utilities.saveHJSON( this.systemConfig.configurations + '/' + index + '.hjson', element );
-					await self.awi.utilities.saveJSON( this.systemConfig.configurations + '/' + index + '.json', element );
+					await self.awi.utilities.saveHJSON( self.getConfigurationPath() + '/personality-' + name + '.hjson', element );
+					await self.awi.utilities.saveJSON( self.getConfigurationPath() + '/personality-' + name + '.json', element );
 				} );
 		}
 		else

@@ -28,7 +28,7 @@ class SouvenirAwiPhoto extends awisouvenir.Souvenir
 		super( awi, options );
 		this.name = 'Photo Souvenir Bubble';
 		this.token = 'photo';
-		this.klass = 'awi';
+		this.classname = 'awi';
 		this.properties.action = 'remembers one photo';
 		this.properties.subTopics.push( ...[ 'photo' ] );
 		this.properties.content = [ 'photos' ];

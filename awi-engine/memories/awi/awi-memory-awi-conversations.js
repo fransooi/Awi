@@ -26,7 +26,7 @@ class MemoryAwiConversations extends awimemory.Memory
 	constructor( awi, options = {} )
 	{
 		super( awi, options );
-		this.token = 'conversation';	
+		this.token = 'conversations';	
 		this.classname = 'awi';
 		this.name = 'Conversation Souvenir Chain';	
 		this.properties.action = 'stores a thread of messages with one person';

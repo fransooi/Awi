@@ -27,6 +27,7 @@ class Souvenir extends awibubbles.Bubble
 	{
 		super( awi, options );
 		this.classname = 'souvenir';
+		this.oClass = 'souvenir';
 		this.properties.topic = '';
 		this.properties.subTopics = [];
 		this.properties.interval = { start: 0, end : 0 };

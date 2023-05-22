@@ -24,6 +24,7 @@ class Messages
 	constructor( awi, options )
 	{
 		this.awi = awi;
+		this.oClass = 'messages';
 		this.options = options;
 
 	}
@@ -45,4 +46,4 @@ class Messages
 		return this.prompts.substring( start, end ).split( '\r\n' ).join( '\n' );
 	}
 }
-module.exports.Messages = Messages
+module.exports.Messages = Messages;

@@ -29,7 +29,9 @@ class Bulb extends awitree.Tree
 		super( 'treeroot', {}, null );
 		this.awi = awi;
 		this.id = options.id; 		
+		this.key = options.id;
 		this.classname = 'bulb';
+		this.oClass = 'bulb';
 		this.options = options;
 		this.parameters = options.parameters ? options.parameters : {};
 		this.useCount = 0;
@@ -38,8 +40,8 @@ class Bulb extends awitree.Tree
 		this.addBubble( { token: 'error', parentClass: options.errorClass, parameters: [], options: {}, onSuccess: {}, onError: '' }, [], {} );
 		this.currentBubble = null;
 		this.addBubble( { token: 'root', parentClass: options.errorClass, parameters: [], options: {}, onSuccess: {}, onError: '' }, [], {} );
-		this.pathwayRoot = {};
-		this.pathway = this.pathwayRoot;
+		this.pathway = 'self.nodes';
+		this.pathways = [];
 		this.working = 0;
 		this.properties = 
 		{
@@ -60,8 +62,8 @@ class Bulb extends awitree.Tree
 	reset()
 	{
 		super.reset()
-		this.pathwayRoot = {}
-		this.pathway = this.pathwayRoot;
+		this.pathway = 'self.nodes';
+		this.pathways = [];
 	}
 	newBubble( command, parameters = [], control = {} )
 	{
@@ -72,8 +74,7 @@ class Bulb extends awitree.Tree
 		var parentClass = ( typeof command.parentClass == 'undefined' ? 'newBubbles' : command.parentClass );
 		var classname =  ( typeof command.classname == 'undefined' ? 'awi' : command.classname );
 		var exits =  ( typeof command.exits == 'undefined' ? { success: '' } : command.exits );
-		var newBubble = new this.awi[ parentClass ][ classname ][ command.token ]( this.awi, { id: id, bulb: this, parent: parent, exits: exits, parameters: parameters } );
-		if ( typeof parent != 'string' )
+		var newBubble = new this.awi[ parentClass ][ classname ][ command.token ]( this.awi, { id: id, bulb: this, parent: parent, exits: exits, parameters: parameters } );		if ( typeof parent != 'string' )
 		{
 			parent.properties.exits.success = newBubble;
 		}
@@ -236,8 +237,8 @@ class Bulb extends awitree.Tree
 		this.working++;
 		do
 		{
-			this.pathway[ bubble.id ] = {};
-			this.pathway = this.pathway[ bubble.id ];
+			this.pathway += '.' + bubble.key;
+			this.pathways.push( this.pathway );
 			answer = await bubble.play( line, parameters, control );
 			if ( answer.success )
 			{
@@ -276,6 +277,7 @@ class Bulb extends awitree.Tree
 				this.awi.editor.print( this, answer.error.split( '\n' ), { user: 'error' } );
 				exit = null;
 			}
+			this.pathway = this.pathway.substring( 0, this.pathway.lastIndexOf( '.' ) );
 			bubble = exit;
 		} while ( bubble );
 		if ( answer.success )

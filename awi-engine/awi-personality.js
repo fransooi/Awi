@@ -25,6 +25,7 @@ class Personality
 	constructor( awi, options = {} )
 	{
 		this.awi = awi;
+		this.oClass = 'personality';		
 		this.options = options;
 		this.currentPrompt = 'prompt-generic';
 		this.prompts = 

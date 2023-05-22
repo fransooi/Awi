@@ -28,7 +28,7 @@ class SouvenirAwiMessage extends awisouvenir.Souvenir
 		super( awi, options );
 		this.name = 'Message Souvenir Bubble';
 		this.token = 'message';
-		this.klass = 'awi';
+		this.classname = 'awi';
 		this.properties.action = 'remembers one conversation exchange';
 		this.properties.subTopics.push( ...[ 'messenger', 'conversation' ] );
 		this.properties.content = [ 'text', 'videos', 'images', 'photos', 'audio', 'links' ];

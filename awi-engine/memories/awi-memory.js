@@ -28,6 +28,8 @@ class Memory extends awibulbs.Bulb
 		options.parentClass = 'newMemories';
 		options.errorClass = 'newSouvenirs';
 		super( awi, options );
+		this.classname = 'memory';
+		this.oClass = 'memory';
 		this.properties.topic = '';
 		this.properties.subTopics = [];
 		this.properties.interval = { start: null, end: null };

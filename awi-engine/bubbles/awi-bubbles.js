@@ -32,6 +32,7 @@ class Bubble extends awitrees.TreeNode
 		this.options = options;
 		this.bulb = options.bulb;
 		this.classname = 'bubble';
+		this.oClass = 'bubble';
 		this.useCount = 0;
 		this.properties = 
 		{
@@ -144,6 +145,10 @@ class Bubble extends awitrees.TreeNode
 	}
 	async transpile( /*data, control*/ )
 	{
+	}
+	async serialize()
+	{
+
 	}
 }
 module.exports.Bubble = Bubble;

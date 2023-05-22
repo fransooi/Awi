@@ -26,7 +26,7 @@ class MemoryAwiPhotos extends awimemory.Memory
 	constructor( awi, options = {} )
 	{
 		super( awi, options );
-		this.token = 'images';	
+		this.token = 'photos';	
 		this.classname = 'awi';
 		this.name = 'Photos Souvenir Chain';	
 		this.properties.action = 'stores a list of photos';

@@ -27,6 +27,7 @@ class Prompt extends awimemoryconversation.Memory
 	constructor( awi, conversation = {}, options = {} )
 	{
 		super( awi, conversation, options );
+		this.oClass = 'prompt';
 		this.connector = awi.connectors.editors.current;
 		this.playing = false;
 		this.viewing = false;
@@ -178,9 +179,15 @@ class Prompt extends awimemoryconversation.Memory
 					var answer = await this.awi.config.setUser( userName );
 					if ( answer.success )
 					{						
+						answer = await this.awi.load( userName );
+						if ( answer.success )
+						{
 						logged = true;
 						line = 'Please say hello to ' + userName + ' with a short joke...';
 						this.awi.editor.print( this, 'User changed to ' + userName + '\n', { user: 'information' } );
+					}
+					else
+							this.awi.editor.print( this, 'Cannot load memories...\n', { user: 'error' } );
 					}
 					else
 						this.awi.editor.print( this, 'Cannot change user to ' + userName + '\n', { user: 'error' } );

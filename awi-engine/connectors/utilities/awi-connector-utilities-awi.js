@@ -1,4 +1,5 @@
 var awiconnector = require( '../awi-connector' );
+var awiawi = require( '../../awi' );
 
 class ConnectorUtilitieAwi extends awiconnector.Connector
 {
@@ -901,7 +902,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		var id;
 		do
 		{
-			id = root + ( root ? '-' : '' ) + count;
+			id = root + ( root ? '_' : '' ) + count;
 			if ( timeString )
 			{
 				var currentdate = new Date();
@@ -916,12 +917,12 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 					milli: currentdate.getMilliseconds(),
 				} );
 				if ( time )
-					id += '-' + time;
+					id += '_' + time;
 			}
 			var numbers = '';
 			for ( var n = 0; n < nNumbers; n++ )
 				numbers += String.fromCharCode( 48 + Math.floor( Math.random() * 10 ) );
-			id += '-' + numbers;
+			id += '_' + numbers;
 			var letters = '';
 			for ( var n = 0; n < nLetters; n++ )
 				letters += String.fromCharCode( 65 + Math.floor( Math.random() * 26 ) );
@@ -1399,6 +1400,201 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			default:
 				return 
 		}
+	}
+	serializeOut( root )
+	{
+		var self = this;
+		var count = 0;
+		function isAwi( o )
+		{
+			return typeof o.token != 'undefined';
+		}
+		function toJSON( data )
+		{
+			var json;
+			try
+			{
+				json = JSON.stringify( data );
+			}
+			catch( e )
+			{}
+			if ( json )
+				return json;
+			return '""';
+		}
+		function savePrompt( o )
+		{
+			var map = '';
+			map += '\t'.repeat( count ) + 'classname:"' + o.classname + '",\n';
+			map += '\t'.repeat( count ) + 'currentBubble:"' + o.currentBubble.key + '",\n';
+			map += '\t'.repeat( count ) + 'id:"' + o.id + '",\n';
+			map += '\t'.repeat( count ) + 'key:"' + o.key + '",\n';
+			map += '\t'.repeat( count ) + 'token:"' + o.token + '",\n';
+			map += '\t'.repeat( count ) + 'options:' + toJSON( o.options ) + ',\n';
+			map += '\t'.repeat( count ) + 'parameters:' + toJSON( o.parameters ) + ',\n';
+			map += '\t'.repeat( count ) + 'parametersType:' + ( self.isArray( o.parameters ) ? '{}' : '[]' ) + ',\n';
+			map += '\t'.repeat( count ) + 'datas:' + toJSON( o.datas ) + ',\n';
+			map += '\t'.repeat( count ) + 'options:' + toJSON( o.options ) + ',\n';
+			map += '\t'.repeat( count ) + 'pathway:"' + toJSON( o.pathway ) + '",\n';
+			map += '\t'.repeat( count ) + 'idCount:' + o.idCount + ',\n';
+			map += '\t'.repeat( count ) + 'questionCount:' + o.questionCount + ',\n';
+			map += '\t'.repeat( count ) + 'parent:"' + ( self.isObject( o.parent ) ? o.parent.key : ( typeof o.parent == 'undefined' ? '' : o.parent ) ) + '",\n';
+			map += '\t'.repeat( count ) + 'previous:"' + ( self.isObject( o.previous ) ? o.previous.key : ( typeof o.previous == 'undefined' ? '' : o.previous ) ) + '",\n';
+			map += '\t'.repeat( count ) + 'exits:\n'
+			map += '\t'.repeat( count ) + '{\n';
+			for ( var p in o.properties.exits )
+				map += '\t'.repeat( count + 1 ) + p + ':"' + ( self.isObject( o.properties.exits[ p ] ) ? o.properties.exits[ p ].key : o.properties.exits[ p ] ) + '",\n';
+			map += '\t'.repeat( count ) + '},\n';
+			map += '\t'.repeat( count ) + 'nodes:\n'
+			map += '\t'.repeat( count ) + '{\n';
+			for ( var p in o.nodes )
+			{
+				var oo = o.nodes[ p ].value;
+				map += '\t'.repeat( count + 1 ) + p + ':{oClass:"' + oo.oClass + '",data:{\n';
+				count += 2;
+				map += saveMap[ oo.oClass ]( oo )
+				count -= 2;
+				map += '\t'.repeat( count + 1 ) + '}},\n';
+			}
+			map += '\t'.repeat( count ) + '},\n'
+			return map;
+		}
+		function saveMemory( o )
+		{
+			var map = '';
+			map += '\t'.repeat( count ) + 'classname:"' + o.classname + '",\n';
+			map += '\t'.repeat( count ) + 'parentClass:"newMemories",\n';
+			map += '\t'.repeat( count ) + 'currentBubble:"' + o.currentBubble.key + '",\n';
+			map += '\t'.repeat( count ) + 'id:"' + o.id + '",\n';
+			map += '\t'.repeat( count ) + 'key:"' + o.key + '",\n';
+			map += '\t'.repeat( count ) + 'token:"' + o.token + '",\n';
+			map += '\t'.repeat( count ) + 'options:' + toJSON( o.options ) + ',\n';
+			map += '\t'.repeat( count ) + 'parameters:' + toJSON( o.parameters ) + ',\n';
+			map += '\t'.repeat( count ) + 'parametersType:' + ( self.isArray( o.parameters ) ? '{}' : '[]' ) + ',\n';
+			map += '\t'.repeat( count ) + 'parent:"' + ( self.isObject( o.parent ) ? o.parent.key : ( typeof o.parent == 'undefined' ? '' : o.parent ) ) + '",\n';
+			map += '\t'.repeat( count ) + 'previous:"' + ( self.isObject( o.previous ) ? o.previous.key : ( typeof o.previous == 'undefined' ? '' : o.previous ) ) + '",\n';
+			map += '\t'.repeat( count ) + 'exits:\n'
+			map += '\t'.repeat( count ) + '{\n';
+			for ( var p in o.properties.exits )
+				map += '\t'.repeat( count + 1 ) + p + ':"' + ( self.isObject( o.properties.exits[ p ] ) ? o.properties.exits[ p ].key : o.properties.exits[ p ] ) + '",\n';
+			map += '\t'.repeat( count ) + '},\n';
+			map += '\t'.repeat( count ) + 'nodes:\n'
+			map += '\t'.repeat( count ) + '{\n';
+			for ( var p in o.nodes )
+			{
+				var oo = o.nodes[ p ].value;
+				map += '\t'.repeat( count + 1 ) + p + ':{oClass:"' + oo.oClass + '",data:{\n';
+				count += 2;
+				map += saveMap[ oo.oClass ]( oo );
+				count -= 2;
+				map += '\t'.repeat( count + 1 ) + '}},\n';
+			}
+			map += '\t'.repeat( count ) + '},\n'
+			return map;
+		}
+		function saveSouvenir( o )
+		{
+			var map = '';
+			map += '\t'.repeat( count ) + 'classname:"' + o.classname + '",\n';
+			map += '\t'.repeat( count ) + 'parentClass:"newSouvenirs",\n';
+			map += '\t'.repeat( count ) + 'id:"' + o.id + '",\n';
+			map += '\t'.repeat( count ) + 'key:"' + o.key + '",\n';
+			map += '\t'.repeat( count ) + 'token:"' + o.token + '",\n';
+			map += '\t'.repeat( count ) + 'parameters:' + toJSON( o.parameters ) + ',\n';
+			map += '\t'.repeat( count ) + 'parametersType:' + ( self.isArray( o.parameters ) ? '{}' : '[]' ) + ',\n';
+			map += '\t'.repeat( count ) + 'options:' + toJSON( o.options ) + ',\n';
+			map += '\t'.repeat( count ) + 'parent:"' + ( self.isObject( o.parent ) ? o.parent.key : ( typeof o.parent == 'undefined' ? '' : o.parent ) ) + '",\n';
+			map += '\t'.repeat( count ) + 'previous:"' + ( self.isObject( o.previous ) ? o.previous.key : ( typeof o.previous == 'undefined' ? '' : o.previous ) ) + '",\n';
+			map += '\t'.repeat( count ) + 'exits:\n'
+			map += '\t'.repeat( count ) + '{\n';
+			for ( var p in o.properties.exits )
+				map += '\t'.repeat( count + 1 ) + p + ':"' + ( self.isObject( o.properties.exits[ p ] ) ? o.properties.exits[ p ].key : o.properties.exits[ p ] ) + '",\n';
+			map += '\t'.repeat( count ) + '},\n';
+			return map;
+		}
+		function saveBulb( o )
+		{
+			var map = '';
+			return map;
+		}
+		function saveBubble( o )
+		{
+			var map = '';
+			map += '\t'.repeat( count ) + 'classname:"' + o.classname + '",\n';
+			map += '\t'.repeat( count ) + 'parentClass:"newBubbles",\n';
+			map += '\t'.repeat( count ) + 'token:"' + o.token + '",\n';
+			map += '\t'.repeat( count ) + 'id:"' + o.id + '",\n';
+			map += '\t'.repeat( count ) + 'key:"' + o.key + '",\n';
+			map += '\t'.repeat( count ) + 'data:' + toJSON( o.data ) + ',\n';
+			map += '\t'.repeat( count ) + 'parameters:' + toJSON( o.parameters ) + ',\n';
+			map += '\t'.repeat( count ) + 'parametersType:' + ( self.isArray( o.parameters ) ? '{}' : '[]' ) + ',\n';
+			map += '\t'.repeat( count ) + 'options:' + toJSON( o.options ) + ',\n';
+			map += '\t'.repeat( count ) + 'parent:"' + ( self.isObject( o.parent ) ? o.parent.key : ( typeof o.parent == 'undefined' ? '' : o.parent ) ) + '",\n';
+			map += '\t'.repeat( count ) + 'previous:"' + ( self.isObject( o.previous ) ? o.previous.key : ( typeof o.previous == 'undefined' ? '' : o.previous ) ) + '",\n';
+			map += '\t'.repeat( count ) + 'exits:\n'
+			map += '\t'.repeat( count ) + '{\n';
+			for ( var p in o.properties.exits )
+				map += '\t'.repeat( count + 1 ) + p + ':"' + ( self.isObject( o.properties.exits[ p ] ) ? o.properties.exits[ p ].key : o.properties.exits[ p ] ) + '",\n';
+			map += '\t'.repeat( count ) + '},\n';
+			return map;
+		}
+		var saveMap = 
+		{
+			'awi': function( o ) { return '\t'.repeat( count - 1 ) + ':{oClass:"awi","data":{""},\n'; },
+			'config': function( o ) { return '\t'.repeat( count - 1 ) + ':{oClass:"config","data":{""},\n'; },
+			'bubble': saveBubble,
+			'bulb': saveBulb,
+			'memory': saveMemory,
+			'souvenir': saveSouvenir,
+			'prompt': savePrompt
+		}
+
+		function createMap( o, map )
+		{
+			count++;
+			if ( o.oClass )
+			{
+				map += '\t'.repeat( count - 1 ) + 'root:{oClass:"' + o.oClass + '",data:{\n';
+				map += saveMap[ o.oClass ]( o );
+				map += '\t'.repeat( count - 1 ) + '}},\n';
+			}
+			else
+			{
+				for ( var p in o )
+				{
+					var oo = o[ p ];
+					if ( self.isObject( oo ) )
+					{
+						if ( oo.oClass )
+						{
+							map += '\t'.repeat( count - 1 ) + p + ':{oClass:"' + oo.oClass + '",data:{\n';
+							map += saveMap[ oo.oClass ]( oo );
+							map += '\t'.repeat( count - 1 ) + '}},\n';
+						}
+						else 
+						{
+							for ( var pp in oo )
+							{
+								var ooo = oo[ pp ];
+								if ( self.isObject( ooo ) )
+								{
+									if ( ooo.oClass )
+									{
+										map += '\t'.repeat( count - 1 ) + pp + ':{oClass:"' + ooo.oClass + '",data:{\n';
+										map += saveMap[ ooo.oClass ]( ooo );
+										map += '\t'.repeat( count - 1 ) + '}},\n';
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			count--;
+			return map;
+		}
+		count++;
+		return 'return {\n'+ createMap( root, '' ) + '}\n';
 	}
 }
 module.exports.Connector = ConnectorUtilitieAwi

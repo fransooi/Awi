@@ -19,29 +19,25 @@
 * @short A tree of bubbles that works as a bubble: a bulb.
 *
 */
-var awitree = require( '../trees/awi-trees' );
-
-
-class Bulb extends awitree.Tree
+class Bulb
 {
 	constructor( awi, options )
 	{
-		super( 'treeroot', {}, null );
 		this.awi = awi;
-		this.id = options.id; 		
-		this.key = options.id;
+		options.errorClass = typeof options.errorClass ? options.errorClass : 'newBubbles';
+		this.options = options;
+		this.parent = options.parent;
+		this.key = options.key;
 		this.classname = 'bulb';
 		this.oClass = 'bulb';
-		this.options = options;
 		this.parameters = options.parameters ? options.parameters : {};
-		this.useCount = 0;
-		this.idCount = 0;
-		options.errorClass = typeof options.errorClass ? options.errorClass : 'newBubbles';
-		this.addBubble( { token: 'error', parentClass: options.errorClass, parameters: [], options: {}, onSuccess: {}, onError: '' }, [], {} );
-		this.currentBubble = null;
-		this.addBubble( { token: 'root', parentClass: options.errorClass, parameters: [], options: {}, onSuccess: {}, onError: '' }, [], {} );
-		this.pathway = 'self.nodes';
+		this.bubbleMap = {};
 		this.pathways = [];
+		this.pathway = 'self.bubbleMap';
+		this.currentBubble = '';
+		this.firstRun = true;
+		this.keyCount = 0;
+		this.useCount = 0;
 		this.working = 0;
 		this.properties = 
 		{
@@ -51,78 +47,68 @@ class Bulb extends awitree.Tree
 			brackets: false,
 			tags: [],
 			editables: [],
-			exits: { success: '' }
+			exits: { success: 'end' }
 		}
 		if ( options.exits )		
 		{
 			for ( var s in options.exits )
 				this.properties.exits[ s ] = options.exits[ s ];
 		}		
+		this.addBubble( { token: 'error', key: 'error', parentClass: options.errorClass, parameters: [], options: {} }, [], {} );
+		this.addBubble( { token: 'root', key: 'root', parentClass: options.errorClass, parameters: [], options: {} }, [], {} );
 	}
 	reset()
 	{
-		super.reset()
-		this.pathway = 'self.nodes';
+		this.pathway = 'self.bubbleMap';
 		this.pathways = [];
+		for ( var b in this.bubbleMap )
+			this.bubbleMap[ b ].reset();
 	}
 	newBubble( command, parameters = [], control = {} )
 	{
 		if ( !parameters || parameters.length == 0 )
 			parameters = command.parameters;
-		var id = ( command.id ? command.id : this.awi.utilities.getUniqueIdentifier( this.nodes, command.token, this.idCount++ ) );
+		var key = ( command.key ? command.key : this.awi.utilities.getUniqueIdentifier( this.bubbleMap, command.token, this.keyCount++ ) );
 		var parent = command.parent ? command.parent : this.currentBubble;
 		var parentClass = ( typeof command.parentClass == 'undefined' ? 'newBubbles' : command.parentClass );
 		var classname =  ( typeof command.classname == 'undefined' ? 'awi' : command.classname );
-		var exits =  ( typeof command.exits == 'undefined' ? { success: '' } : command.exits );
-		var newBubble = new this.awi[ parentClass ][ classname ][ command.token ]( this.awi, { id: id, bulb: this, parent: parent, exits: exits, parameters: parameters } );		if ( typeof parent != 'string' )
-		{
-			parent.properties.exits.success = newBubble;
-		}
+		var exits =  ( typeof command.exits == 'undefined' ? { success: 'end' } : command.exits );
+		var newBubble = new this.awi[ parentClass ][ classname ][ command.token ]( this.awi, { key: key, bulb: this, parent: parent, exits: exits, parameters: parameters } );
+		if ( parent )
+			this.getBubble( parent ).properties.exits.success = newBubble.key;
+		this.currentBubble = newBubble.key;
 		return newBubble;
 	}
 	addBubbles( commandList, control = {} )
 	{
 		for ( var c = 0; c < commandList.length; c++ )
-		{
 			this.addBubble( commandList[ c ], commandList[ c ].parameters, control );
 		}
-	}
 	addBubble( command, parameters = [], control = {} )
 	{
-		var bubble, parentId;
-		var doNew = true;
+		var bubble;
 		if ( typeof command.properties != 'undefined' && typeof command.properties.exits != 'undefined' )
 		{
 			bubble = command;
-			doNew = false;
-		}
-		if ( this.currentBubble )
-		{
-			command.parent = this.currentBubble;
-			command.id = this.awi.utilities.getUniqueIdentifier( this.nodes, command.token, this.idCount++ );
-			parentId = command.parent.id;
+			bubble.key = this.awi.utilities.getUniqueIdentifier( this.bubbleMap, bubble.token, this.keyCount++ );
+			bubble.parent = this.currentBubble;
+			this.getBubble( this.currentBubble ).properties.exits.success = bubble.key;
 		}
 		else
 		{
-			command.parent = 'treeroot';
-			command.id = command.token;
-			parentId = 'treeroot';
-		}
-		if ( doNew )
+			command.parent = this.currentBubble;
+			if ( typeof command.key == 'undefined' )
+				command.key = this.awi.utilities.getUniqueIdentifier( this.bubbleMap, command.token, this.keyCount++ );
 			bubble = this.newBubble( command, parameters, control );
-		bubble.previous = bubble.parent;
-		this.insert( parentId, bubble.id, bubble );		
-		if ( bubble.previous && typeof bubble.previous != 'string' )
-			bubble.previous.properties.exits.success = bubble;
-		this.currentBubble = bubble;
-		return bubble.id;
+		}
+		this.bubbleMap[ bubble.key ] = bubble;
+		return bubble.key;
 	}
 	addBubbleFromLine( line, control = {} )
 	{
 		var start;
 		var command;
 		var parameters = [];
-		parameters.push( { name: 'originalInput', value: line } );
 		for ( start = 0; start < line.length; start++ )
 		{
 			var c = line.charAt( start );
@@ -138,8 +124,7 @@ class Bulb extends awitree.Tree
 					token: 'eval', 
 					classname: 'awi',
 					parameters: parameters, 
-					options: options, 
-					exits: {}
+					options: options
 				};
 				break;
 			}
@@ -175,8 +160,7 @@ class Bulb extends awitree.Tree
 						token: token, 
 						classname: classname,
 						parameters: parameters, 
-						options: {}, 
-						exits: {}
+						options: {}
 					};
 					line = line.substring( space ).trim();
 					break;
@@ -190,8 +174,7 @@ class Bulb extends awitree.Tree
 				token: 'chat', 
 				classname: 'awi',
 				parameters: parameters, 
-				options: {}, 
-				exits: {}
+				options: {}
 			};
 			var column = line.indexOf( ':' );
 			if ( column > 0 )
@@ -206,35 +189,28 @@ class Bulb extends awitree.Tree
 		this.addBubble( command, parameters, control );
 		return line;
 	}
-	deleteBubble( id )
-	{
-		if ( this.remove( id ) )
-			this.awi.systemWarning( 'Bubble not found!' )
-	}
 	reset()
 	{
-		for ( var node in this.nodes ) 
-		{
-			if ( this.nodes[ node ].value )
-				this.nodes[ node ].value.reset();
-		}
+		for ( var key in this.bubbleMap )
+			this.bubbleMap[ key ].reset();
 	}
 	async play( line, parameters, control = {} )
 	{
-		var bubble = this.currentBubble;
-		if ( !bubble || control.start == 'root' || bubble.token == 'root' )
+		var startBubble = this.currentBubble;
+		if ( !startBubble || control.start == 'root' || this.firstRun )
 		{
-			bubble = this.getBubble( 'root' );
-			this.currentBubble = bubble;
+			startBubble = 'root';
 			this.reset();
 			this.working = 0;
+			this.firstRun = false;
 		}
-		if ( !bubble )
+		if ( !startBubble )
 			return { success: false, data: {}, error: 'awi:no-bubble-to-play:iwa' };
 		control.start = null;
 
 		var answer;
 		this.working++;
+		var bubble = this.bubbleMap[ startBubble ];
 		do
 		{
 			this.pathway += '.' + bubble.key;
@@ -275,10 +251,10 @@ class Bulb extends awitree.Tree
 			else if ( answer.error )
 			{
 				this.awi.editor.print( this, answer.error.split( '\n' ), { user: 'error' } );
-				exit = null;
+				exit = 'end';
 			}
 			this.pathway = this.pathway.substring( 0, this.pathway.lastIndexOf( '.' ) );
-			bubble = exit;
+			bubble = this.bubbleMap[ exit ];
 		} while ( bubble );
 		if ( answer.success )
 			answer.success = 'end';
@@ -287,7 +263,6 @@ class Bulb extends awitree.Tree
 	}
 	async playback( line, parameter, control )
 	{
-		super.playback( line, parameter, control );
 	}
 	pause( onOff )
 	{
@@ -319,9 +294,29 @@ class Bulb extends awitree.Tree
 	{
 		return await this.run( position, 'serialize', path, data, control );
 	}
+
+	recallLastBubbles( howMany )
+	{
+		var memory = [];
+		var bubbles = this.getBubbleChain( 'end', 1, howMany );
+		for ( var b = bubbles.length - 1; b >= 0; b-- )
+		{
+			var bubble = bubbles[ b ];
+			if ( bubble.token == 'chat' && bubble.data )
+			{
+				memory.push(
+				{
+					userText: bubble.parameters[ 0 ].value,
+					contactText: bubble.data.join( ' ' )
+				} );
+
+			}
+		}
+		return memory;
+	}
 	getLastData( bubble, token )
 	{
-		var bubble = bubble.previous;
+		var bubble = this.getBubble( bubble.parent );
 		while( bubble )
 		{
 			for ( var p = 0; p < bubble.properties.outputs.length; p++ )
@@ -330,18 +325,22 @@ class Bulb extends awitree.Tree
 				if ( output.name == token )
 					return bubble.data;
 			}
-			bubble = bubble.previous;
+			bubble = this.getBubble( bubble.parent );
 		}
 		return null;
 	}
-	getBubble( id )
+
+	// Bubble tree handling
+	getBubble( key )
 	{
-		if ( typeof id == 'string' )
+		return this.bubbleMap[ key ];
+	}
+	getNumberOfBubbles()
 		{
-			if ( this.nodes[ id ] )
-				return this.nodes[ id ].value;
-		}
-		return undefined;
+		var count = 0;
+		for ( var b in this.bubbleMap )
+			count++;
+		return count - 1;
 	}
 	getLastBubble( exit )
 	{
@@ -349,12 +348,27 @@ class Bulb extends awitree.Tree
 
 		var found;
 		var bubble = this.getBubble( 'root' );
-		while ( bubble && typeof bubble != 'string' )
+		while ( bubble )
 		{
 			found = bubble;
-			bubble = bubble.properties.exits[ exit ];
+			bubble = this.getBubble( bubble.properties.exits[ exit ] );
 		}
 		return found;
+	}
+	deleteBubble( key )
+	{
+		if ( this.bubbleMap[ key ] )
+		{
+			var newBubbleMap = {};
+			for ( var b in this.bubbleMap )
+			{
+				if ( this.bubbleMap[ b ] )
+					newBubbleMap[ b ] = this.bubbleMap[ b ];
+			}
+			this.bubbleMap = newBubbleMap;
+			return;
+		}
+		this.awi.systemWarning( 'Bubble not found!' )
 	}
 	getBubbleChain( whereFrom, distance, howMany, exit )
 	{
@@ -367,13 +381,13 @@ class Bulb extends awitree.Tree
 			bubble = this.getLastBubble( exit );
 			while( bubble && distance > 0 )
 			{
-				bubble = bubble.previous;
+				bubble = this.getBubble( bubble.parent );
 				distance--;
 			}
 			while( bubble && howMany > 0 )
 			{
 				result.push( bubble );
-				bubble = bubble.previous;
+				bubble = this.getBubble( bubble.parent );
 				howMany--;
 			}
 		}
@@ -382,50 +396,17 @@ class Bulb extends awitree.Tree
 			bubble = this.getBubble( 'root' );
 			while( bubble && distance > 0 )
 			{
-				bubble = bubble.exits[ exit ];
+				bubble = this.getBubble( bubble.properties.exits[ exit ] );
 				distance--;
 			}
 			while( bubble && howMany > 0 )
 			{
 				result.push( bubble );
-				bubble = bubble.exits[ exit ];
+				bubble = this.getBubble( bubble.properties.exits[ exit ] );
 				howMany--;
 			}
 		}
 		return result;
 	}
-	getNumberOfBubbles()
-	{
-		return Math.max( this.getLength() - 1, 0 );
-	}
-	recallLastBubbles( howMany )
-	{
-		var memory = [];
-		var bubbles = this.getBubbleChain( 'end', 1, howMany );
-		for ( var b = bubbles.length - 1; b >= 0; b-- )
-		{
-			var bubble = bubbles[ b ];
-			if ( bubble.token == 'chat' )
-			{
-				if ( !bubble.empty )
-				{
-					for ( var p = 0; p < bubble.parameters.length; p++ )
-					{
-						if ( bubble.parameters[ p ].name == 'userInput' )
-						{
-							memory.push( 
-							{
-								userText: bubble.parameters[ p ].value,
-								contactText: bubble.data.join( ' ' )
-							} );
-							break;
-						}
-					}
-				}
-			}
-		}
-		return memory;
-	}
 }
 module.exports.Bulb = Bulb
-

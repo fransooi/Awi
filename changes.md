@@ -1,3 +1,9 @@
+20230523 Personalities now handle memories, and loading / saving
+20230523 Pass 2 on serialization, still not working but close
+20230523 Renamed "awi" type of memories to "generic"
+20230523 Removal of Tree and Tree node in favor of a faster and simpler tree system, relocatable
+20230523 More bugs
+
 20230522 various debugging
 20230522 implemented serialization of bubbles (not complete)
 20230522 changed bubble ID to underscores

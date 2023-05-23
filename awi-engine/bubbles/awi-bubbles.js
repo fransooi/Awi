@@ -19,17 +19,15 @@
 * @short Main bubble class from which all elements are derived.
 *
 */
-var awitrees = require( '../trees/awi-trees' );
-
-class Bubble extends awitrees.TreeNode
+class Bubble
 {
 	constructor( awi, options )
 	{
-		super( options.id, {}, options.parent );
-		this.id = options.id; 		
+		this.key = options.key; 		
 		this.parameters = options.parameters ? options.parameters : {};
 		this.awi = awi;
 		this.options = options;
+		this.parent = options.parent;
 		this.bulb = options.bulb;
 		this.classname = 'bubble';
 		this.oClass = 'bubble';
@@ -109,7 +107,7 @@ class Bubble extends awitrees.TreeNode
 				if ( parameter.name != 'userInput' && typeof lineDatas[ parameter.name ] == 'undefined' )
 				{
 					if ( !parameter.optional )
-						todo.push( { token: 'input', classname: 'awi', parameters: [ parameter ], options: {}, exits: {} } );
+						todo.push( { token: 'input', classname: 'awi', parameters: [ parameter ], options: {} } );
 					else
 						parameters[ parameter.name ] = parameter.default;
 				}
@@ -141,7 +139,6 @@ class Bubble extends awitrees.TreeNode
 	}
 	async playback( line, parameter, control )
 	{
-		super.playback( line, parameter, control );
 	}
 	async transpile( /*data, control*/ )
 	{

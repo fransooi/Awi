@@ -4,9 +4,9 @@
 *          / _ \              (°°)       Intelligent
 *        / ___ \ [ \ [ \ [  ][   ]       Programmable
 *     _/ /   \ \_\ \/\ \/ /  |  | \      Personal Assistant
-* (_)|____| |____|\__/\__/ [_| |_] \     link: 
+* (_)|____| |____|\__/\__/ [_| |_] \     link:
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -26,9 +26,9 @@ class MemoryAwiVideos extends awimemory.Memory
 	constructor( awi, options = {} )
 	{
 		super( awi, options );
-		this.token = 'videos';	
-		this.classname = 'awi';
-		this.name = 'Videos Souvenir Chain';	
+		this.token = 'videos';
+		this.classname = 'generic';
+		this.name = 'Videos Souvenir Chain';
 		this.properties.action = 'stores information about videos';
 		this.properties.inputs = [
 			{ userInput: 'what to find in the video', type: 'string' },
@@ -46,7 +46,7 @@ class MemoryAwiVideos extends awimemory.Memory
 		if ( !nested )
 			control.memory.level = 1;
 		else
-			control.memory.level++;			
+			control.memory.level++;
 		var answer = await this[ control.memory.command ]( line, parameters, control );
 		control.memory.level--;
 		return answer;
@@ -58,16 +58,16 @@ class MemoryAwiVideos extends awimemory.Memory
 	async printData( line, parameters, control )
 	{
 		if ( control.memory.scanLevel > 0 && control.memory.level == 1 )
-		{	
+		{
 			var text = 'Video recorded between ' + parameters.interval;
 			this.awi.editor.print( this, text, { user: 'memory2' } );
 
-			var souvenir = this.getBubble( 'root' ).properties.exits[ 'success' ];
+			var souvenir = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
 			while( souvenir )
 			{
 				if ( souvenir.parameters )
 					await souvenir.play( line, {}, control );
-				souvenir = souvenir.properties.exits[ 'success' ];
+				souvenir = this.getBubble( souvenir.properties.exits[ 'success' ] );
 			};
 		}
 	}
@@ -75,10 +75,10 @@ class MemoryAwiVideos extends awimemory.Memory
 	{
 		var directSouvenirs = [];
 		var indirectSouvenirs = [];
-		this.awi.prompt.waitForInput = true;							
+		this.awi.prompt.waitForInput = true;
 		if ( control.memory.scanLevel > 0 && control.memory.level == 1 )
-		{	
-			var bubble = this.getBubble( 'root' ).properties.exits[ 'success' ];
+		{
+			var bubble = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
 			while( bubble )
 			{
 				if ( bubble.parameters )
@@ -91,13 +91,13 @@ class MemoryAwiVideos extends awimemory.Memory
 							directSouvenirs.push( bubble );
 					}
 				}
-				bubble = bubble.properties.exits[ 'success' ];
+				bubble = this.getBubble( bubble.properties.exits[ 'success' ] );
 			};
 			if ( directSouvenirs.length > 0 )
 			{
 				this.awi.prompt.waitForInput = true;
 				if ( control.memory.scanLevel > 1 )
-				{	
+				{
 					var text = '';
 					for ( var s = 0; s < directSouvenirs.length; s++ )
 					{
@@ -108,10 +108,10 @@ class MemoryAwiVideos extends awimemory.Memory
 								text += answer.data.indirectSouvenirs[ ss ].parameters.text;
 						}
 					}
-					var bubble = this.getBubble( 'root' ).properties.exits[ 'success' ];
+					var bubble = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
 					while( bubble )
 					{
-						var found = directSouvenirs.findIndex( 
+						var found = directSouvenirs.findIndex(
 							function( element )
 							{
 								return element === bubble;
@@ -124,22 +124,22 @@ class MemoryAwiVideos extends awimemory.Memory
 							if ( answer.success = 'found' )
 								indirectSouvenirs.push( ...answer.data.indirectSouvenirs );
 						}
-						bubble = bubble.properties.exits[ 'success' ];
+						bubble = this.getBubble( bubble.properties.exits[ 'success' ] );
 					};
-				}		
+				}
 				this.awi.prompt.waitForInput = false;
-	}
+			}
 			return { success: 'found', data: { directSouvenirs: directSouvenirs }, indirectSouvenirs: indirectSouvenirs };
 		}
 		if ( control.memory.scanLevel > 1 && control.memory.level == 2 )
-		{	
-			var bubble = this.getBubble( 'root' ).properties.exits[ 'success' ];
+		{
+			var bubble = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
 			while( bubble )
-	{
+			{
 				var answer = await bubble.play( parameters.userInput, parameters, this.awi.utilities.copyObject( control ) );
 				if ( answer.success == 'found' )
 					indirectSouvenirs.push( ...answer.data );
-				bubble = bubble.properties.exits[ 'success' ];
+				bubble = this.getBubble( bubble.properties.exits[ 'success' ] );
 			};
 			if ( indirectSouvenirs.length > 0 )
 				return { success: 'found', data: { indirectSouvenirs: directSouvenirs } };

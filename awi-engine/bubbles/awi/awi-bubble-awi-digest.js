@@ -38,11 +38,11 @@ class BubbleAwiDigest extends awibubbles.Bubble
 		this.properties.brackets = false;
 		this.properties.tags = [ 'awi', 'memory', 'souvenirs' ];
 	}
-	async messenger( path, parameters )
+	async messenger( path, parameters, control )
 	{
 		var self = this;
 
-		// Import one message list
+		// Import one message listdigest
 		async function importMessages( todo, options )
 		{
 			var importer = self.awi.getConnector( 'importers', 'messenger', {} );
@@ -139,6 +139,8 @@ class BubbleAwiDigest extends awibubbles.Bubble
 		var numberOfSouvenirs = 0;		
 		var invalid = [];
 		var valid = [];
+		if ( control.store )
+		{
 		for ( var td = 0; td < todo.length; td++ )
 		{
 			var tobedone = await importMessages( todo[ td ], {} );
@@ -151,7 +153,7 @@ class BubbleAwiDigest extends awibubbles.Bubble
 						contactName: tobedone.contactName,
 						referencePath: tobedone.htmlPath
 					}
-					self.awi.memories.awi.messenger.addMemory( tobedone.memories, params );
+						this.awi.personality.memories.messenger.addMemory( tobedone.memories, params );
 					numberOfSouvenirs += tobedone.numberOfSouvenirs;
 					valid.push( tobedone );
 				}
@@ -161,6 +163,8 @@ class BubbleAwiDigest extends awibubbles.Bubble
 				invalid.push( tobedone );
 			}
 		}
+		}
+		control.store = false;
 		return {
 			numberOfMemories: todo.length,
 			numberOfSouvenirs: numberOfSouvenirs,
@@ -168,7 +172,7 @@ class BubbleAwiDigest extends awibubbles.Bubble
 			valid: valid
 		}
 	}
-	async videos( path, parameters )
+	async videos( path, parameters, control )
 	{
 		var invalid = [];
 		var valid = [];
@@ -194,7 +198,7 @@ class BubbleAwiDigest extends awibubbles.Bubble
 				}
 			}	
 		}
-		if ( valid.length > 0 )
+		if ( control.store && valid.length > 0 )
 		{
 			var params =
 			{
@@ -202,8 +206,9 @@ class BubbleAwiDigest extends awibubbles.Bubble
 				contactName: parameters.contactName,
 				referencePath: path
 			}
-			this.awi.memories.awi.videos.addMemory( valid, params );
+			this.awi.personality.memories.videos.addMemory( valid, params );
 		}
+		control.store = false;
 		return {
 			numberOfMemories: valid.length,
 			numberOfSouvenirs: numberOfSouvenirs,
@@ -211,7 +216,7 @@ class BubbleAwiDigest extends awibubbles.Bubble
 			valid: valid
 		}
 	}
-	async audios( path, parameters )
+	async audios( path, parameters, control )
 	{
 		var invalid = [];
 		var valid = [];
@@ -237,7 +242,7 @@ class BubbleAwiDigest extends awibubbles.Bubble
 				}
 			}	
 		}
-		if ( valid.length > 0 )
+		if ( control.store && valid.length > 0 )
 		{
 			var params =
 			{
@@ -245,8 +250,9 @@ class BubbleAwiDigest extends awibubbles.Bubble
 				contactName: parameters.contactName,
 				referencePath: path
 			}
-			this.awi.memories.awi.audios.addMemory( valid, params );
+			this.awi.personality.memories.audios.addMemory( valid, params );
 		}
+		control.store = false;
 		return {
 			numberOfMemories: valid.length,
 			numberOfSouvenirs: numberOfSouvenirs,
@@ -287,7 +293,7 @@ class BubbleAwiDigest extends awibubbles.Bubble
 				}
 				if ( this[ type ] )
 				{
-					var info = await this[ type ]( path, parameters );
+					var info = await this[ type ]( path, parameters, { store: true } );
 					result.numberOfMemories += info.numberOfMemories;
 					result.numberOfSouvenirs += info.numberOfSouvenirs;
 					result.valid.push( ...info.valid );
@@ -308,7 +314,7 @@ class BubbleAwiDigest extends awibubbles.Bubble
 						{
 							if ( this[ file.name ] )
 							{
-								var info = await this[ file.name ]( file.path, parameters );
+								var info = await this[ file.name ]( file.path, parameters, { store: true } );
 								result.numberOfMemories += info.numberOfMemories;
 								result.numberOfSouvenirs += info.numberOfSouvenirs;
 								result.valid.push( ...info.valid );
@@ -322,7 +328,7 @@ class BubbleAwiDigest extends awibubbles.Bubble
 			this.awi.editor.print( this, result.numberOfSouvenirs + ( result.numberOfSouvenirs <= 1 ? ' souvenir' : ' souvenirs' ) +' added.', { user: 'information' } );
 			if ( result.invalid.length > 0 )
 			{
-				this.awi.editor.print( self, 'These items could not be imported...', { user: 'warning' } );
+				this.awi.editor.print( this, 'These items could not be imported...', { user: 'warning' } );
 				for ( var i = 0; i < result.invalid.length; i++ )
 				{
 					this.awi.editor.print( this, ' - ' +  result.invalid[ i ], { user: 'warning' } );

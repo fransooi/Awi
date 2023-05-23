@@ -83,8 +83,7 @@ class BubbleAwiImport extends awibubbles.Bubble
 			token: 'input', 
 			classname: 'awi',
 			parameters: [ { name: 'choice',	description: 'Please enter a number between 1 and ' + files.length, type: 'number',	interval: [ 1, files.length ] } ], 
-			options: { }, 
-			exits: {}, 
+			options: { }
 		} ] );			
 		if ( param.success )
 			return await importFile( files[ param.data.userInput - 1 ].path );

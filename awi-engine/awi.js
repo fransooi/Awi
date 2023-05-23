@@ -131,7 +131,7 @@ class Awi
 					var classname = files[ f ].substring( classpos + 1, namepos );
 					var exports = window.awi[ 'awi-bubble-' + classname + '-' + name ];
 					this.bubbles[ classname ] = ( typeof this.bubbles[ classname ] == 'undefined' ? {} : this.bubbles[ classname ] );
-					this.bubbles[ classname ][ name ] = new exports.Bubble( this, { id: this.utilities.getUniqueIdentifier( {}, name, f ), previous: '', parent: '' } );
+					this.bubbles[ classname ][ name ] = new exports.Bubble( this, { key: this.utilities.getUniqueIdentifier( {}, name, f ), parent: '' } );
 					this.newBubbles[ classname ] = ( typeof this.newBubbles[ classname ] == 'undefined' ? {} : this.newBubbles[ classname ] );
 					this.newBubbles[ classname ][ name ] = exports.Bubble;
 				}
@@ -147,8 +147,6 @@ class Awi
 					var classpos = files[ f ].lastIndexOf( '-', namepos - 1 );
 					var classname = files[ f ].substring( classpos + 1, namepos );
 					var exports = window.awi[ 'awi-souvenir-' + classname + '-' + name ];
-					//this.souvenirs[ classname ] = ( typeof this.souvenirs[ classname ] == 'undefined' ? {} : this.souvenirs[ classname ] );
-					//this.souvenirs[ name ] = new exports.Souvenir( this, {} );
 					this.newSouvenirs[ classname ] = ( typeof this.newSouvenirs[ classname ] == 'undefined' ? {} : this.newSouvenirs[ classname ] );
 					this.newSouvenirs[ classname ][ name ] = exports.Souvenir;
 				}
@@ -164,8 +162,6 @@ class Awi
 					var classpos = files[ f ].lastIndexOf( '-', namepos - 1 );
 					var classname = files[ f ].substring( classpos + 1, namepos );
 					var exports = window.awi[ 'awi-memory-' + classname + '-' + name ];
-					this.memories[ classname ] = ( typeof this.memories[ classname ] == 'undefined' ? {} : this.memories[ classname ] );
-					this.memories[ classname ][ name ] = new exports.Memory( this, { id: this.utilities.getUniqueIdentifier( {}, name, f ), previous: '', parent: '' } );
 					this.newMemories[ classname ] = ( typeof this.newMemories[ classname ] == 'undefined' ? {} : this.newMemories[ classname ] );
 					this.newMemories[ classname ][ name ] = exports.Memory;
 				}
@@ -253,7 +249,7 @@ class Awi
 				if ( found )
 				{
 				this.bubbles[ classname ] = ( typeof this.bubbles[ classname ] == 'undefined' ? {} : this.bubbles[ classname ] );
-					this.bubbles[ classname ][ name ] = new exports.Bubble( this, { id: this.utilities.getUniqueIdentifier( {}, name, f ), previous: '', parent: '' } );
+					this.bubbles[ classname ][ name ] = new exports.Bubble( this, { key: this.utilities.getUniqueIdentifier( {}, name, f ), parent: '' } );
 				this.newBubbles[ classname ] = ( typeof this.newBubbles[ classname ] == 'undefined' ? {} : this.newBubbles[ classname ] );
 				this.newBubbles[ classname ][ name ] = exports.Bubble;
 				}
@@ -271,8 +267,6 @@ class Awi
 				var classpos = name.lastIndexOf( '-', namepos - 1 );
 				var classname = name.substring( classpos + 1, namepos );
 				name = name.substring( namepos + 1 );
-				//this.souvenirs[ classname ] = ( typeof this.souvenirs[ classname ] == 'undefined' ? {} : this.souvenirs[ classname ] );
-				//this.souvenirs[ name ] = new exports.Souvenir( this, {} );
 				this.newSouvenirs[ classname ] = ( typeof this.newSouvenirs[ classname ] == 'undefined' ? {} : this.newSouvenirs[ classname ] );
 				this.newSouvenirs[ classname ][ name ] = exports.Souvenir;
 			}
@@ -289,19 +283,17 @@ class Awi
 				var classpos = name.lastIndexOf( '-', namepos - 1 );
 				var classname = name.substring( classpos + 1, namepos );
 				name = name.substring( namepos + 1 );
-				this.memories[ classname ] = ( typeof this.memories[ classname ] == 'undefined' ? {} : this.memories[ classname ] );
-				this.memories[ classname ][ name ] = new exports.Memory( this, { id: this.utilities.getUniqueIdentifier( {}, name, f ), previous: '', parent: '' } );
 				this.newMemories[ classname ] = ( typeof this.newMemories[ classname ] == 'undefined' ? {} : this.newMemories[ classname ] );
 				this.newMemories[ classname ][ name ] = exports.Memory;
 			}
 		}
 
-		// Create personality
-		this.personality = new awipersonality.Personality( this, {} );
-
 		// Create messages
 		this.messages = new awimessages.Messages( this, {} );
 		await this.messages.loadMessages();
+
+		// Create personality
+		this.personality = new awipersonality.Personality( this, {} );
 
 		// Is everyone connected?
 		this.connected = true;
@@ -410,155 +402,43 @@ class Awi
 	async save( user )
 	{
 		user = typeof user == 'undefined' ? this.config.user : user;
-		var memories = this.utilities.serializeOut( this.memories, '' );
+		var answer = await this.personality.saveMemories( user );
+		if ( !answer.success )
+			return answer;
+
 		var conversations = this.utilities.serializeOut( this.prompt, '' );
 		var path = this.config.getConfigurationPath() + '/' + user + '-';
-		var answer1 = await this.system.writeFile( path + 'memories.js', memories, { encoding: 'utf8' } );
-		var answer2 = await this.system.writeFile( path + 'conversations.js', conversations, { encoding: 'utf8' } );
-		var answer3 = await this.config.saveConfigs( user );
-		if ( answer1.success && answer2.success && answer3.success )
-			return { success: true };
-		if ( !answer1.success )
-			return answer1;
-		if ( !answer2.success )
-			return answer2;
-		return answer3;		
+		return await this.system.writeFile( path + 'conversations.js', conversations, { encoding: 'utf8' } );
 	}
 	async load( user )
 	{
-		var self = this;
-		var lastBulb = 'root';
-		function fromJSON( json, def )
-		{
-			var data;
-			try
-			{
-				data = JSON.parse( json );
-			}
-			catch( e )
-			{}
-			if ( data )
-				return data;
-			return def;
-		}
-		function createObjects( o, map )
-		{
-			if ( o.oClass )
-			{
-				// create the object
-				var oo;
-				if ( o.oClass != 'prompt' )
-				{
-					oo = new self[ o.data.parentClass ][ o.data.classname ][ o.data.token ]( self, { id: o.data.key, bulb: lastBulb, parent: o.data.parent, exits: o.data.exits, parameters: o.data.parameters } );
-					if ( o.data.parentClass == 'newMemories' )
-						lastBulb = oo;
-				}
-				else
-				{
-					oo = self.prompt;
-					lastBulb = oo;
-				}
-				switch ( o.oClass )
-				{
-					case 'bubble':
-						break;
-					case 'bulb':
-						break;
-					case 'memory':
-						oo.currentBubble = o.data.currentBubble;
-						oo.parameters = fromJSON( o.data.parameters, o.data.parametersType );
-						oo.properties.exits = o.data.exits;
-						oo.parent = o.data.parent;
-						oo.previous = o.data.previous;
-						for ( var p in o.data.nodes )
-						{
-							oo.nodes[ p ] = createObjects( o.data.nodes[ p ], {} );
-						}
-						break;
-					case 'souvenir':
-						oo.parameters = fromJSON( o.data.parameters, o.data.parametersType );
-						oo.options = fromJSON( o.data.options, {} );
-						oo.parent = o.data.parent;
-						oo.previous = o.data.previous;
-						oo.properties.exits = o.data.exits;
-						 break;
-					case 'prompt':
-						oo.currentBubble = o.data.currentBubble;
-						oo.parameters = fromJSON( o.data.parameters, o.data.parametersType );
-						oo.datas = fromJSON( o.data.datas, {} );
-						oo.options = fromJSON( o.data.options, {} );
-						oo.properties.exits = o.data.exits;
-						oo.parent = o.data.parent;
-						oo.previous = o.data.previous;
-						oo.options = fromJSON( o.data.options, {} );
-						for ( var p in o.data.nodes )
-							oo.nodes[ p ] = createObjects( o.data.nodes[ p ], {} );
-						oo.pathway = o.data.pathway;
-						oo.idCount = o.data.idCount;
-						oo.questionCount = o.data.questionCount;
-						oo.properties.exits = o.data.exits;
-						break
-				}
-				return oo;
-			}
-			else
-			{
-				for ( var p in o )
-				{
-					var oo = o[ p ];
-					if ( oo.oClass )
-					{
-						o[ p ] = createObjects( oo, map );
-					}
-				}
-				return o;
-			}
-		}
 		user = typeof user == 'undefined' ? this.config.user : user;
+
+		var answer = await this.personality.loadMemories( user );
+		if ( !answer.success )
+			return answer;
+
 		var path = this.config.getConfigurationPath() + '/' + user + '-';
-		var memories, conversations;
-		var answer1 = await this.system.exists( path + 'memories.js' );
-		if ( answer1.success )
-		{
-			answer1 = await this.system.readFile( path + 'memories.js', { encoding: 'utf8' } );
-			if ( answer1.success )
-				memories = answer1.data;
-		}
-		var answer2 = await this.system.exists( path + 'conversations.js' );
-		if ( answer2.success )
-		{
-			answer2 = await this.system.readFile( path + 'conversations.js', { encoding: 'utf8' } );
-			if ( answer2.success )
-				conversations = answer2.data;
-		}
-		if ( memories )
-		{
-			try
+		var conversations;
+		answer = await this.system.exists( path + 'conversations.js' );
+		if ( answer.success )
 			{
-				memories = Function( memories );
-				memories = memories();
-			}
-			catch( e )
-			{
-				memories = null;
-			}
-		}
-		if ( conversations )
+			answer = await this.system.readFile( path + 'conversations.js', { encoding: 'utf8' } );
+			if ( answer.success )
 		{
+				conversations = answer.data;
 			try
 			{
 				conversations = Function( conversations );
 				conversations = conversations();
+					this.utilities.serializeIn( conversations.root, {} );
+					return { success: true };
 			}
 			catch( e )
 			{
-				conversations = null;
 			}
 		}
-		if ( memories && conversations )
-		{
-			this.memories = createObjects( memories, {} );
-			createObjects( conversations.root, {} );
+			return { success: false, error: 'awi:cannot-load-conversations:iwa' };
 		}
 		return { success: true };
 	}

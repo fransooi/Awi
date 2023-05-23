@@ -47,8 +47,8 @@ class ConnectorImporterAudio extends awiconnector.Connector
 			stats = stats.data;
 			var typeMemory = typeof options.typeMemory != 'undefined' ? options.typeMemory : 'audios';
 			var typeSouvenir = typeof options.typeSouvenir != 'undefined' ? options.typeSouvenir : 'audio';
-			var id = this.awi.utilities.getUniqueIdentifier( {}, typeMemory, Math.floor( Math.random() * 100 ) );
-			var memory = new this.awi.newMemories.awi[ typeMemory ]( this.awi, [], { id: id, parent: '', parameters: { senderName: senderName, path: path, stats: stats } } );
+			var key = this.awi.utilities.getUniqueIdentifier( {}, typeMemory, Math.floor( Math.random() * 100 ) );
+			var memory = new this.awi.newMemories.generic[ typeMemory ]( this.awi, [], { key: key, parent: '', parameters: { senderName: senderName, path: path, stats: stats } } );
 			var numberOfSouvenirs = 0;
 
 			// Convert SRT to array
@@ -95,7 +95,7 @@ class ConnectorImporterAudio extends awiconnector.Connector
 			this.awi.editor.print( this, 'Number of lines: ' + numberOfSouvenirs , { user: 'importer2' } )
 			return { success: true, data: { memories: memory, numberOfMemories: 1, numberOfSouvenirs: numberOfSouvenirs } };
 		}
-		return answer;
+		return transcription;
 	}
 }
 module.exports.Connector = ConnectorImporterAudio;

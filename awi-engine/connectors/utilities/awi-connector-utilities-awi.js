@@ -1401,6 +1401,96 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 				return 
 		}
 	}
+	serializeIn( map, root )
+	{
+		var self = this;
+		var lastBulb = 'root';
+		function fromJSON( json, def )
+		{
+			var data;
+			try
+			{
+				data = JSON.parse( json );
+			}
+			catch( e )
+			{}
+			if ( data )
+				return data;
+			return def;
+		}
+		function createObjects( o, map )
+		{
+			if ( o.oClass )
+			{
+				// create the object
+				var oo;
+				if ( o.oClass != 'prompt' )
+				{
+					oo = new self.awi[ o.data.parentClass ][ o.data.classname ][ o.data.token ]( self, { key: o.data.key, bulb: lastBulb, parent: o.data.parent, exits: o.data.exits, parameters: o.data.parameters } );
+					if ( o.data.parentClass == 'newMemories' )
+						lastBulb = oo;
+				}
+				else
+				{
+					oo = self.prompt;
+					lastBulb = oo;
+				}
+				switch ( o.oClass )
+				{
+					case 'bubble':
+						break;
+					case 'bulb':
+						break;
+					case 'memory':
+						oo.currentBubble = o.data.currentBubble;
+						oo.parameters = fromJSON( o.data.parameters, o.data.parametersType );
+						oo.properties.exits = o.data.exits;
+						oo.parent = o.data.parent;
+						for ( var p in o.data.bubbleMap )
+						{
+							oo.bubbleMap[ p ] = createObjects( o.data.bubbleMap[ p ], {} );
+						}
+						break;
+					case 'souvenir':
+						oo.parameters = fromJSON( o.data.parameters, o.data.parametersType );
+						oo.options = fromJSON( o.data.options, {} );
+						oo.parent = o.data.parent;
+						oo.properties.exits = o.data.exits;
+						break;
+					case 'prompt':
+						oo.currentBubble = o.data.currentBubble;
+						oo.parameters = fromJSON( o.data.parameters, o.data.parametersType );
+						oo.datas = fromJSON( o.data.datas, {} );
+						oo.options = fromJSON( o.data.options, {} );
+						oo.properties.exits = o.data.exits;
+						oo.parent = o.data.parent;
+						oo.options = fromJSON( o.data.options, {} );
+						for ( var p in o.data.bubbleMap )
+							oo.bubbleMap[ p ] = createObjects( o.data.bubbleMap[ p ], {} );
+						oo.pathway = o.data.pathway;
+						oo.keyCount = o.data.keyCount;
+						oo.questionCount = o.data.questionCount;
+						oo.properties.exits = o.data.exits;
+						oo.firstRun = false;
+						break
+				}
+				return oo;
+			}
+			else
+			{
+				for ( var p in o )
+				{
+					var oo = o[ p ];
+					if ( oo.oClass )
+					{
+						o[ p ] = createObjects( oo, map );
+					}
+				}
+				return o;
+			}
+		}
+		return createObjects( map, root );
+	}
 	serializeOut( root )
 	{
 		var self = this;
@@ -1426,8 +1516,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		{
 			var map = '';
 			map += '\t'.repeat( count ) + 'classname:"' + o.classname + '",\n';
-			map += '\t'.repeat( count ) + 'currentBubble:"' + o.currentBubble.key + '",\n';
-			map += '\t'.repeat( count ) + 'id:"' + o.id + '",\n';
+			map += '\t'.repeat( count ) + 'currentBubble:"' + ( typeof o.currentBubble != 'undefined' ? ( typeof o.currentBubble == 'string' ? o.currentBubble : o.currentBubble.key ) : '' ) + '",\n';
 			map += '\t'.repeat( count ) + 'key:"' + o.key + '",\n';
 			map += '\t'.repeat( count ) + 'token:"' + o.token + '",\n';
 			map += '\t'.repeat( count ) + 'options:' + toJSON( o.options ) + ',\n';
@@ -1435,8 +1524,9 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			map += '\t'.repeat( count ) + 'parametersType:' + ( self.isArray( o.parameters ) ? '{}' : '[]' ) + ',\n';
 			map += '\t'.repeat( count ) + 'datas:' + toJSON( o.datas ) + ',\n';
 			map += '\t'.repeat( count ) + 'options:' + toJSON( o.options ) + ',\n';
-			map += '\t'.repeat( count ) + 'pathway:"' + toJSON( o.pathway ) + '",\n';
-			map += '\t'.repeat( count ) + 'idCount:' + o.idCount + ',\n';
+			map += '\t'.repeat( count ) + 'pathway:"' + o.pathway + '",\n';
+			map += '\t'.repeat( count ) + 'pathways:' + toJSON( o.pathways ) + ',\n';
+			map += '\t'.repeat( count ) + 'keyCount:' + o.keyCount + ',\n';
 			map += '\t'.repeat( count ) + 'questionCount:' + o.questionCount + ',\n';
 			map += '\t'.repeat( count ) + 'parent:"' + ( self.isObject( o.parent ) ? o.parent.key : ( typeof o.parent == 'undefined' ? '' : o.parent ) ) + '",\n';
 			map += '\t'.repeat( count ) + 'previous:"' + ( self.isObject( o.previous ) ? o.previous.key : ( typeof o.previous == 'undefined' ? '' : o.previous ) ) + '",\n';
@@ -1445,11 +1535,11 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			for ( var p in o.properties.exits )
 				map += '\t'.repeat( count + 1 ) + p + ':"' + ( self.isObject( o.properties.exits[ p ] ) ? o.properties.exits[ p ].key : o.properties.exits[ p ] ) + '",\n';
 			map += '\t'.repeat( count ) + '},\n';
-			map += '\t'.repeat( count ) + 'nodes:\n'
+			map += '\t'.repeat( count ) + 'bubbleMap:\n'
 			map += '\t'.repeat( count ) + '{\n';
-			for ( var p in o.nodes )
+			for ( var p in o.bubbleMap )
 			{
-				var oo = o.nodes[ p ].value;
+				var oo = o.bubbleMap[ p ];
 				map += '\t'.repeat( count + 1 ) + p + ':{oClass:"' + oo.oClass + '",data:{\n';
 				count += 2;
 				map += saveMap[ oo.oClass ]( oo )
@@ -1464,13 +1554,14 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			var map = '';
 			map += '\t'.repeat( count ) + 'classname:"' + o.classname + '",\n';
 			map += '\t'.repeat( count ) + 'parentClass:"newMemories",\n';
-			map += '\t'.repeat( count ) + 'currentBubble:"' + o.currentBubble.key + '",\n';
-			map += '\t'.repeat( count ) + 'id:"' + o.id + '",\n';
+			map += '\t'.repeat( count ) + 'currentBubble:"' + ( typeof o.currentBubble != 'undefined' ? ( typeof o.currentBubble == 'string' ? o.currentBubble : o.currentBubble.key ) : '' ) + '",\n';
 			map += '\t'.repeat( count ) + 'key:"' + o.key + '",\n';
 			map += '\t'.repeat( count ) + 'token:"' + o.token + '",\n';
 			map += '\t'.repeat( count ) + 'options:' + toJSON( o.options ) + ',\n';
 			map += '\t'.repeat( count ) + 'parameters:' + toJSON( o.parameters ) + ',\n';
 			map += '\t'.repeat( count ) + 'parametersType:' + ( self.isArray( o.parameters ) ? '{}' : '[]' ) + ',\n';
+			map += '\t'.repeat( count ) + 'pathway:"' + o.pathway + '",\n';
+			map += '\t'.repeat( count ) + 'pathways:' + toJSON( o.pathways ) + ',\n';
 			map += '\t'.repeat( count ) + 'parent:"' + ( self.isObject( o.parent ) ? o.parent.key : ( typeof o.parent == 'undefined' ? '' : o.parent ) ) + '",\n';
 			map += '\t'.repeat( count ) + 'previous:"' + ( self.isObject( o.previous ) ? o.previous.key : ( typeof o.previous == 'undefined' ? '' : o.previous ) ) + '",\n';
 			map += '\t'.repeat( count ) + 'exits:\n'
@@ -1478,11 +1569,11 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			for ( var p in o.properties.exits )
 				map += '\t'.repeat( count + 1 ) + p + ':"' + ( self.isObject( o.properties.exits[ p ] ) ? o.properties.exits[ p ].key : o.properties.exits[ p ] ) + '",\n';
 			map += '\t'.repeat( count ) + '},\n';
-			map += '\t'.repeat( count ) + 'nodes:\n'
+			map += '\t'.repeat( count ) + 'bubbleMap:\n'
 			map += '\t'.repeat( count ) + '{\n';
-			for ( var p in o.nodes )
+			for ( var p in o.bubbleMap )
 			{
-				var oo = o.nodes[ p ].value;
+				var oo = o.bubbleMap[ p ];
 				map += '\t'.repeat( count + 1 ) + p + ':{oClass:"' + oo.oClass + '",data:{\n';
 				count += 2;
 				map += saveMap[ oo.oClass ]( oo );
@@ -1497,7 +1588,6 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			var map = '';
 			map += '\t'.repeat( count ) + 'classname:"' + o.classname + '",\n';
 			map += '\t'.repeat( count ) + 'parentClass:"newSouvenirs",\n';
-			map += '\t'.repeat( count ) + 'id:"' + o.id + '",\n';
 			map += '\t'.repeat( count ) + 'key:"' + o.key + '",\n';
 			map += '\t'.repeat( count ) + 'token:"' + o.token + '",\n';
 			map += '\t'.repeat( count ) + 'parameters:' + toJSON( o.parameters ) + ',\n';
@@ -1523,7 +1613,6 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			map += '\t'.repeat( count ) + 'classname:"' + o.classname + '",\n';
 			map += '\t'.repeat( count ) + 'parentClass:"newBubbles",\n';
 			map += '\t'.repeat( count ) + 'token:"' + o.token + '",\n';
-			map += '\t'.repeat( count ) + 'id:"' + o.id + '",\n';
 			map += '\t'.repeat( count ) + 'key:"' + o.key + '",\n';
 			map += '\t'.repeat( count ) + 'data:' + toJSON( o.data ) + ',\n';
 			map += '\t'.repeat( count ) + 'parameters:' + toJSON( o.parameters ) + ',\n';

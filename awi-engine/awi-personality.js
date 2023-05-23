@@ -28,6 +28,17 @@ class Personality
 		this.oClass = 'personality';		
 		this.options = options;
 		this.currentPrompt = 'prompt-generic';
+
+		this.memories = {};
+		this.memories[ 'audios' ] = new this.awi.newMemories.generic.audios( this.awi, { key: this.awi.utilities.getUniqueIdentifier( {}, 'audios', 0 ), parent: '' } );
+		this.memories[ 'conversations' ] = new this.awi.newMemories.generic.conversations( this.awi, { key: this.awi.utilities.getUniqueIdentifier( {}, 'conversations', 1 ), parent: '' } );
+		this.memories[ 'documents' ] = new this.awi.newMemories.generic.documents( this.awi, { key: this.awi.utilities.getUniqueIdentifier( {}, 'documents', 2 ), parent: '' } );
+		this.memories[ 'images' ] = new this.awi.newMemories.generic.images( this.awi, { key: this.awi.utilities.getUniqueIdentifier( {}, 'images', 3 ), parent: '' } );
+		this.memories[ 'mails' ] = new this.awi.newMemories.generic.mails( this.awi, { key: this.awi.utilities.getUniqueIdentifier( {}, 'mails', 4 ), parent: '' } );
+		this.memories[ 'messenger' ] = new this.awi.newMemories.generic.messenger( this.awi, { key: this.awi.utilities.getUniqueIdentifier( {}, 'messenger', 5 ), parent: '' } );
+		this.memories[ 'photos' ] = new this.awi.newMemories.generic.photos( this.awi, { key: this.awi.utilities.getUniqueIdentifier( {}, 'photos', 6 ), parent: '' } );
+		this.memories[ 'videos' ] = new this.awi.newMemories.generic.videos( this.awi, { key: this.awi.utilities.getUniqueIdentifier( {}, 'videos', 7 ), parent: '' } );
+
 		this.prompts = 
 		{
 'prompt-hello': `
@@ -117,6 +128,39 @@ It returns `
 			this.temperature = temperature;
 		return true;
 	}
+	async remember( line, parameters, control )
+	{
+		var directSouvenirs = [];
+		var indirectSouvenirs = [];
+		if ( parameters.kind == 'all' )
+		{
+			for ( var k in this.awi.memories )
+			{
+				var answer = await this.awi.memories[ k ].play( line, parameters, { start: 'root', memory: { command: 'findSouvenirs', scanLevel: parameters.scanLevel } } );
+				if ( answer.success == 'found' )
+				{
+					if ( answer.data.directSouvenirs )
+						directSouvenirs.push( ...answer.data.directSouvenirs );
+					if ( answer.data.indirectSouvenirs )
+						indirectSouvenirs.push( ...answer.data.indirectSouvenirs );
+				}
+			}
+		}
+		else if ( typeof this.awi.memories[ parameters.kind ] != 'undefined' )
+		{
+			var answer = await this.awi.memories[ parameters.kind ].play( line, parameters, { start: 'root', memory: { command: 'findSouvenirs', scanLevel: parameters.scanLevel } } );
+			if ( answer.success == 'found' )
+			{
+				if ( answer.data.directSouvenirs )
+					directSouvenirs.push( ...answer.data.directSouvenirs );
+				if ( answer.data.indirectSouvenirs )
+					indirectSouvenirs.push( ...answer.data.indirectSouvenirs );
+			}
+		}
+		if ( directSouvenirs.length + indirectSouvenirs.length > 0 )
+			return { success: 'found', data: { directSouvenirs: directSouvenirs, indirectSouvenirs: indirectSouvenirs } };
+		return { success: 'notfound', data: { directSouvenirs: [], indirectSouvenirs: [] } };
+	}
 	getPrompt( token, newData, options = {} )
 	{
 		if ( token == 'current' )
@@ -199,6 +243,96 @@ It returns `
 			conversation += '- ' + contact + '"' + memory.contactText + '"\n';
 		}
 		return conversation;
+	}
+	async loadMemories( user, type = 'all')
+	{
+		user = typeof user == 'undefined' ? this.awi.config.user : user;
+
+		var self = this;
+		async function loadMemory( type )
+		{
+			var path = self.awi.config.getConfigurationPath() + '/' + user + '-' + type + '-';
+			var memory;
+			var answer = await self.awi.system.exists( path + 'memory.js' );
+			if ( answer.success )
+			{
+				answer = await self.awi.system.readFile( path + 'memory.js', { encoding: 'utf8' } );
+				if ( answer.success )
+				{
+					memory = answer.data;
+					try
+					{
+						memory = Function( memory );
+						memory = memory();
+						memory = self.awi.utilities.serializeIn( memory.root, {} );
+						return { success: true, data: memory };
+					}
+					catch( e )
+					{
+						return { success: false, error: 'awi:cannot-load-memory:iwa' };
+					}
+				}
+				return { success: false, error: 'awi:cannot-load-memory:iwa' };
+			}
+			return { success: true };
+		}
+		var answer;
+		if ( type == 'all' )
+		{
+			for ( var type in this.memories )
+			{
+				answer = await loadMemory( type );
+				if ( !answer.success )
+					break;
+				if ( answer.data )
+				{
+					this.memories[ type ].addMemory( answer.data, { parent: this.memories[ type ].key } )
+				}
+			}
+		}
+		else
+		{
+			answer = await loadMemory( type );
+			if ( answer.success )
+			{
+				if ( answer.data )
+				{
+					this.memories[ type ].addMemory( answer.data, { parent: this.memories[ type ].key } )
+				}
+			}
+		}
+		return answer;
+	}
+	async saveMemories( user, type = 'all' )
+	{
+		user = typeof user == 'undefined' ? this.awi.config.user : user;
+
+		var self = this;
+		async function saveMemory( type )
+		{
+			if ( self.memories[ type ] )
+			{
+				var memories = self.awi.utilities.serializeOut( self.memories[ type ], '' );
+				var path = self.awi.config.getConfigurationPath() + '/' + user + '-' + type + '-';
+				return await self.awi.system.writeFile( path + 'memory.js', memories, { encoding: 'utf8' } );
+			}
+			return { success: false, error: 'awi:no-memory-of-type:iwa' };
+		}
+		var answer;
+		if ( type == 'all' )
+		{
+			for ( var type in this.memories )
+			{
+				answer = await saveMemory( type );
+				if ( !answer.success )
+					break;
+			}
+		}
+		else
+		{
+			answer = await saveMemory( type );
+		}
+		return answer;
 	}
 }
 module.exports.Personality = Personality

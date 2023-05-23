@@ -19,8 +19,7 @@
 * @short Handle a prompt in the current editor
 *
 */
-var awibulbs = require( './bubbles/awi-bulbs' );
-var awimemoryconversation = require( './memories/awi/awi-memory-awi-conversations' );
+var awimemoryconversation = require( './memories/generic/awi-memory-generic-conversations' );
 
 class Prompt extends awimemoryconversation.Memory
 {
@@ -183,7 +182,7 @@ class Prompt extends awimemoryconversation.Memory
 						if ( answer.success )
 						{
 						logged = true;
-						line = 'Please say hello to ' + userName + ' with a short joke...';
+							line = '';//'Please say hello to ' + userName + ' with a short joke...';
 						this.awi.editor.print( this, 'User changed to ' + userName + '\n', { user: 'information' } );
 					}
 					else
@@ -259,7 +258,7 @@ class Prompt extends awimemoryconversation.Memory
 		var answer = { success: true, data: {} };
 		for ( var p = 0 ; p < parameters.length; p++ )
 		{
-			var bubble = this.newBubble( { token: 'input', classname: 'awi', parent: 'prompt', parameters: {}, exits: [] }, [], control );
+			var bubble = this.newBubble( { token: 'input', classname: 'awi', parent: 'prompt', parameters: {} }, [], control );
 			var parameter = { inputInfo: this.awi.utilities.getBubbleParams( parameters[ p ] ) };
 			answer = await bubble.play( '', parameter, control );
 			if ( !answer.success )

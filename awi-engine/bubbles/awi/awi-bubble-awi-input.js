@@ -40,7 +40,7 @@ class BubbleAwiInput extends awibubbles.Bubble
 		var data = {};
 		for ( var p = 0 ; p < parameters.length; p++ )
 		{
-			var bubble = this.bubl.newBubble( { token: 'input', classname: 'awi', parameters: {}, exits: [] }, [], control );
+			var bubble = this.bubl.newBubble( { token: 'input', classname: 'awi', parameters: {} }, [], control );
 			var parameter = { inputInfo: this.awi.utilities.getBubbleParams( parameters[ p ] ) };
 			var answer = await bubble.play( '', parameter, control );
 			if ( !answer.success )

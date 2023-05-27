@@ -11,7 +11,7 @@
 * Please support the project: https://patreon.com/francoislionet
 *
 * ----------------------------------------------------------------------------
-* @file awi-bubble-awi-code.js
+* @file awi-bubble-generic-code.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
 * @version 0.2
@@ -22,14 +22,14 @@
 var awibubbles = require( '../awi-bubbles' )
 var awimessages = require( '../../awi-messages' )
 
-class BubbleAwiCode extends awibubbles.Bubble
+class BubbleAozBasicCode extends awibubbles.Bubble
 {
 	constructor( awi, options = {} )
 	{
 		super( awi, options );
 		this.name = 'Code';
 		this.token = 'code';
-		this.classname = 'awi';
+		this.classname = 'aozbasic';
 		this.properties.action = 'writes a javascript function';
 		this.properties.inputs = [ 
 			{ codeName: 'the name of the procedure to create.\n The name should contain the function.', type: 'string', clear: true },
@@ -225,4 +225,4 @@ Now the code:
 		super.playback( line, parameter, control );
 	}
 }
-module.exports.Bubble = BubbleAwiCode;
+module.exports.Bubble = BubbleAozBasicCode;

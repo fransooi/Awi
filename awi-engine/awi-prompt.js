@@ -19,15 +19,16 @@
 * @short Handle a prompt in the current editor
 *
 */
-var awimemoryconversation = require( './memories/generic/awi-memory-generic-conversations' );
+var awibulbs = require( './bubbles/awi-bulbs' );
 
-class Prompt extends awimemoryconversation.Memory
+class Prompt
 {
-	constructor( awi, conversation = {}, options = {} )
+	constructor( awi, options = {} )
 	{
-		super( awi, conversation, options );
+		this.awi = awi;
 		this.oClass = 'prompt';
 		this.connector = awi.connectors.editors.current;
+		this.personality = typeof options.personality != 'undefined' ? options.personality : 'awi';
 		this.playing = false;
 		this.viewing = false;
 		this.lineActivated = false;
@@ -112,6 +113,7 @@ class Prompt extends awimemoryconversation.Memory
 				}
 			}	
 		}
+		this.bulb = new awibulbs.Bulb( this.awi, { parent: 'prompt' } )
 	}
 	async play( line, data, control )
 	{
@@ -123,7 +125,7 @@ class Prompt extends awimemoryconversation.Memory
 	}
 	async prompt( line, data, control )
 	{
-		if ( this.working || this.noCommand )
+		if ( this.bulb.working || this.noCommand )
 		 	return;
 		
 		if ( !this.promptOn )
@@ -171,7 +173,7 @@ class Prompt extends awimemoryconversation.Memory
 				if ( userName.toLowerCase() == 'newuser' )
 				{
 					logged = true;
-					line = 'PlayWelcome';
+					line = 'Welcome';
 				}
 				if ( this.awi.config.checkUserConfig( userName ) != null )
 				{
@@ -217,48 +219,25 @@ class Prompt extends awimemoryconversation.Memory
 		}
 
 		// A normal bubble...
-		line = this.addBubbleFromLine( line, {} );
+		line = this.bulb.addBubbleFromLine( line, {} );
 		control.start = 'current';
 		control.questionCount = this.questionCount++;
-		this.waitForInput = false;
-		var answer = await this.play( line, data, control );
+		var answer = await this.bulb.play( line, data, control );
 		control.questionCount = undefined;
-		if ( answer )
-		{
 			if ( answer.success && answer.data == 'noprompt' )
 				this.awi.editor.waitForInput( '' );
 			else
 				this.awi.editor.waitForInput( this.awi.config.getPrompt( 'user' ) );
 			return answer;
 		}
-		else
-		{
-			var self = this;
-			return new Promise( ( resolve ) => 
-			{
-				var handle = setInterval( 
-					function()
-					{
-						if ( !self.waitForInput && self.working == 0 )
-						{
-							clearInterval( handle );
-							var prompt = self.awi.config.getPrompt( 'user' );
-							self.awi.editor.waitForInput( prompt, { toPrint: prompt } );
-							resolve( { success: true, data: data } );
-						}
-					}, 100 );
-			} );
-		}
-	}
 	async getParameters( parameters, data, control = {} )
 	{
 		var data = {};
 		var parameters = this.awi.utilities.copyObject( parameters );
-		this.waitForInput = true;
 		var answer = { success: true, data: {} };
 		for ( var p = 0 ; p < parameters.length; p++ )
 		{
-			var bubble = this.newBubble( { token: 'input', classname: 'awi', parent: 'prompt', parameters: {} }, [], control );
+			var bubble = this.bulb.newBubble( { token: 'input', classname: 'generic', parent: 'prompt', parameters: {} }, [], control );
 			var parameter = { inputInfo: this.awi.utilities.getBubbleParams( parameters[ p ] ) };
 			answer = await bubble.play( '', parameter, control );
 			if ( !answer.success )
@@ -266,12 +245,6 @@ class Prompt extends awimemoryconversation.Memory
 			for ( var d in answer.data )
 				data[ d ] = answer.data[ d ];
 		}
-		var self = this;
-		setTimeout( 
-			function()
-			{
-				self.waitForInput = false;
-			}, 500 );
 		if ( answer.success )
 			return { success: true, data: data };
 		return { success: false, error: answer.error };

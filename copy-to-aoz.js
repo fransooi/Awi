@@ -105,7 +105,7 @@ async function startAwi( userConfig )
 		filelistNoRequire.push( extractModule( filelistRequire, 'awi-souvenir' ) );
 		filelistNoRequire.push( extractModule( filelistRequire, 'awi-memory' ) );
 		filelistNoRequire.push( extractModule( filelistRequire, 'awi-memory-awi-error' ) );
-		filelistNoRequire.push( extractModule( filelistRequire, 'awi-bubble-awi-error' ) );
+		filelistNoRequire.push( extractModule( filelistRequire, 'awi-bubble-generic-error' ) );
 		filelistNoRequire.push( extractModule( filelistRequire, 'awi-souvenir-awi-error' ) );
 		filelistNoRequire.push( ...filelistRequire );
 		filelistNoRequire.push( ...last );

@@ -21,7 +21,7 @@
 */
 var awimemory = require( '../awi-memory' );
 
-class MemoryAwiError extends awimemory.Memory
+class MemoryGenericError extends awimemory.Memory
 {
 	constructor( awi, options = {} )
 	{
@@ -35,14 +35,23 @@ class MemoryAwiError extends awimemory.Memory
 		this.properties.subTopics.push( ...[ 'memory', 'error' ] );
 		this.properties.tags = [ 'memory', 'error' ];
 	}
+	async extractContent( line, parameters, control )
+	{
+	}
+	async getContent( line, parameters, control )
+	{
+	}
+	async findSouvenirs( line, parameters, control )
+	{
+	}
 	async play( line, parameter, control )
 	{
-		super.play( line, parameter, control );
-		return { success: true, data: [] }
+	}
+	async playback( line, parameter, control )
+	{
 	}
 	async transpile( line, parameter, control )
 	{
-		return super.transpile( line, parameter, control );
 	}
 }
-module.exports.Memory = MemoryAwiError;
+module.exports.Memory = MemoryGenericError;

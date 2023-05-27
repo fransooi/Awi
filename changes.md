@@ -1,3 +1,12 @@
+20230527 loadJavascript in utilities to load external utilities
+20230527 new "Debug" bubble
+20230527 final debugging of serialization
+20230527 integration of souvenirs into conversation
+20230527 remember now works
+20230527 debugging/rewriting of digest/memories/souvenirs
+20230527 cleaning of messnger importer
+20230527 cleaning of bubble creation
+
 20230523 Personalities now handle memories, and loading / saving
 20230523 Pass 2 on serialization, still not working but close
 20230523 Renamed "awi" type of memories to "generic"

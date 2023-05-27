@@ -11,7 +11,7 @@
 * Please support the project: https://patreon.com/francoislionet
 *
 * ----------------------------------------------------------------------------
-* @file awi-bubble-awi-bin.js
+* @file awi-bubble-generic-bin.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
 * @version 0.2

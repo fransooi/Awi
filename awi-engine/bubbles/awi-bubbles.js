@@ -11,7 +11,7 @@
 * Please support the project: https://patreon.com/francoislionet
 *
 * ----------------------------------------------------------------------------
-* @file awi-bubble-awi-bubbles.js
+* @file awi-bubble-generic-bubbles.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
 * @version 0.2
@@ -32,6 +32,7 @@ class Bubble
 		this.classname = 'bubble';
 		this.oClass = 'bubble';
 		this.useCount = 0;
+		this.data = {};
 		this.properties = 
 		{
 			action: '',
@@ -52,7 +53,7 @@ class Bubble
 	}
 	reset()
 	{
-		this.value = {};
+		this.data = {};
 		this.useCount = 0;
 	}
 	getEditable( name )
@@ -104,10 +105,10 @@ class Bubble
 			var parameter = this.awi.utilities.getBubbleParams( this.properties.inputs[ p ] );
 			if ( typeof parameters[ parameter.name ] == 'undefined' || parameters[ parameter.name ] == '' )
 			{
-				if ( parameter.name != 'userInput' && typeof lineDatas[ parameter.name ] == 'undefined' )
+				if ( typeof lineDatas[ parameter.name ] == 'undefined' )
 				{
 					if ( !parameter.optional )
-						todo.push( { token: 'input', classname: 'awi', parameters: [ parameter ], options: {} } );
+						todo.push( { token: 'input', classname: 'generic', parameters: [ parameter ], options: {} } );
 					else
 						parameters[ parameter.name ] = parameter.default;
 				}
@@ -149,4 +150,3 @@ class Bubble
 	}
 }
 module.exports.Bubble = Bubble;
-

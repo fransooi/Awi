@@ -26,20 +26,22 @@ class Souvenir extends awibubbles.Bubble
 	constructor( awi, options = {} )
 	{
 		super( awi, options );
+		this.parameters.senderName = typeof this.parameters.senderName == 'undefined' ? '' : this.parameters.senderName;
+		this.parameters.receiverName = typeof this.parameters.receiverName == 'undefined' ? '' : this.parameters.receiverName;
 		this.classname = 'souvenir';
 		this.oClass = 'souvenir';
 		this.properties.topic = '';
 		this.properties.subTopics = [];
 		this.properties.interval = { start: 0, end : 0 };
-		if ( options.parameters )
+	}
+	async extractContent( line, parameters, control )
+	{
+	}
+	async getContent( line, parameters, control )
 		{
-			if ( options.parameters.topic )
-				this.properties.topic = options.parameters.topic;
-			if ( options.parameters.subTopics )
-				this.properties.subTopics.push( ...options.parameters.subTopics );
-			if ( options.parameters.interval )
-				this.properties.interval = options.parameters.interval;
 		}
+	async findSouvenirs( line, parameters, control )
+	{
 	}
 	async play( line, parameter, control )
 	{

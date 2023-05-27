@@ -433,15 +433,6 @@ class Config
 			return null;
 		}
 		return null;
-		/*
-		if ( !prompt )
-			prompt = config.prompts[ type ];
-		if ( !prompt && userConfig.debug == 0 )
-			return null;
-		//if ( !prompt )
-		//	prompt = config.prompts[ 'awi' ];
-		return prompt;
-		*/
 	}
 	getConfigTypes( type )
 	{
@@ -493,6 +484,18 @@ class Config
 	getCurrentSystem()
 	{
 		return this.configs.system.configs[ this.systemName ];
+	}
+	getDebug()
+	{
+		return this.getConfig( 'user' ).debug;
+	}
+	setDebug( debug )
+	{
+		if ( this.getConfig( 'user' ).debug != debug )
+		{
+			if ( debug >= 0 && debug <= 3 )
+				this.getConfig( 'user' ).debug = debug;
+		}
 	}
 	degreeToRadian( angle )
 	{
@@ -560,4 +563,3 @@ class Config
 	}
 }
 module.exports.Config = Config;
-

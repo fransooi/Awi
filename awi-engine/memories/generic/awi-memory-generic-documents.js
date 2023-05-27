@@ -21,25 +21,50 @@
 */
 var awimemory = require( '../awi-memory' );
 
-class MemoryAwiDocuments extends awimemory.Memory
+class MemoryGenericDocuments extends awimemory.Memory
 {
 	constructor( awi, options = {} )
 	{
 		super( awi, options );
 		this.token = 'documents';
 		this.classname = 'generic';
-		this.name = 'Documents Souvenir Chain';
-		this.properties.action = 'stores a list of documents';
+		this.name = 'Document Souvenir Chain';
+		this.properties.action = 'stores the content documents';
 		this.properties.inputs = [
 			{ userInput: 'what to find in the documents', type: 'string' },
-			{ kind: 'the kind of things to find', type: 'string', optional: true, default: 'all' },
+			{ from: 'the kind of things to find', type: 'string', optional: true, default: 'any' },
+			{ interval: 'when the document was created', type: 'string', optional: true, default: 'any' },
 		];
-		this.properties.outputs = [ { memoryList: 'list of memories found', type: 'string.array' } ];
-		this.properties.tags = [ 'memory', 'documents' ];
-		this.properties.content = [ 'text' ];
-		//this.properties.topic = '';
-		//this.properties.subTopics = [ '' ];
-		//this.properties.interval = { from: 0, to: 0 };
+		this.properties.outputs = [ { documentInfos: 'list of documents found', type: 'documentInfo.souvenir.array' } ];
+		this.properties.tags = [ 'memory', 'document' ];
+	}
+	async play( line, parameters, control )
+	{
+		if ( !parameters.interval )
+			parameters.interval = 'any';
+		return await this[ control.memory.command ]( line, parameters, control );
+	}
+	async extractContent( line, parameters, control )
+	{
+		return await super.extractContent( line, parameters, control );
+	}
+	async getContent( line, parameters, control )
+	{
+		var souvenir = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
+		if ( souvenir )
+		{
+			this.awi.editor.print( this, 'Document file: ' + souvenir.parameters.path, { user: 'memory2' } );
+			this.awi.editor.print( this, 'Creation date: ' + souvenir.parameters.date + '.', { user: 'memory2' } );
+		}
+		return await super.getContent( line, parameters, control );
+	}
+	async findSouvenirs( line, parameters, control )
+	{
+		return await super.findSouvenirs( line, parameters, control );
+	}
+	async playback( line, parameter, control )
+	{
+		return await super.playback( line, parameter, control );
 	}
 }
-module.exports.Memory = MemoryAwiDocuments;
+module.exports.Memory = MemoryGenericDocuments;

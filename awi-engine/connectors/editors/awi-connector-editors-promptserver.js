@@ -93,7 +93,7 @@ class ConnectorEditorPromptServer extends awiconnector.Connector
 	{
 		if ( message.data.key && !this.connections[ message.key ] )
 		{
-			var handle = this.awi.utilities.getUniqueIdentifier( this.connections, 'Awi', this.connectionCount );
+			var handle = this.awi.utilities.getUniqueIdentifier( this.connections, 'awi', this.connectionCount );
 			this.connections[ handle ] =
 			{
 				key: message.key,

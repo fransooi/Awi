@@ -61,14 +61,11 @@ class ConnectorSystemAozRuntime extends awiconnector.Connector
 		{
 			const checkCompletion = () => 
 			{
-				var handle = setInterval( function()
-				{
 					if ( self.commandAnswer )
 					{
 						clearInterval( handle );
 						resolve( self.commandAnswer );
 					}
-				}, 10 );
 			};
 			checkCompletion();
 		} );

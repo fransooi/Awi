@@ -11,7 +11,7 @@
 * Please support the project: https://patreon.com/francoislionet
 *
 * ----------------------------------------------------------------------------
-* @file awi-bubble-awi-bulb.js
+* @file awi-bubble-generic-bulb.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
 * @version 0.2
@@ -31,6 +31,7 @@ class Bulb
 		this.classname = 'bulb';
 		this.oClass = 'bulb';
 		this.parameters = options.parameters ? options.parameters : {};
+		this.data = {};
 		this.bubbleMap = {};
 		this.pathways = [];
 		this.pathway = 'self.bubbleMap';
@@ -54,8 +55,8 @@ class Bulb
 			for ( var s in options.exits )
 				this.properties.exits[ s ] = options.exits[ s ];
 		}		
-		this.addBubble( { token: 'error', key: 'error', parentClass: options.errorClass, parameters: [], options: {} }, [], {} );
-		this.addBubble( { token: 'root', key: 'root', parentClass: options.errorClass, parameters: [], options: {} }, [], {} );
+		this.addBubbleFromCommand( { token: 'error', key: 'error', parentClass: options.errorClass, parameters: {}, options: {} }, {}, {} );
+		this.addBubbleFromCommand( { token: 'root', key: 'root', parentClass: options.errorClass, parameters: {}, options: {} }, {}, {} );
 	}
 	reset()
 	{
@@ -63,52 +64,53 @@ class Bulb
 		this.pathways = [];
 		for ( var b in this.bubbleMap )
 			this.bubbleMap[ b ].reset();
+		this.data = {};
 	}
-	newBubble( command, parameters = [], control = {} )
+	newBubble( command, parameters = {}, control = {} )
 	{
-		if ( !parameters || parameters.length == 0 )
-			parameters = command.parameters;
+		parameters = typeof command.parameters != 'undefined' ? command.parameters : parameters;
 		var key = ( command.key ? command.key : this.awi.utilities.getUniqueIdentifier( this.bubbleMap, command.token, this.keyCount++ ) );
 		var parent = command.parent ? command.parent : this.currentBubble;
 		var parentClass = ( typeof command.parentClass == 'undefined' ? 'newBubbles' : command.parentClass );
-		var classname =  ( typeof command.classname == 'undefined' ? 'awi' : command.classname );
+		var classname =  ( typeof command.classname == 'undefined' ? 'generic' : command.classname );
 		var exits =  ( typeof command.exits == 'undefined' ? { success: 'end' } : command.exits );
 		var newBubble = new this.awi[ parentClass ][ classname ][ command.token ]( this.awi, { key: key, bulb: this, parent: parent, exits: exits, parameters: parameters } );
-		if ( parent )
+		if ( parent && this.getBubble( parent ) )
 			this.getBubble( parent ).properties.exits.success = newBubble.key;
-		this.currentBubble = newBubble.key;
 		return newBubble;
 	}
-	addBubbles( commandList, control = {} )
+	addBubble( bubble, control = {} )
 	{
-		for ( var c = 0; c < commandList.length; c++ )
-			this.addBubble( commandList[ c ], commandList[ c ].parameters, control );
-		}
-	addBubble( command, parameters = [], control = {} )
-	{
-		var bubble;
-		if ( typeof command.properties != 'undefined' && typeof command.properties.exits != 'undefined' )
-		{
-			bubble = command;
 			bubble.key = this.awi.utilities.getUniqueIdentifier( this.bubbleMap, bubble.token, this.keyCount++ );
 			bubble.parent = this.currentBubble;
 			this.getBubble( this.currentBubble ).properties.exits.success = bubble.key;
+		this.bubbleMap[ bubble.key ] = bubble;
+		this.currentBubble = bubble.key;
+		return bubble.key;
 		}
-		else
+	addBubbleFromCommand( command, parameters = {}, control = {} )
 		{
 			command.parent = this.currentBubble;
 			if ( typeof command.key == 'undefined' )
 				command.key = this.awi.utilities.getUniqueIdentifier( this.bubbleMap, command.token, this.keyCount++ );
-			bubble = this.newBubble( command, parameters, control );
-		}
+		var bubble = this.newBubble( command, parameters, control );
 		this.bubbleMap[ bubble.key ] = bubble;
+		this.currentBubble = bubble.key;
 		return bubble.key;
+	}
+	addBubbles( commandList, parameters = {}, control = {} )
+	{
+		commandList = this.awi.utilities.isObject( commandList ) ? [ commandList ] : commandList;
+		for ( var c = 0; c < commandList.length; c++ )
+		{
+			this.addBubbleFromCommand( commandList[ c ], parameters, control );
+		}
 	}
 	addBubbleFromLine( line, control = {} )
 	{
 		var start;
 		var command;
-		var parameters = [];
+		var parameters = {};
 		for ( start = 0; start < line.length; start++ )
 		{
 			var c = line.charAt( start );
@@ -122,7 +124,7 @@ class Bulb
 				command = 
 				{ 
 					token: 'eval', 
-					classname: 'awi',
+					classname: 'generic',
 					parameters: parameters, 
 					options: options
 				};
@@ -172,7 +174,7 @@ class Bulb
 			command = 
 			{ 
 				token: 'chat', 
-				classname: 'awi',
+				classname: 'generic',
 				parameters: parameters, 
 				options: {}
 			};
@@ -186,7 +188,7 @@ class Bulb
 					line = line.substring( column + 1 );
 			}
 		}
-		this.addBubble( command, parameters, control );
+		this.addBubbleFromCommand( command, parameters, control );
 		return line;
 	}
 	reset()
@@ -196,6 +198,7 @@ class Bulb
 	}
 	async play( line, parameters, control = {} )
 	{
+		var data = {};
 		var startBubble = this.currentBubble;
 		if ( !startBubble || control.start == 'root' || this.firstRun )
 		{
@@ -237,13 +240,15 @@ class Bulb
 					{
 						var output = this.awi.utilities.getBubbleParams( bubble.properties.outputs[ 0 ] );
 						bubble.data = answer.data;
+						data = answer.data;
 					}
 					else
 					{
-						for ( var o = 0; o < bubble.properties.length; o++ )
+						for ( var o = 0; o < bubble.properties.outputs.length; o++ )
 						{
 							var output = this.awi.utilities.getBubbleParams( bubble.properties.outputs[ o ] );
 							bubble.data[ output.name ] = answer.data[ output.name ];
+							data[ output.name ] = answer.data[ output.name ];
 						}
 					}
 				}
@@ -307,7 +312,7 @@ class Bulb
 				memory.push(
 				{
 					userText: bubble.parameters[ 0 ].value,
-					contactText: bubble.data.join( ' ' )
+					receiverText: bubble.data.join( ' ' )
 				} );
 
 			}
@@ -369,6 +374,17 @@ class Bulb
 			return;
 		}
 		this.awi.systemWarning( 'Bubble not found!' )
+	}
+	findBubble( callback )
+	{
+		for ( var key in this.bubbleMap )
+		{
+			if ( callback( this.bubbleMap[ key ] ) )
+			{
+				return this.bubbleMap[ key ];
+			}
+		}
+		return null;
 	}
 	getBubbleChain( whereFrom, distance, howMany, exit )
 	{

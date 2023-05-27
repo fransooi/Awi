@@ -29,7 +29,7 @@ class BubbleJavascriptCode extends awibubbles.Bubble
 		super( awi, options );
 		this.name = 'Code';
 		this.token = 'code';
-		this.classname = 'awi';
+		this.classname = 'javascript';
 		this.properties.action = 'writes an Aoz Basic procedure';
 		this.properties.inputs = [ 
 			{ codeName: 'the name of the procedure to create, the name should be meaningful.', type: 'string', clear: true },

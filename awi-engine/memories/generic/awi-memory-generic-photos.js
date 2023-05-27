@@ -21,7 +21,7 @@
 */
 var awimemory = require( '../awi-memory' );
 
-class MemoryAwiPhotos extends awimemory.Memory
+class MemoryGenericPhotos extends awimemory.Memory
 {
 	constructor( awi, options = {} )
 	{
@@ -31,23 +31,38 @@ class MemoryAwiPhotos extends awimemory.Memory
 		this.name = 'Photos Souvenir Chain';
 		this.properties.action = 'stores a list of photos';
 		this.properties.inputs = [
-			{ userInput: 'what to find in the photos', type: 'string' },
+			{ userInput: 'what to find in the photos', type: 'string', optional: false, default: '' },
+			{ from: 'what kind of content to find', type: 'string', optional: true, default: 'any' },
+			{ interval: 'interval of time when the photo was taken', type: 'string', optional: true, default: 'any' },
 		];
-		this.properties.outputs = [ { memoryList: 'list of memories found', type: 'string.array' } ];
+		this.properties.outputs = [ { photoInfos: 'the photos found', type: 'photoInfo.object.array' } ];
 		this.properties.tags = [ 'memory', 'photos' ];
-		this.properties.content = [ 'photos' ];
-		this.properties.subTopics.push( ... [ 'memory', 'photos' ] );
 	}
-	remember( line, data, callback, options )
+	async play( line, parameters, control )
 	{
-		return { memory: '', memories: [] };
+		return await this[ control.memory.command ]( line, parameters, control );
 	}
-	learn( line, data, callback, extra )
+	async extractContent( line, parameters, control )
 	{
-
+		return await super.extractContent( line, parameters, control );
 	}
-	pushNewSouvenir( command, options = {} )
+	async getContent( line, parameters, control )
 	{
+		var souvenir = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
+		if ( souvenir )
+		{
+			this.awi.editor.print( this, 'Photo file: ' + souvenir.parameters.path, { user: 'memory2' } );
+			this.awi.editor.print( this, 'Taken on the ' + souvenir.parameters.date, { user: 'memory2' } );
+		}
+		return await super.getContent( line, parameters, control );
+	}
+	async findSouvenirs( line, parameters, control )
+	{
+		return await super.findSouvenirs( line, parameters, control );
+	}
+	async playback( line, parameter, control )
+	{
+		return await super.playback( line, parameter, control );
 	}
 }
-module.exports.Memory = MemoryAwiPhotos;
+module.exports.Memory = MemoryGenericPhotos;

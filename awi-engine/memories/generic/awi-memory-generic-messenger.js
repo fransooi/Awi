@@ -21,7 +21,7 @@
 */
 var awimemory = require( '../awi-memory' );
 
-class MemoryAwiMessenger extends awimemory.Memory
+class MemoryGenericMessenger extends awimemory.Memory
 {
 	constructor( awi, options = {} )
 	{
@@ -31,107 +31,38 @@ class MemoryAwiMessenger extends awimemory.Memory
 		this.name = 'Messages Souvenir Chain';
 		this.properties.action = 'stores a thread of messages with one person';
 		this.properties.inputs = [
-			{ userInput: 'what to find in the messages', type: 'string' },
-			{ interval: 'interval of time when the message was sent', type: 'string', optional: true, default: 'all' },
-			{ memoryContent: 'what kind of content to remember', type: 'string', optional: true, default: 'all' },
+			{ userInput: 'what to find in the messages', type: 'string', optional: false, default: '' },
+			{ from: 'what kind of content to remember', type: 'string', optional: true, default: 'any' },
+			{ interval: 'interval of time when the message was written', type: 'string', optional: true, default: 'any' },
 		];
-		this.properties.outputs = [ { memoryList: 'list of memories found', type: 'string.array' } ];
-		this.properties.tags = [ 'memory', 'mails' ];
-		this.properties.content = [ 'text', 'images', 'photos', 'audio', 'video' ];
-		this.properties.subTopics.push( ... [ 'memory', 'messenger', 'conversation' ] );
+		this.properties.outputs = [ { messageInfos: 'list of messages found', type: 'messageInfo.object.array' } ];
+		this.properties.tags = [ 'memory', 'messages' ];
 	}
 	async play( line, parameters, control, nested )
 	{
-		if ( !nested )
-			control.memory.level = 1;
-		else
-			control.memory.level++;
 		return await this[ control.memory.command ]( line, parameters, control );
 	}
-	async playback( line, parameter, control )
+	async extractContent( line, parameters, control )
 	{
-		super.playback( line, parameter, control );
+		return await super.extractContent( line, parameters, control );
 	}
-	async printData( line, parameters, control )
+	async getContent( line, parameters, control )
 	{
-		if ( control.memory.scanLevel > 0 && control.memory.level == 1 )
-		{
-			var text = 'Conversation between ' + this.parameters.senderName + ' and ' + this.parameters.contactName;
-			this.awi.editor.print( this, text, { user: 'memory2' } );
-
 			var souvenir = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
-			do
+		if ( souvenir )
 			{
-				if ( souvenir.parameters && souvenir.parameters.contactName )
-					await souvenir.play( line, {}, control );
-				souvenir = this.getBubble( souvenir.properties.exits[ 'success' ] );
-			} while ( souvenir );
+			this.awi.editor.print( this, 'Conversation between ' + souvenir.parameters.senderName + ' and ' + souvenir.parameters.receiverName + ',', { user: 'memory2' } );
+			this.awi.editor.print( this, 'On the ' + souvenir.parameters.date, { user: 'memory2' } );
 		}
+		return await super.getContent( line, parameters, control );
 	}
 	async findSouvenirs( line, parameters, control )
 	{
-		var directSouvenirs = [];
-		var indirectSouvenirs = [];
-		if ( control.memory.scanLevel > 0 && control.memory.level == 1 )
-		{
-			var bubble = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
-			while( bubble )
-			{
-				if ( bubble.parameters )
-				{
-					var info1 = this.awi.utilities.matchTwoStrings( bubble.parameters.contactName, parameters.userInput, { caseInsensitive: true } );
-					var info2 = this.awi.utilities.matchTwoStrings( bubble.parameters.senderName, parameters.senderName, { caseInsensitive: true } );
-					if ( info2.result == 1 && info1.score >= 1 )
-					{
-						directSouvenirs.push( bubble );
-					}
-				}
-				bubble = this.getBubble( bubble.properties.exits[ 'success' ] );
-			};
-
-			if ( control.memory.scanLevel > 1 )
-			{
-				var bubble = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
-				while( bubble )
-				{
-					var found = directSouvenirs.findIndex(
-					function( element )
-					{
-						return element === bubble;
-					} );
-					if ( found < 0 && bubble.parameters && bubble.parameters.contactName )
-					{
-						control.start = 'root';
-						control.caseInsensitive = true;
-						this.awi.prompt.waitForInput = true;
-						var answer = await bubble.play( parameters.userInput, parameters, control, true );
-						if ( answer.success = 'found' )
-							indirectSouvenirs.push( ...answer.data.indirectSouvenirs );
-						this.awi.prompt.waitForInput = false;
-					}
-					bubble = this.getBubble( bubble.properties.exits[ 'success' ] );
-				};
-			}
+		return await super.findSouvenirs( line, parameters, control );
 		}
-		if ( control.memory.scanLevel > 1 && control.memory.level == 2 )
+	async playback( line, parameter, control )
 		{
-			var bubble = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
-			while( bubble )
-			{
-				if ( bubble.parameters && bubble.parameters.conversation && bubble.parameters.conversation.length )
-				{
-					var info3 = this.awi.utilities.matchTwoStrings( bubble.parameters.conversation, parameters.userInput, { caseInsensitive: true } );
-					if ( info3.result > 0 )
-						indirectSouvenirs.push( bubble );
-				}
-				bubble = this.getBubble( bubble.properties.exits[ 'success' ] );
-			};
-		}
-
-		control.memory.level--;
-		if ( directSouvenirs.length > 0 || indirectSouvenirs.length > 0 )
-			return { success: 'found', data: { directSouvenirs: directSouvenirs, indirectSouvenirs: indirectSouvenirs } };
-		return { success: 'notfound', data: { directSouvenirs: [], indirectSouvenirs: [] } };
+		super.playback( line, parameter, control );
 	}
 }
-module.exports.Memory = MemoryAwiMessenger;
+module.exports.Memory = MemoryGenericMessenger;

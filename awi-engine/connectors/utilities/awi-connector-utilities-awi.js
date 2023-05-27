@@ -6,7 +6,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 	constructor( awi, options = {} )
 	{
 		super( awi, options );
-		this.name = 'Awi';
+		this.name = 'Awi utilities';
 		this.token = 'awi';
 		this.classname = 'utilities';
 		this.version = '0.2.1';
@@ -19,6 +19,15 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		this.connectAnswer.success = true;
 		return this.connectAnswer;
 	}	
+	async completeConnect()
+	{
+		var answer = await this.loadJavascript( this.awi.config.getEnginePath() + '/data/libs/compromise.js' );
+		if ( answer.success )
+			this.compromise = answer.data;
+		answer = await this.loadJavascript( this.awi.config.getEnginePath() + '/data/libs/sha1.js', { eval: true } );
+		if ( answer.success )
+			this.sha1 = answer.data;
+	}
 	capitalize( text )
 	{
 		return text.charAt( 0 ).toUpperCase() + text.substring( 1 );
@@ -1101,8 +1110,14 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			return true;
 		return false;
 	}
+	getTimestampFromStats( stats )
+	{
+		var date = new Date( stats.birthtimeMs );
+		return this.getTimestampFromDate( date );
+	}
 	getTimestampFromDate( date )
 	{
+		/*
 		var timeInfo =
 		{
 			year: this.fillString( '' + date.getYear(), '0', 2, 'start' ),
@@ -1113,10 +1128,10 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			seconds: this.fillString( '' + date.getSeconds(), '0', 2, 'start' ),
 			milliseconds: this.fillString( '' + date.getMilliseconds(), '0', 3, 'start' ),
 		};
-		var timeString = this.format( '{year}-{month}-{day}.{hours}:{minutes}:{seconds},{milliseconds}', timeInfo );
-		return { time: date.getTime(), text: timeString, info: timeInfo };	
+		var timeString = this.format( '{year}-{month}-{day}.{hours}:{minutes}:{seconds},{milliseconds}', timeInfo );*/
+		return { time: date.getTime(), text: date.toUTCString() };
 	};
-	getTimestamp( matches, monthReplacement )
+	getTimestamp( matches, monthReplacement = 1 )
 	{
 		var [ _, month, day, year, hours, minutes, seconds, ampm ] = matches;
 	
@@ -1134,7 +1149,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			var nMonth = monthList[ n ].toLowerCase().indexOf( month );
 			if ( nMonth >= 0 )
 			{
-				nMonth /= 4;
+				nMonth = Math.floor( nMonth / 4 );
 				nMonth++;
 				break;
 			}
@@ -1144,6 +1159,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		month = nMonth;	
 		var isPM = ( ampm === 'pm' || ampm === 'PM' );
 		var newHours = ( isPM && hours !== '12' ) ? parseInt( hours ) + 12 : parseInt( hours );
+		/*
 		var timeInfo =
 		{
 			day: typeof day == 'undefined' ? 'DD' : this.fillString( day, '0', 2, 'start' ),
@@ -1153,17 +1169,9 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			minutes:  typeof minutes == 'undefined' ? 'MM' : this.fillString( minutes, '0', 2, 'start' ),
 			seconds: typeof seconds == 'undefined' ? 'SS' : this.fillString( seconds, '0', 2, 'start' ),
 		};
-		var timeString = this.format( '{year}-{month}-{day}.{hours}:{minutes}:{seconds}', timeInfo );
-	
-		var time;
-		try
-		{
-			time = new Date( parseInt( year ), month - 1, parseInt( day ), newHours, parseInt( minutes ), parseInt( seconds ) ).getTime();
-		}
-		catch( e )
-		{		
-		}
-		return { time: time, text: timeString, info: timeInfo };	
+		var timeString = this.format( '{year}-{month}-{day}.{hours}:{minutes}:{seconds}', timeInfo );*/
+		var date = new Date( parseInt( year ), month - 1, parseInt( day ), newHours, parseInt( minutes ), parseInt( seconds ) )
+		return { time: date.getTime(), text: date.toUTCString() };
 	}
 	getMediaTimestamp( matches )
 	{
@@ -1179,7 +1187,16 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		date.setMinutes( parseInt( minutes ) );
 		date.setSeconds( parseInt( seconds ) );
 		date.setMilliseconds( parseInt( milliseconds ) );
-		return this.getTimestampFromDate( date );
+		var timestamp = this.getTimestampFromDate( date );
+		var timeInfo =
+		{
+			hours:  this.fillString( '' + date.getHours(), '0', 2, 'start' ),
+			minutes:  this.fillString( '' + date.getMinutes(), '0', 2, 'start' ),
+			seconds: this.fillString( '' + date.getSeconds(), '0', 2, 'start' ),
+			milliseconds: this.fillString( '' + date.getMilliseconds(), '0', 3, 'start' ),
+		};
+		timestamp.text = this.format( '{hours}:{minutes}:{seconds}.{milliseconds}', timeInfo );
+		return timestamp;
 	}
 	normalize( path )
 	{
@@ -1272,34 +1289,6 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			}
 		}
 		return result;
-	}
-	matchTwoStrings( string1, string2, options = {} )
-	{
-		if ( this.isArray( string1 ) )
-			string1 = string1.join( ' ' );
-		if ( this.isArray( string2 ) )
-			string2 = string2.join( ' ' );
-		string1 = string1.split( '\n' ).join( ' ' );
-		string2 = string2.split( '\n' ).join( ' ' );
-		if ( options.caseInsensitive )
-		{
-			string1 = string1.toLowerCase();
-			string2 = string2.toLowerCase();
-		}
-		var words1 = string1.split( ' ' );
-		var words2 = string2.split( ' ' );
-		if ( words1.length == 0 )
-			return { result: 0, count: 0 };
-		var count = 0;
-		for ( var w1 = 0; w1 < words1.length; w1++ )
-		{
-			for ( var w2 = 0; w2 < words2.length; w2++ )
-			{
-				if ( words1[ w1 ].indexOf( words2[ w2 ] ) >= 0 )
-					count++;
-			}
-		}
-		return { result: count / words1.length, score: count / words2.length, count: count };
 	}
 	removeDuplicatedLines( text )
 	{
@@ -1405,19 +1394,6 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 	{
 		var self = this;
 		var lastBulb = 'root';
-		function fromJSON( json, def )
-		{
-			var data;
-			try
-			{
-				data = JSON.parse( json );
-			}
-			catch( e )
-			{}
-			if ( data )
-				return data;
-			return def;
-		}
 		function createObjects( o, map )
 		{
 			if ( o.oClass )
@@ -1426,13 +1402,13 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 				var oo;
 				if ( o.oClass != 'prompt' )
 				{
-					oo = new self.awi[ o.data.parentClass ][ o.data.classname ][ o.data.token ]( self, { key: o.data.key, bulb: lastBulb, parent: o.data.parent, exits: o.data.exits, parameters: o.data.parameters } );
+					oo = new self.awi[ o.data.parentClass ][ o.data.classname ][ o.data.token ]( self.awi, { key: o.data.key, bulb: lastBulb, parent: o.data.parent, exits: o.data.exits, parameters: o.data.parameters } );
 					if ( o.data.parentClass == 'newMemories' )
 						lastBulb = oo;
 				}
 				else
 				{
-					oo = self.prompt;
+					oo = self.awi.prompt;
 					lastBulb = oo;
 				}
 				switch ( o.oClass )
@@ -1443,7 +1419,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 						break;
 					case 'memory':
 						oo.currentBubble = o.data.currentBubble;
-						oo.parameters = fromJSON( o.data.parameters, o.data.parametersType );
+						oo.parameters = o.data.parameters;
 						oo.properties.exits = o.data.exits;
 						oo.parent = o.data.parent;
 						for ( var p in o.data.bubbleMap )
@@ -1452,19 +1428,19 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 						}
 						break;
 					case 'souvenir':
-						oo.parameters = fromJSON( o.data.parameters, o.data.parametersType );
-						oo.options = fromJSON( o.data.options, {} );
+						oo.parameters = o.data.parameters;
+						oo.options = o.data.options;
 						oo.parent = o.data.parent;
 						oo.properties.exits = o.data.exits;
 						break;
 					case 'prompt':
 						oo.currentBubble = o.data.currentBubble;
-						oo.parameters = fromJSON( o.data.parameters, o.data.parametersType );
-						oo.datas = fromJSON( o.data.datas, {} );
-						oo.options = fromJSON( o.data.options, {} );
+						oo.parameters = o.data.parameters;
+						oo.datas = o.data.datas;
+						oo.options = o.data.options;
 						oo.properties.exits = o.data.exits;
 						oo.parent = o.data.parent;
-						oo.options = fromJSON( o.data.options, {} );
+						oo.options = o.data.options;
 						for ( var p in o.data.bubbleMap )
 							oo.bubbleMap[ p ] = createObjects( o.data.bubbleMap[ p ], {} );
 						oo.pathway = o.data.pathway;
@@ -1521,7 +1497,6 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			map += '\t'.repeat( count ) + 'token:"' + o.token + '",\n';
 			map += '\t'.repeat( count ) + 'options:' + toJSON( o.options ) + ',\n';
 			map += '\t'.repeat( count ) + 'parameters:' + toJSON( o.parameters ) + ',\n';
-			map += '\t'.repeat( count ) + 'parametersType:' + ( self.isArray( o.parameters ) ? '{}' : '[]' ) + ',\n';
 			map += '\t'.repeat( count ) + 'datas:' + toJSON( o.datas ) + ',\n';
 			map += '\t'.repeat( count ) + 'options:' + toJSON( o.options ) + ',\n';
 			map += '\t'.repeat( count ) + 'pathway:"' + o.pathway + '",\n';
@@ -1533,7 +1508,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			map += '\t'.repeat( count ) + 'exits:\n'
 			map += '\t'.repeat( count ) + '{\n';
 			for ( var p in o.properties.exits )
-				map += '\t'.repeat( count + 1 ) + p + ':"' + ( self.isObject( o.properties.exits[ p ] ) ? o.properties.exits[ p ].key : o.properties.exits[ p ] ) + '",\n';
+				map += '\t'.repeat( count + 1 ) + p + ':"' + o.properties.exits[ p ] + '",\n';
 			map += '\t'.repeat( count ) + '},\n';
 			map += '\t'.repeat( count ) + 'bubbleMap:\n'
 			map += '\t'.repeat( count ) + '{\n';
@@ -1559,7 +1534,6 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			map += '\t'.repeat( count ) + 'token:"' + o.token + '",\n';
 			map += '\t'.repeat( count ) + 'options:' + toJSON( o.options ) + ',\n';
 			map += '\t'.repeat( count ) + 'parameters:' + toJSON( o.parameters ) + ',\n';
-			map += '\t'.repeat( count ) + 'parametersType:' + ( self.isArray( o.parameters ) ? '{}' : '[]' ) + ',\n';
 			map += '\t'.repeat( count ) + 'pathway:"' + o.pathway + '",\n';
 			map += '\t'.repeat( count ) + 'pathways:' + toJSON( o.pathways ) + ',\n';
 			map += '\t'.repeat( count ) + 'parent:"' + ( self.isObject( o.parent ) ? o.parent.key : ( typeof o.parent == 'undefined' ? '' : o.parent ) ) + '",\n';
@@ -1567,7 +1541,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			map += '\t'.repeat( count ) + 'exits:\n'
 			map += '\t'.repeat( count ) + '{\n';
 			for ( var p in o.properties.exits )
-				map += '\t'.repeat( count + 1 ) + p + ':"' + ( self.isObject( o.properties.exits[ p ] ) ? o.properties.exits[ p ].key : o.properties.exits[ p ] ) + '",\n';
+				map += '\t'.repeat( count + 1 ) + p + ':"' + o.properties.exits[ p ] + '",\n';
 			map += '\t'.repeat( count ) + '},\n';
 			map += '\t'.repeat( count ) + 'bubbleMap:\n'
 			map += '\t'.repeat( count ) + '{\n';
@@ -1591,14 +1565,13 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			map += '\t'.repeat( count ) + 'key:"' + o.key + '",\n';
 			map += '\t'.repeat( count ) + 'token:"' + o.token + '",\n';
 			map += '\t'.repeat( count ) + 'parameters:' + toJSON( o.parameters ) + ',\n';
-			map += '\t'.repeat( count ) + 'parametersType:' + ( self.isArray( o.parameters ) ? '{}' : '[]' ) + ',\n';
 			map += '\t'.repeat( count ) + 'options:' + toJSON( o.options ) + ',\n';
 			map += '\t'.repeat( count ) + 'parent:"' + ( self.isObject( o.parent ) ? o.parent.key : ( typeof o.parent == 'undefined' ? '' : o.parent ) ) + '",\n';
 			map += '\t'.repeat( count ) + 'previous:"' + ( self.isObject( o.previous ) ? o.previous.key : ( typeof o.previous == 'undefined' ? '' : o.previous ) ) + '",\n';
 			map += '\t'.repeat( count ) + 'exits:\n'
 			map += '\t'.repeat( count ) + '{\n';
 			for ( var p in o.properties.exits )
-				map += '\t'.repeat( count + 1 ) + p + ':"' + ( self.isObject( o.properties.exits[ p ] ) ? o.properties.exits[ p ].key : o.properties.exits[ p ] ) + '",\n';
+				map += '\t'.repeat( count + 1 ) + p + ':"' + o.properties.exits[ p ] + '",\n';
 			map += '\t'.repeat( count ) + '},\n';
 			return map;
 		}
@@ -1616,14 +1589,13 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			map += '\t'.repeat( count ) + 'key:"' + o.key + '",\n';
 			map += '\t'.repeat( count ) + 'data:' + toJSON( o.data ) + ',\n';
 			map += '\t'.repeat( count ) + 'parameters:' + toJSON( o.parameters ) + ',\n';
-			map += '\t'.repeat( count ) + 'parametersType:' + ( self.isArray( o.parameters ) ? '{}' : '[]' ) + ',\n';
 			map += '\t'.repeat( count ) + 'options:' + toJSON( o.options ) + ',\n';
 			map += '\t'.repeat( count ) + 'parent:"' + ( self.isObject( o.parent ) ? o.parent.key : ( typeof o.parent == 'undefined' ? '' : o.parent ) ) + '",\n';
 			map += '\t'.repeat( count ) + 'previous:"' + ( self.isObject( o.previous ) ? o.previous.key : ( typeof o.previous == 'undefined' ? '' : o.previous ) ) + '",\n';
 			map += '\t'.repeat( count ) + 'exits:\n'
 			map += '\t'.repeat( count ) + '{\n';
 			for ( var p in o.properties.exits )
-				map += '\t'.repeat( count + 1 ) + p + ':"' + ( self.isObject( o.properties.exits[ p ] ) ? o.properties.exits[ p ].key : o.properties.exits[ p ] ) + '",\n';
+				map += '\t'.repeat( count + 1 ) + p + ':"' + o.properties.exits[ p ] + '",\n';
 			map += '\t'.repeat( count ) + '},\n';
 			return map;
 		}
@@ -1684,6 +1656,123 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		}
 		count++;
 		return 'return {\n'+ createMap( root, '' ) + '}\n';
+	}
+	objectHash( object )
+	{
+		var hash = module.exports.sha1;
+		return hash( object );
+	}
+	compareTwoStrings( first, second, options = {} )
+	{
+		if ( options.caseInsensitive )
+		{
+			first = first.toLowerCase();
+			second = second.toLowerCase();
+		}
+		first = first.replace( /\s+/g, '' );
+		second = second.replace( /\s+/g, '' );
+
+		if ( first === second ) return 1; // identical or empty
+		if ( first.length < 2 || second.length < 2 ) return 0; // if either is a 0-letter or 1-letter string
+
+		let firstBigrams = new Map();
+		for ( let i = 0; i < first.length - 1; i++ )
+		{
+			const bigram = first.substring( i, i + 2 );
+			const count = firstBigrams.has( bigram )
+				? firstBigrams.get( bigram ) + 1
+				: 1;
+
+			firstBigrams.set( bigram, count );
+		};
+
+		let intersectionSize = 0;
+		for ( let i = 0; i < second.length - 1; i++ )
+		{
+			const bigram = second.substring( i, i + 2 );
+			const count = firstBigrams.has( bigram )
+				? firstBigrams.get( bigram )
+				: 0;
+
+			if ( count > 0 )
+			{
+				firstBigrams.set( bigram, count - 1 );
+				intersectionSize++;
+			}
+		}
+		return { result: ( 2.0 * intersectionSize ) / ( first.length + second.length - 2 ) };
+	}
+	findBestMatch( mainString, targetStrings )
+	{
+		const ratings = [];
+		let bestMatchIndex = 0;
+		for ( let i = 0; i < targetStrings.length; i++ )
+		{
+			const currentTargetString = targetStrings[ i ];
+			const currentRating = this.compareTwoStrings( mainString, currentTargetString );
+			ratings.push( { target: currentTargetString, rating: currentRating } );
+			if ( currentRating > ratings[ bestMatchIndex ].rating )
+			{
+				bestMatchIndex = i
+			}
+		}
+		return { ratings: ratings, bestMatch: ratings[ bestMatchIndex ], bestMatchIndex: bestMatchIndex };
+	}
+	matchTwoStrings( string1, string2, options = {} )
+	{
+		if ( this.isArray( string1 ) )
+			string1 = string1.join( ' ' );
+		if ( this.isArray( string2 ) )
+			string2 = string2.join( ' ' );
+		string1 = string1.split( '\n' ).join( ' ' );
+		string2 = string2.split( '\n' ).join( ' ' );
+		if ( options.caseInsensitive )
+		{
+			string1 = string1.toLowerCase();
+			string2 = string2.toLowerCase();
+		}
+		var words1 = string1.split( ' ' );
+		var words2 = string2.split( ' ' );
+		if ( words1.length == 0 )
+			return { result: 0, count: 0 };
+		var positions = [];
+		for ( var w1 = 0; w1 < words1.length; w1++ )
+		{
+			var word1 = words1[ w1 ];
+			for ( var w2 = 0; w2 < words2.length; w2++ )
+			{
+				var word2 = words2[ w2 ];
+				var position = word1.indexOf( words2[ w2 ] );
+				if ( position >= 0 )
+				{
+					positions.push( position )
+				}
+			}
+		}
+		var count = positions.length;
+		return { result: count / words1.length, score: count / words2.length, count: count, positions: positions };
+	}
+	async loadJavascript( path, options = {} )
+	{
+		var answer = await this.awi.system.readFile( path, { encoding: 'utf8' } );
+		if ( answer.success )
+		{
+			try
+			{
+				if ( !options.eval )
+				{
+					var f = Function( answer.data + '' );
+					answer.data = f();
+				}
+				else
+				{
+					answer.data = eval( answer.data + '' );
+				}
+			} catch( e ) {
+				answer.success = false;
+			}
+		}
+		return answer;
 	}
 }
 module.exports.Connector = ConnectorUtilitieAwi

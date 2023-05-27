@@ -43,6 +43,8 @@ class Awi
 		this.newMemories = {};
 		this.newBubbles = {};
 		this.newConnectors = {};
+		this.directRemembering = [];
+		this.indirectRemembering = [];
 		this.editor = null;
 		this.system = null;
 		this.language = null;
@@ -228,7 +230,7 @@ class Awi
 			}
 
 			// Make the list of bubbles to load
-			var classList = [ 'awi', 'audio', 'filesystem', 'user', 'vision', this.connectors.languages.current.token ];
+			var classList = [ 'generic', 'audio', 'filesystem', 'user', 'vision', this.connectors.languages.current.token ];
 			var answer = await this.system.getDirectory( this.config.getEnginePath() + '/bubbles', { recursive: true, filters: [ 'awi-bubble-*.js' ] } );
 			var files = this.utilities.getFileArrayFromTree( answer.data );
 			for ( var f = 0; f < files.length; f++ )
@@ -295,6 +297,9 @@ class Awi
 		// Create personality
 		this.personality = new awipersonality.Personality( this, {} );
 
+		// Finish initialization of utilities
+		await this.utilities.completeConnect();
+
 		// Is everyone connected?
 		this.connected = true;
 		for ( var d in answers )
@@ -318,7 +323,7 @@ class Awi
 		prompt += '\n';
 		if ( this.connected )
 		{
-			this.prompt = new awiprompt.Prompt( this, {} );
+			this.prompt = new awiprompt.Prompt( this, { parameters: { senderName: '', receiverName: '' } } );	// TODO: fix this.
 			answer.success = true;
 		}
 		else
@@ -399,22 +404,29 @@ class Awi
 			callback( true, answer, extra );
 		return answer;
 	}
+	initMemory( memory )
+	{
+		memory.bubbleHash = {};
+		for ( var key in memory.bubbleMap )
+			memory.bubbleHash[ memory.bubbleMap[ key ] ] = key;
+		return memory;
+	}
 	async save( user )
 	{
 		user = typeof user == 'undefined' ? this.config.user : user;
-		var answer = await this.personality.saveMemories( user );
-		if ( !answer.success )
+		var answer = await this.personality.saveMemories( 'any' );
+		//if ( !answer.success )
 			return answer;
 
-		var conversations = this.utilities.serializeOut( this.prompt, '' );
-		var path = this.config.getConfigurationPath() + '/' + user + '-';
-		return await this.system.writeFile( path + 'conversations.js', conversations, { encoding: 'utf8' } );
+		//var conversations = this.utilities.serializeOut( this.prompt, '' );
+		//var path = this.config.getConfigurationPath() + '/' + user + '-';
+		//return await this.system.writeFile( path + 'conversations.js', conversations, { encoding: 'utf8' } );
 	}
 	async load( user )
 	{
 		user = typeof user == 'undefined' ? this.config.user : user;
 
-		var answer = await this.personality.loadMemories( user );
+		var answer = await this.personality.loadMemories( 'any' );
 		if ( !answer.success )
 			return answer;
 
@@ -441,6 +453,115 @@ class Awi
 			return { success: false, error: 'awi:cannot-load-conversations:iwa' };
 		}
 		return { success: true };
+	}
+	remember( what, direct, indirect )
+	{
+		this.directRemembering.push( { what: what.toLowerCase(), souvenirs: direct.souvenirs, content: direct.content } );
+		this.indirectRemembering.push( { what: what.toLowerCase(), souvenirs: indirect.souvenirs, content: indirect.content } );
+	}
+	forget( what )
+	{
+		what = what.toLowerCase();
+
+		var newArray = [];
+		for ( var s = 0; s < this.directRemembering.length; s++ )
+		{
+			if ( what != this.directRemembering[ s ].name )
+				newArray.push( this.directRemembering[ s ] );
+		}
+		this.directRemembering = newArray;
+
+		newArray = [];
+		for ( var s = 0; s < this.indirectRemembering.length; s++ )
+		{
+			if ( what != this.indirectRemembering[ s ].name )
+				newArray.push( this.indirectRemembering[ s ] );
+		}
+		this.indirectRemembering = newArray;
+	}
+	async extractContentFromMemories( line, parameters, control, options = {} )
+	{
+		var direct = [];
+		for ( var r = 0; r < this.directRemembering.length; r++ )
+		{
+			var remembering = this.directRemembering[ r ];
+			for ( var s = 0; s < remembering.souvenirs.length; s++ )
+			{
+				var answer = await remembering.souvenirs[ s ].extractContent( line, parameters, control );
+				if ( answer.success == 'found' )
+					direct.push( answer.data );
+			}
+		}
+		var indirect = [];
+		for ( var r = 0; r < this.indirectRemembering.length; r++ )
+		{
+			var remembering = this.indirectRemembering[ r ];
+			for ( var s = 0; s < remembering.souvenirs.length; s++ )
+			{
+				var answer = await remembering.souvenirs[ s ].extractContent( line, parameters, control );
+				if ( answer.success == 'found' )
+					indirect.push( answer.data );
+			}
+		}
+		direct.sort(
+			function( element1, element2 )
+			{
+				if ( element1.result < element2.result )
+					return 1;
+				if ( element1.result > element2.result )
+					return -1;
+				return 0;
+			} );
+		indirect.sort(
+			function( element1, element2 )
+			{
+				if ( element1.result < element2.result )
+					return 1;
+				if ( element1.result > element2.result )
+					return -1;
+				return 0;
+			} );
+
+		var directExtracted = '';
+		var indirectExtracted = '';
+		options.type = typeof options.type == 'undefined' ? 'chat' : options.type;
+		options.nDirectExtracts = typeof options.nDirectExtracts == 'undefined' ? 3 : options.nDirectExtracts;
+		options.nIndirectExtracts = typeof options.nIndirectExtracts == 'undefined' ? 3 : options.nIndirectExtracts;
+		switch ( options.type )
+		{
+			default:
+			case 'chat':
+				for ( var n = 0; n < options.nDirectExtracts; n++ )
+				{
+					if ( n < direct.length )
+					{
+						var extract = direct[ n ];
+						if ( extract.content.text )
+							directExtracted += 'Someone said: ' + extract.text + '\n';
+						if ( extract.content.senderText )
+							directExtracted += extract.content.senderName + ' said: ' + extract.content.senderText + '\n';
+						if ( extract.content.receiverText )
+							directExtracted += extract.content.receiverName + ' said: ' + extract.content.receiverText + '\n';
+					}
+				}
+				for ( var n = 0; n < options.nIndirectExtracts; n++ )
+				{
+					if ( n < indirect.length )
+					{
+						var extract = indirect[ n ];
+						if ( extract.content.text )
+							indirectExtracted += 'Someone said: ' + extract.text + '\n';
+						if ( extract.content.senderText )
+							indirectExtracted += extract.content.senderName + ' said: ' + extract.content.senderText + '\n';
+						if ( extract.content.receiverText )
+							indirectExtracted += extract.content.receiverName + ' said: ' + extract.content.receiverText + '\n';
+					}
+				}
+				break;
+		}
+		if ( directExtracted || indirectExtracted )
+			return { success: 'found', data: { directExtracted: directExtracted, indirectExtracted: indirectExtracted } };v
+		return { success: 'notfound', data: { directExtracted: '', indirectExtracted: '' } };
 	}
 }
 module.exports.Awi = Awi;

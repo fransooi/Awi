@@ -21,7 +21,7 @@
 */
 var awimemory = require( '../awi-memory' );
 
-class MemoryAwiMails extends awimemory.Memory
+class MemoryGenericMails extends awimemory.Memory
 {
 	constructor( awi, options = {} )
 	{
@@ -31,26 +31,38 @@ class MemoryAwiMails extends awimemory.Memory
 		this.name = 'Mails Souvenir Chain';
 		this.properties.action = 'stores a list of mails';
 		this.properties.inputs = [
-			{ userInput: 'what to find in the mails', type: 'string' },
-			{ kind: 'the kind of things to find', type: 'string', optional: true, default: 'all' },
+			{ userInput: 'what to find in the mail', type: 'string' },
+			{ from: 'the kind of things to find', type: 'string', optional: true, default: 'any' },
+			{ interval: 'when the mail was sent', type: 'string', optional: true, default: 'any' },
 		];
-		this.properties.outputs = [ { memoryList: 'list of memories found', type: 'string.array' } ];
+		this.properties.outputs = [ { mailInfos: 'list of mails found', type: 'mailInfo.object.array' } ];
 		this.properties.tags = [ 'memory', 'mails' ];
-		this.properties.content = [ 'text', 'images', 'photos', 'audio', 'video' ];
-		//this.properties.topic = '';
-		//this.properties.subTopics = [ '' ];
-		//this.properties.interval = { from: 0, to: 0 };
 	}
-	remember( line, data, callback, options )
+	async play( line, parameters, control, nested )
 	{
-		return { memory: '', memories: [] };
+		return await this[ control.memory.command ]( line, parameters, control );
 	}
-	learn( line, data, callback, extra )
+	async extractContent( line, parameters, control )
 	{
-
+		return await super.extractContent( line, parameters, control );
 	}
-	pushNewSouvenir( command, options = {} )
+	async getContent( line, parameters, control )
 	{
+		var souvenir = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
+		if ( souvenir )
+		{
+			this.awi.editor.print( this, 'Mail between: ' + souvenir.parameters.senderName + ' and ' + souvenir.parameters.receiverName, { user: 'memory2' } );
+			this.awi.editor.print( this, 'On the ' + souvenir.parameters.date, { user: 'memory2' } );
+		}
+		return await super.getContent( line, parameters, control );
+	}
+	async findSouvenirs( line, parameters, control )
+	{
+		return await super.findSouvenirs( line, parameters, control );
+	}
+	async playback( line, parameter, control )
+	{
+		super.playback( line, parameter, control );
 	}
 }
-module.exports.Memory = MemoryAwiMails;
+module.exports.Memory = MemoryGenericMails;

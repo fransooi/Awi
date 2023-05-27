@@ -45,7 +45,7 @@ class ConnectorImporterVideo extends awiconnector.Connector
 		if ( answer.success )
 		{
 			var importer = this.awi.getConnector( 'importers', 'audio', {} );
-			return await importer.import( destinationPath, senderName, { typeMemory: 'videos', typeSouvenir: 'video' } ); 
+			return await importer.import( destinationPath, senderName, { typeSouvenir: 'video' } );
 		}
 		return answer;
 	}

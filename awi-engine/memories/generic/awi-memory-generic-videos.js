@@ -21,7 +21,7 @@
 */
 var awimemory = require( '../awi-memory' );
 
-class MemoryAwiVideos extends awimemory.Memory
+class MemoryGenericVideos extends awimemory.Memory
 {
 	constructor( awi, options = {} )
 	{
@@ -29,122 +29,48 @@ class MemoryAwiVideos extends awimemory.Memory
 		this.token = 'videos';
 		this.classname = 'generic';
 		this.name = 'Videos Souvenir Chain';
-		this.properties.action = 'stores information about videos';
+		this.properties.action = 'stores information about one videos';
 		this.properties.inputs = [
-			{ userInput: 'what to find in the video', type: 'string' },
-			{ interval: 'interval of time when the video was recorded', type: 'string', optional: false, default: 'any' },
+			{ userInput: 'what to find in the video', type: 'string', optional: false, default: '' },
+			{ type: 'what type of content to find', type: 'string', optional: true, default: 'any' },
+			{ interval: 'interval of time when the video was taken', type: 'string', optional: true, default: 'any' },
 		];
-		this.properties.outputs = [ { memoryList: 'list of memories found', type: 'string.array' } ];
-		this.properties.tags = [ 'memory', 'video' ];
-		this.properties.content = [ 'video' ];
-		this.properties.subTopics.push( ... [ 'memory', 'videos' ] );
+		this.properties.outputs = [	{ videoInfos: 'the list of videos found', type: 'videoInfo.object.array' } ];
+		this.properties.tags = [ 'memory', 'videos' ];
 	}
 	async play( line, parameters, control, nested )
 	{
-		if ( !parameters.interval )
-			parameters.interval = 'any';
-		if ( !nested )
-			control.memory.level = 1;
-		else
-			control.memory.level++;
-		var answer = await this[ control.memory.command ]( line, parameters, control );
-		control.memory.level--;
-		return answer;
+		return await this[ control.memory.command ]( line, parameters, control );
 	}
-	async playback( line, parameter, control )
+	async extractContent( line, parameters, control )
 	{
-		super.playback( line, parameter, control );
+		return await super.extractContent( line, parameters, control );
 	}
-	async printData( line, parameters, control )
+	async getContent( line, parameters, control )
 	{
-		if ( control.memory.scanLevel > 0 && control.memory.level == 1 )
-		{
-			var text = 'Video recorded between ' + parameters.interval;
-			this.awi.editor.print( this, text, { user: 'memory2' } );
-
-			var souvenir = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
-			while( souvenir )
+		var answer = await super.getContent( line, parameters, control );
+		if ( answer.success == 'found' )
 			{
-				if ( souvenir.parameters )
-					await souvenir.play( line, {}, control );
-				souvenir = this.getBubble( souvenir.properties.exits[ 'success' ] );
-			};
+			this.awi.editor.print( this, 'Video file: ' + answer.data.audioInfo.path, { user: 'memory2' } );
+			this.awi.editor.print( this, 'Recorded on the: ' + answer.data.audioInfo.date, { user: 'memory2' } );
+			this.awi.editor.print( this, '', { user: 'memory2' } );
 		}
 	}
 	async findSouvenirs( line, parameters, control )
 	{
-		var directSouvenirs = [];
-		var indirectSouvenirs = [];
-		this.awi.prompt.waitForInput = true;
-		if ( control.memory.scanLevel > 0 && control.memory.level == 1 )
+		var answer = await super.findSouvenirs( line, parameters, control );
+		if ( answer.success == 'found' )
 		{
-			var bubble = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
-			while( bubble )
-			{
-				if ( bubble.parameters )
-				{
-					var info2 = this.awi.utilities.matchTwoStrings( bubble.parameters.senderName, parameters.senderName, { caseInsensitive: true } );
-					if ( info2.result == 1 )
-					{
-						var within = this.awi.utilities.isStatsWithinInterval( bubble.parameters.stats, parameters.interval );
-						if ( within )
-							directSouvenirs.push( bubble );
-					}
-				}
-				bubble = this.getBubble( bubble.properties.exits[ 'success' ] );
-			};
-			if ( directSouvenirs.length > 0 )
-			{
-				this.awi.prompt.waitForInput = true;
-				if ( control.memory.scanLevel > 1 )
-				{
-					var text = '';
-					for ( var s = 0; s < directSouvenirs.length; s++ )
-					{
-						var answer = await directSouvenirs[ s ].play( parameters.userInput, parameters, control, true );
-						if ( answer.success = 'found' )
-						{
-							for ( var ss = 0; ss < answer.data.indirectSouvenirs.length; ss++ )
-								text += answer.data.indirectSouvenirs[ ss ].parameters.text;
+			var content = ( typeof answer.data.direct.content[ 0 ] == 'undefined' ? answer.data.indirect.content[ 0 ] : answer.data.direct.content[ 0 ] );
+			this.awi.editor.print( this, 'Video file: ' + content.videoInfo.path, { user: 'memory2' } );
+			this.awi.editor.print( this, 'Recorded on the: ' + content.videoInfo.date.text, { user: 'memory2' } );
+			this.awi.editor.print( this, '', { user: 'memory2' } );
 						}
+		return answer;
 					}
-					var bubble = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
-					while( bubble )
+	async playback( line, parameter, control )
 					{
-						var found = directSouvenirs.findIndex(
-							function( element )
-							{
-								return element === bubble;
-							} );
-						if ( found < 0 )
-						{
-							control.start = 'root';
-							control.caseInsensitive = true;
-							var answer = await bubble.play( text, parameters, control, true );
-							if ( answer.success = 'found' )
-								indirectSouvenirs.push( ...answer.data.indirectSouvenirs );
-						}
-						bubble = this.getBubble( bubble.properties.exits[ 'success' ] );
-					};
-				}
-				this.awi.prompt.waitForInput = false;
-			}
-			return { success: 'found', data: { directSouvenirs: directSouvenirs }, indirectSouvenirs: indirectSouvenirs };
-		}
-		if ( control.memory.scanLevel > 1 && control.memory.level == 2 )
-		{
-			var bubble = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
-			while( bubble )
-			{
-				var answer = await bubble.play( parameters.userInput, parameters, this.awi.utilities.copyObject( control ) );
-				if ( answer.success == 'found' )
-					indirectSouvenirs.push( ...answer.data );
-				bubble = this.getBubble( bubble.properties.exits[ 'success' ] );
-			};
-			if ( indirectSouvenirs.length > 0 )
-				return { success: 'found', data: { indirectSouvenirs: directSouvenirs } };
-		}
-		return { success: 'notfound' };
+		return await super.playback( line, parameter, control );
 	}
 }
-module.exports.Memory = MemoryAwiVideos;
+module.exports.Memory = MemoryGenericVideos;

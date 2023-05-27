@@ -25,6 +25,7 @@ class Personality
 	constructor( awi, options = {} )
 	{
 		this.awi = awi;
+		this.name = 'Awi';
 		this.oClass = 'personality';		
 		this.options = options;
 		this.currentPrompt = 'prompt-generic';
@@ -77,6 +78,10 @@ Please take the following context into consideration before executing the task. 
 Please read first the conversation with the user. Conversation:
 {conversation}
 `, 
+'prompt-generic-memories':`
+Here are some memories about the subject, please consider them in your response. Memories:
+{memories}
+`,
 'prompt-generic-task-question#1':`
 Now the task:
 Answer question: {task-question}
@@ -130,36 +135,38 @@ It returns `
 	}
 	async remember( line, parameters, control )
 	{
-		var directSouvenirs = [];
-		var indirectSouvenirs = [];
-		if ( parameters.kind == 'all' )
+		var result = {
+			direct: { souvenirs: [], content: [] },
+			indirect: { souvenirs: [], content: [] }
+		};
+		if ( parameters.from == 'any' )
 		{
-			for ( var k in this.awi.memories )
+			for ( var k in this.memories )
 			{
-				var answer = await this.awi.memories[ k ].play( line, parameters, { start: 'root', memory: { command: 'findSouvenirs', scanLevel: parameters.scanLevel } } );
+				var answer = await this.memories[ k ].findSouvenirs( line, parameters, control );
 				if ( answer.success == 'found' )
 				{
-					if ( answer.data.directSouvenirs )
-						directSouvenirs.push( ...answer.data.directSouvenirs );
-					if ( answer.data.indirectSouvenirs )
-						indirectSouvenirs.push( ...answer.data.indirectSouvenirs );
+					result.direct.souvenirs.push( ...answer.data.direct.souvenirs );
+					result.direct.content.push( ...answer.data.direct.content );
+					result.indirect.souvenirs.push( ...answer.data.indirect.souvenirs );
+					result.indirect.content.push( ...answer.data.indirect.content );
 				}
 			}
 		}
-		else if ( typeof this.awi.memories[ parameters.kind ] != 'undefined' )
+		else if ( typeof this.memories[ parameters.from ] != 'undefined' )
 		{
-			var answer = await this.awi.memories[ parameters.kind ].play( line, parameters, { start: 'root', memory: { command: 'findSouvenirs', scanLevel: parameters.scanLevel } } );
+			var answer = await this.memories[ parameters.from ].findSouvenirs( line, parameters, control );
 			if ( answer.success == 'found' )
 			{
-				if ( answer.data.directSouvenirs )
-					directSouvenirs.push( ...answer.data.directSouvenirs );
-				if ( answer.data.indirectSouvenirs )
-					indirectSouvenirs.push( ...answer.data.indirectSouvenirs );
+				result.direct.souvenirs.push( ...answer.data.direct.souvenirs );
+				result.direct.content.push( ...answer.data.direct.content );
+				result.indirect.souvenirs.push( ...answer.data.indirect.souvenirs );
+				result.indirect.content.push( ...answer.data.indirect.content );
 			}
 		}
-		if ( directSouvenirs.length + indirectSouvenirs.length > 0 )
-			return { success: 'found', data: { directSouvenirs: directSouvenirs, indirectSouvenirs: indirectSouvenirs } };
-		return { success: 'notfound', data: { directSouvenirs: [], indirectSouvenirs: [] } };
+		if ( result.direct.souvenirs.length + result.indirect.souvenirs.length > 0 )
+			return { success: 'found', data: result };
+		return { success: 'notfound' };
 	}
 	getPrompt( token, newData, options = {} )
 	{
@@ -202,7 +209,7 @@ It returns `
 				}
 				if ( subPrompt )
 				{
-					if ( data.name == 'takeNote' || data.name == 'conversation' )
+					if ( data.name == 'takeNote' || data.name == 'conversation' || data.name == 'memories' )
 					{
 						if ( data.content )
 						{
@@ -240,18 +247,16 @@ It returns `
 		{
 			var memory = memoryList[ m ];
 			conversation += '- ' + user + '"' + memory.userText + '"\n';
-			conversation += '- ' + contact + '"' + memory.contactText + '"\n';
+			conversation += '- ' + contact + '"' + memory.receiverText + '"\n';
 		}
 		return conversation;
 	}
-	async loadMemories( user, type = 'all')
+	async loadMemories( type = 'any')
 	{
-		user = typeof user == 'undefined' ? this.awi.config.user : user;
-
 		var self = this;
 		async function loadMemory( type )
 		{
-			var path = self.awi.config.getConfigurationPath() + '/' + user + '-' + type + '-';
+			var path = self.awi.config.getConfigurationPath() + '/' + self.name.toLowerCase() + '-' + type + '-';
 			var memory;
 			var answer = await self.awi.system.exists( path + 'memory.js' );
 			if ( answer.success )
@@ -277,7 +282,7 @@ It returns `
 			return { success: true };
 		}
 		var answer;
-		if ( type == 'all' )
+		if ( type == 'any' )
 		{
 			for ( var type in this.memories )
 			{
@@ -286,7 +291,7 @@ It returns `
 					break;
 				if ( answer.data )
 				{
-					this.memories[ type ].addMemory( answer.data, { parent: this.memories[ type ].key } )
+					this.memories[ type ] = this.awi.initMemory( answer.data );
 				}
 			}
 		}
@@ -297,29 +302,27 @@ It returns `
 			{
 				if ( answer.data )
 				{
-					this.memories[ type ].addMemory( answer.data, { parent: this.memories[ type ].key } )
+					this.memories[ type ] = this.awi.initMemory( answer.data );
 				}
 			}
 		}
 		return answer;
 	}
-	async saveMemories( user, type = 'all' )
+	async saveMemories( type = 'any' )
 	{
-		user = typeof user == 'undefined' ? this.awi.config.user : user;
-
 		var self = this;
 		async function saveMemory( type )
 		{
 			if ( self.memories[ type ] )
 			{
 				var memories = self.awi.utilities.serializeOut( self.memories[ type ], '' );
-				var path = self.awi.config.getConfigurationPath() + '/' + user + '-' + type + '-';
+				var path = self.awi.config.getConfigurationPath() + '/' + self.name.toLowerCase() + '-' + type + '-';
 				return await self.awi.system.writeFile( path + 'memory.js', memories, { encoding: 'utf8' } );
 			}
 			return { success: false, error: 'awi:no-memory-of-type:iwa' };
 		}
 		var answer;
-		if ( type == 'all' )
+		if ( type == 'any' )
 		{
 			for ( var type in this.memories )
 			{

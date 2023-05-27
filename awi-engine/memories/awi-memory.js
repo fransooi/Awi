@@ -28,114 +28,121 @@ class Memory extends awibulbs.Bulb
 		options.parentClass = 'newMemories';
 		options.errorClass = 'newSouvenirs';
 		super( awi, options );
+		this.parameters.senderName = typeof this.parameters.senderName == 'undefined' ? '' : this.parameters.senderName;
+		this.parameters.receiverName = typeof this.parameters.receiverName == 'undefined' ? '' : this.parameters.receiverName;
 		this.classname = 'memory';
 		this.oClass = 'memory';
-		this.properties.topic = '';
-		this.properties.subTopics = [];
-		this.properties.interval = { start: null, end: null };
-		if ( options.parameters )
-		{
-			if ( options.parameters.topic )
-				this.properties.topic = options.parameters.topic;
-			if ( options.parameters.subTopics )
-				this.properties.subTopics.push( ...options.parameters.subTopics );
-			if ( options.parameters.interval )
-				this.properties.interval = options.parameters.interval;
+		this.bubbleHash = {};
 		}
-	}
-	remember( line, data, callback, options )
+	async play( line, parameters, control, nested )
 	{
-
+		return parameters;
 	}
-	recallWord( word )
+	async playback( line, parameter, control )
 	{
-		var result = 
+		return parameters;
+	}
+	async extractContent( line, parameters, control )
+	{
+		var content = [];
+		var souvenir = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
+		while ( souvenir )
 		{
-			user: { totalCount: 0, wordCount: 0, probability: 0, text: '' },
-			contact: { totalCount: 0, wordCount: 0, probability: 0, text: '' }
-		};		
-
-		function analyse( text )
+			var answer = await souvenir.extractContent( line, parameters, control );
+			if ( answer.success )
+				content.push( answer.data );
+			souvenir = this.getBubble( souvenir.properties.exits[ 'success' ] );
+		}
+		if ( content.length )
+			return { success: 'found', content: content };
+		return { success: 'notfound' };
+	}
+	async getContent( line, parameters, control )
 		{
-			var totalCount = 0;
-			var wordCount = 0;
-			var words = text.toLowerCase().split( '\n' ).join( ' ' ).split( ' ' );
-			for ( var w = 0; w < words.length; w++ )
+		var content = [];
+		var souvenir = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
+		while ( souvenir )
 			{
-				if ( word == words[ w ] )
-					wordCount++;
-				totalCount++;
+			var answer = await souvenir.getContent( line, parameters, control );
+			if ( answer.success )
+				content.push( answer.data );
+			souvenir = this.getBubble( souvenir.properties.exits[ 'success' ] );
 			}
-			if ( wordCount > 0 )
-				return { totalCount: totalCount, wordCount: wordCount, probability: wordCount / totalCount, text: text }
-			return null;
+		if ( content.length )
+			return { success: 'found', content: content };
+		return { success: 'notfound' };
 		}
-		for ( var c = 0; c < this.commands.length; c++ )
+	async findSouvenirs( line, parameters, control )
 		{
-			var command = this.commands[ c ];
-			for ( var p = 0; p < command.parameters.length; p++ )
+		var directSouvenirs = [];
+		var indirectSouvenirs = [];
+		var souvenir = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
+		while( souvenir )
 			{
-				var parameter = command.parameters [ p ];
-				for ( var pp in parameter )
+			var info1 = this.awi.utilities.matchTwoStrings( souvenir.parameters.receiverName, line, { caseInsensitive: true } );
+			if ( info1.result >= 0.5 )
 				{
-					if ( pp == 'userText' )
+				if ( parameters.senderName )
 					{
-						info = analyse( parameter.userText );
-						if ( info )
+					var info2 = this.awi.utilities.matchTwoStrings( souvenir.parameters.senderName, parameters.senderName, { caseInsensitive: true } );
+					if ( info2.result == 1 )
+						directSouvenirs.push( souvenir );
+				}
+				else
 						{
-							result.user.wordCount += info.wordCount;
-							result.user.totalCount = info.totalCount;
-							result.user.probability += info.wordCount / info.totalCount;
-							result.user.text = info.text;
+					directSouvenirs.push( souvenir );
 						}
 					}
-					if ( pp == 'contactText' )
-					{
-						var info = analyse( parameter.contactText );
-						if ( info )
+			else
 						{
-							result.contact.wordCount += info.wordCount;
-							result.contact.totalCount = info.totalCount;
-							result.contact.probability += info.wordCount / info.totalCount;
-							result.contact.text = info.text;
-						}						
+				var answer = await souvenir.findSouvenirs( line, parameters, control );
+				if ( answer.success == 'found' )
+					indirectSouvenirs.push( souvenir );
 					}
+			souvenir = this.getBubble( souvenir.properties.exits[ 'success' ] );
+		} while ( souvenir );
+		var directContent = [];
+		var indirectContent = [];
+		for ( var s = 0; s < directSouvenirs.length; s++ )
+		{
+			var answer = await directSouvenirs[ s ].getContent( line, parameters, control );
+			directContent.push( answer.data );
+		}
+		for ( var s = 0; s < indirectSouvenirs.length; s++ )
+		{
+			var answer = await indirectSouvenirs[ s ].getContent( line, parameters, control );
+			indirectContent.push( answer.data );
+		}
+		if ( directSouvenirs.length > 0 || indirectSouvenirs.length > 0 )
+			return {
+				success: 'found',
+				data: {
+					direct: { souvenirs: directSouvenirs, content: directContent },
+					indirect: { souvenirs: indirectSouvenirs, content: indirectContent }
+				} };
+		return { success: 'notfound' };
 				}
+	addMemory( memory, control = {} )
+	{
+		return super.addBubble( memory, control );
 			}
-		}
-		if ( !result.user.wordCount && !result.contact.wordCount )
-			return null;
-		return result;
-	}
-	learn( line, data, callback, options )
+	addMemories( memories, parameters = {}, control = {} )
 	{
-
+		return super.addBubble( memories, parameters, control );
 	}
-	addMemory( command, parameters = [] )
+	addSouvenir( souvenir, control = {} )
 	{
-		if ( this.awi.utilities.isArray( command ) )
+		var hash = this.awi.utilities.objectHash( souvenir.parameters );
+		if ( !this.bubbleHash[ hash ] )
 		{
-			for ( var c = 0; c < command.length; c++ )
-			{
-				this.addSouvenir( command[ c ], parameters );
-			}
+			this.bubbleHash[ hash ] = souvenir.key;
+			return super.addBubble( souvenir, control );
 		}
-		else
-		{
-			command.errorClass = 'newMemories';
-			command.parentClass = 'newMemories';
-			return super.addBubble( command, parameters, {} );
-		}
+		return '';
 	}
-	addSouvenir( command, parameters = [] )
+	addSouvenirs( commandList, parameters = {}, control = {} )
 	{
-		command.errorClass = 'newSouvenirs';
-		command.parentClass = 'newSouvenirs';
-		return super.addBubble( command, parameters, {} );
-	}
-	addMemoryFromLine( line, control = {} )
-	{
-		return super.addBubbleFromLine( line, /*{ source: 'newSouvenirs' }*/ );
+		return super.addBubble( commandList, parameters, control );
 	}
 }
 module.exports.Memory = Memory;

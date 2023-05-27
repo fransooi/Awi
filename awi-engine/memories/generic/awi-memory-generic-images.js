@@ -21,7 +21,7 @@
 */
 var awimemory = require( '../awi-memory' );
 
-class MemoryAwiImages extends awimemory.Memory
+class MemoryGenericImages extends awimemory.Memory
 {
 	constructor( awi, options = {} )
 	{
@@ -32,22 +32,37 @@ class MemoryAwiImages extends awimemory.Memory
 		this.properties.action = 'stores a list of images';
 		this.properties.inputs = [
 			{ userInput: 'what to find in the images', type: 'string' },
+			{ from: 'the kind of things to find', type: 'string', optional: true, default: 'any' },
+			{ interval: 'when the image was created', type: 'string', optional: true, default: 'any' },
 		];
-		this.properties.outputs = [ { memoryList: 'list of memories found', type: 'string.array' } ];
+		this.properties.outputs = [ { imageInfos: 'list of images found', type: 'imageInfo.souvenir.array' } ];
 		this.properties.tags = [ 'memory', 'images' ];
-		this.properties.content = [ 'images' ];
-		this.properties.subTopics.push( ... [ 'memory', 'images' ] );
 	}
-	remember( line, data, callback, options )
+	async play( line, parameters, control, nested )
 	{
-		return { memory: '', memories: [] };
+		return await this[ control.memory.command ]( line, parameters, control );
 	}
-	learn( line, data, callback, extra )
+	async extractContent( line, parameters, control )
 	{
-
+		return await super.extractContent( line, parameters, control );
 	}
-	pushNewSouvenir( command, options = {} )
+	async getContent( line, parameters, control )
 	{
+		var souvenir = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
+		if ( souvenir )
+		{
+			this.awi.editor.print( this, 'Image file: ' + souvenir.parameters.path, { user: 'memory2' } );
+			this.awi.editor.print( this, 'Created on the ' + souvenir.parameters.date, { user: 'memory2' } );
+		}
+		return await super.getContent( line, parameters, control );
+	}
+	async findSouvenirs( line, parameters, control )
+	{
+		return await super.findSouvenirs( line, parameters, control );
+	}
+	async playback( line, parameter, control )
+	{
+		super.playback( line, parameter, control );
 	}
 }
-module.exports.Memory = MemoryAwiImages;
+module.exports.Memory = MemoryGenericImages;

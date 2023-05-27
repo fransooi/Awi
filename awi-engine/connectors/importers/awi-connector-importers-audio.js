@@ -45,15 +45,12 @@ class ConnectorImporterAudio extends awiconnector.Connector
 		{
 			var stats = await this.awi.system.stat( path );
 			stats = stats.data;
-			var typeMemory = typeof options.typeMemory != 'undefined' ? options.typeMemory : 'audios';
 			var typeSouvenir = typeof options.typeSouvenir != 'undefined' ? options.typeSouvenir : 'audio';
-			var key = this.awi.utilities.getUniqueIdentifier( {}, typeMemory, Math.floor( Math.random() * 100 ) );
-			var memory = new this.awi.newMemories.generic[ typeMemory ]( this.awi, [], { key: key, parent: '', parameters: { senderName: senderName, path: path, stats: stats } } );
 			var numberOfSouvenirs = 0;
 
 			// Convert SRT to array
 			var lines = transcription.data.split( '\n' );
-			var data = [];
+			var souvenirs = [];
 			for ( var l = 0; l < lines.length; l++ )
 			{
 				var number = parseInt( lines[ l ] );
@@ -72,20 +69,18 @@ class ConnectorImporterAudio extends awiconnector.Connector
 						break;
 					text += lines[ ll + l ] + ' ';
 				}
-				memory.addSouvenir( 
-				{ 
-					token: typeSouvenir, 
-					classname: 'awi',
-					parameters: 
+				var key = this.awi.utilities.getUniqueIdentifier( {}, typeSouvenir, Math.floor( Math.random() * 100 ) );
+				var souvenir = new this.awi.newSouvenirs.generic[ typeSouvenir ]( this.awi, { key: key, parent: '', parameters:
 					{
+					senderName: senderName,
+					receiverName: '',
+					path: path,
 						text: text,
+					date: this.awi.utilities.getTimestampFromStats( stats ),
 						start: start,
-						end: end,
-					},
-					options: {}, 
-					onSuccess: {}, 
-					onError: '' 
-				}, [], {} );	
+					end: end
+				} } );
+				souvenirs.push( souvenir );
 				numberOfSouvenirs++;
 				l += ll;
 				this.awi.editor.print( this, 'From: ' + start.text + ' to ' + end.text , { user: 'importer3' } )
@@ -93,7 +88,7 @@ class ConnectorImporterAudio extends awiconnector.Connector
 				this.awi.editor.print( this, '--------------------------------------------------------------------------------', { user: 'importer3' } )
 			}
 			this.awi.editor.print( this, 'Number of lines: ' + numberOfSouvenirs , { user: 'importer2' } )
-			return { success: true, data: { memories: memory, numberOfMemories: 1, numberOfSouvenirs: numberOfSouvenirs } };
+			return { success: true, data: { souvenirs: souvenirs } };
 		}
 		return transcription;
 	}

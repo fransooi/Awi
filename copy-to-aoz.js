@@ -4,7 +4,7 @@ const { mkdirp } = require( 'mkdirp' );
 
 function extractModule( fileArray, module )
 {
-	var foundIndex = fileArray.findIndex( 
+	var foundIndex = fileArray.findIndex(
 		function( element )
 		{
 			var pos = element.lastIndexOf( module );
@@ -31,7 +31,7 @@ async function startAwi( userConfig )
 		var destinationPath = 'C:/AOZ_Studio/AOZ_Studio/app/aoz/runtime/awi-engine';
 		awi.utilities.deleteDirectory( destinationPath, { recursive: true, keepRoot: true } );
 
-		var answer = await awi.system.getDirectory( sourcePath, { recursive: true, filters: [ '*.*' ] } );		
+		var answer = await awi.system.getDirectory( sourcePath, { recursive: true, filters: [ '*.*' ] } );
 		var files = awi.utilities.getFileArrayFromTree( answer.data );
 		for ( var f = 0; f < files.length; f++ )
 		{
@@ -51,7 +51,7 @@ async function startAwi( userConfig )
 					var source = await awi.utilities.loadIfExist( file.path, { encoding: 'utf8' } );
 					source = source.data.split( '\r\n' ).join( '\n' );
 					var isRequire = false;
-					var require = source.indexOf( 'require' );					
+					var require = source.indexOf( 'require' );
 					while ( require >= 0 )
 					{
 						isRequire = true;
@@ -62,7 +62,7 @@ async function startAwi( userConfig )
 							endLine++;
 						var name = source.substring( quote + 1, endQuote ).split( '/' );
 						name = name[ name.length - 1 ];
-						source = source.substring( 0, require ) + 'window.awi[ "' + name + '" ]' + source.substring( endLine );					
+						source = source.substring( 0, require ) + 'window.awi[ "' + name + '" ]' + source.substring( endLine );
 						require = source.indexOf( 'require', require + 1 );
 					}
 					var detect = 'module.exports';
@@ -70,7 +70,7 @@ async function startAwi( userConfig )
 					while ( exports >= 0 )
 					{
 						var classname = exports + detect.length;
-						source =  source.substring( 0, exports ) + 'window.awi[ "' + moduleName + '" ]' + source.substring( classname );					
+						source =  source.substring( 0, exports ) + 'window.awi[ "' + moduleName + '" ]' + source.substring( classname );
 						exports = source.indexOf( detect, exports + 1 );
 					}
 					subPath = subPath.substring( 0, subPath.length - 3 );
@@ -82,31 +82,26 @@ async function startAwi( userConfig )
 				}
 				else
 				{
-					if ( file.path.indexOf( 'digested') < 0 && file.path.indexOf( 'todigest' ) < 0 )
+					if ( file.name.indexOf( 'package' ) < 0 )
 					{
-						if ( file.name.indexOf( 'package' ) < 0 )
-						{
-							mkdirp.sync( destinationPath + '/' + dir );
-							fs.copyFileSync( path, copyPath );
-						}
+						mkdirp.sync( destinationPath + '/' + dir );
+						fs.copyFileSync( path, copyPath );
 					}
 				}
 			}
 		}
-		mkdirp.sync( destinationPath + '/data/digested/messenger' );
-		mkdirp.sync( destinationPath + '/data/todigest/messenger' );
 
 		// Order file-list
 		var last = [];
 		last.push( extractModule( filelistRequire, 'awi-prompt' ) );
 		last.push( extractModule( filelistRequire, 'awi' ) );
-		filelistNoRequire.push( extractModule( filelistRequire, 'awi-bubbles' ) );
-		filelistNoRequire.push( extractModule( filelistRequire, 'awi-bulbs' ) );
+		filelistNoRequire.push( extractModule( filelistRequire, 'awi-bubble' ) );
+		filelistNoRequire.push( extractModule( filelistRequire, 'awi-branch' ) );
 		filelistNoRequire.push( extractModule( filelistRequire, 'awi-souvenir' ) );
 		filelistNoRequire.push( extractModule( filelistRequire, 'awi-memory' ) );
-		filelistNoRequire.push( extractModule( filelistRequire, 'awi-memory-awi-error' ) );
+		filelistNoRequire.push( extractModule( filelistRequire, 'awi-memory-generic-error' ) );
 		filelistNoRequire.push( extractModule( filelistRequire, 'awi-bubble-generic-error' ) );
-		filelistNoRequire.push( extractModule( filelistRequire, 'awi-souvenir-awi-error' ) );
+		filelistNoRequire.push( extractModule( filelistRequire, 'awi-souvenir-generic-error' ) );
 		filelistNoRequire.push( ...filelistRequire );
 		filelistNoRequire.push( ...last );
 		awi.utilities.saveJSON( destinationPath + '/files.json', filelistNoRequire );
@@ -116,16 +111,17 @@ async function startAwi( userConfig )
 
 console.log( 'jskfdj ');
 startAwi( {
-	user: 'francois',
-	configurations: 'C:/Awi/configs',
-	engine: 'C:/Awi/awi-engine',
-	connectors: 
+	prompt: '',
+	configurations: thispath + '/configs',
+	engine: thispath + '/awi-engine',
+	data: thispath + '/data',
+	connectors:
 	[
 		{ name: 'systems.node', options: {}, default: true },
 		{ name: 'utilities.awi', options: {}, default: true },
-		{ name: 'servers.node', options: {}, default: true },
+		{ name: 'clients.openainode', options: {}, default: true },
 		{ name: 'editors.commandline', options: {}, default: true },
-		{ name: 'languages.aoz', options: {}, default: true },
+		{ name: 'languages.javascript', options: {}, default: true },
 		{ name: 'importers.*', options: {} },
-	],
+	]
 } );

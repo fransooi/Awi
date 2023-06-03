@@ -19,9 +19,9 @@
 * @short Digest command: digest the content of the toDigest directory
 *
 */
-var awibubbles = require( '../awi-bubbles' )
+var awibubble = require( '../awi-bubble' )
 
-class BubbleGenericDigest extends awibubbles.Bubble
+class BubbleGenericDigest extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{

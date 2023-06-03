@@ -19,9 +19,9 @@
 * @short Error management bubble
 *
 */
-var awibubbles = require( '../awi-bubbles' );
+var awibubble = require( '../awi-bubble' );
 
-class BubbleGenericError extends awibubbles.Bubble
+class BubbleGenericError extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{

@@ -19,9 +19,9 @@
 * @short Remember command: dig a specific topid out of the memory
 *
 */
-var awibubbles = require( '../awi-bubbles' )
+var awibubble = require( '../awi-bubble' )
 
-class BubbleGenericRemember extends awibubbles.Bubble
+class BubbleGenericRemember extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{

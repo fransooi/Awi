@@ -16,7 +16,7 @@
 * @date first pushed on 10/11/2019
 * @version 0.2
 *
-* @short Video memory bulb
+* @short Video memory branch
 *
 */
 var awimemory = require( '../awi-memory' );
@@ -50,7 +50,7 @@ class MemoryGenericVideos extends awimemory.Memory
 	{
 		var answer = await super.getContent( line, parameters, control );
 		if ( answer.success == 'found' )
-			{
+		{
 			this.awi.editor.print( this, 'Video file: ' + answer.data.audioInfo.path, { user: 'memory2' } );
 			this.awi.editor.print( this, 'Recorded on the: ' + answer.data.audioInfo.date, { user: 'memory2' } );
 			this.awi.editor.print( this, '', { user: 'memory2' } );
@@ -65,11 +65,11 @@ class MemoryGenericVideos extends awimemory.Memory
 			this.awi.editor.print( this, 'Video file: ' + content.videoInfo.path, { user: 'memory2' } );
 			this.awi.editor.print( this, 'Recorded on the: ' + content.videoInfo.date.text, { user: 'memory2' } );
 			this.awi.editor.print( this, '', { user: 'memory2' } );
-						}
+		}
 		return answer;
-					}
+	}
 	async playback( line, parameter, control )
-					{
+	{
 		return await super.playback( line, parameter, control );
 	}
 }

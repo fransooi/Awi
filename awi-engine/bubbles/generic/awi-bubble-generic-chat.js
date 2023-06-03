@@ -19,9 +19,9 @@
 * @short Chat bubble
 *
 */
-var awibubbles = require( '../awi-bubbles' );
+var awibubble = require( '../awi-bubble' );
 
-class BubbleGenericChat extends awibubbles.Bubble
+class BubbleGenericChat extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{

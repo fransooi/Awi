@@ -18,7 +18,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		this.connected = true;
 		this.connectAnswer.success = true;
 		return this.connectAnswer;
-	}	
+	}
 	async completeConnect()
 	{
 		var answer = await this.loadJavascript( this.awi.config.getEnginePath() + '/data/libs/compromise.js' );
@@ -54,28 +54,28 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			ret = new obj.constructor();
 		} else
 			ret = Object.create(obj.constructor.prototype);
-	
+
 		var prop = null;
 		var allProps = Object.getOwnPropertyNames(obj); //gets non enumerables also
-	
-	
+
+
 		var props = {};
 		for (var i in allProps) {
 			prop = allProps[i];
 			props[prop] = false;
 		}
-	
+
 		for (i in obj) {
 			props[i] = i;
 		}
-	
-		//now props contain both enums and non enums 
+
+		//now props contain both enums and non enums
 		var propDescriptor = null;
 		var newPropVal = null; // value of the property in new object
 		for (i in props) {
 			prop = obj[i];
 			propDescriptor = Object.getOwnPropertyDescriptor(obj, i);
-	
+
 			if (Array.isArray(prop)) { //not backward compatible
 				prop = prop.slice(); // to copy the array
 			} else
@@ -97,14 +97,14 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 						}
 					}
 					prop = prop.clone();
-	
-				} else // normal object	
+
+				} else // normal object
 				{
 					prop = this.copyObject(prop);
 				}
-	
+
 			}
-	
+
 			newPropVal = {
 				value: prop
 			};
@@ -114,14 +114,14 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 					*/
 				newPropVal.enumerable = propDescriptor.enumerable;
 				newPropVal.writable = propDescriptor.writable;
-	
+
 			}
 			if (!ret.hasOwnProperty(i)) // when String or other predefined objects
 				Object.defineProperty(ret, i, newPropVal); // non enumerable
-	
+
 		}
 		return ret;
-	}	
+	}
 	copyArray( arr, arrDest )
 	{
 		arrDest = typeof arrDest == 'undefined' ? [] : arrDest;
@@ -257,12 +257,12 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		}
 		return { success: false, data: null };
 	}
-	
+
 	async loadFile( path, options )
 	{
 		return await this.loadIfExist( path, options );
 	}
-	
+
 	getFilenameAndExtension( path )
 	{
 		return this.basename( this.normalize( path ) );
@@ -273,11 +273,11 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		name = name.toLowerCase();
 		if ( typeof wildcards == 'string' )
 			wildcards = [ wildcards ];
-	
+
 		for ( var w = 0; w < wildcards.length; w++ )
 		{
 			var wildcard = wildcards[ w ].toLowerCase();
-	
+
 			// Look for *[ and ]*
 			var start;
 			if ( ( start = wildcard.indexOf( '*[' ) ) >= 0 )
@@ -297,7 +297,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 					wildcard = wildcard.substring( 0, start - 2 ) + newFilter + wildcard.substring( end + 2 );
 				}
 			}
-	
+
 			name = this.basename( name );
 			var pName = 0;
 			var pWild = 0;
@@ -340,7 +340,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		}
 		return false;
 	}
-	
+
 	async getFileInfo( path )
 	{
 		var result = undefined;
@@ -350,7 +350,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			stats = stats.data;
 			if ( stats.isDirectory() )
 			{
-				result = 
+				result =
 				{
 					name: this.getFilenameAndExtension( path ),
 					path: path,
@@ -361,7 +361,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			}
 			else
 			{
-				result = 
+				result =
 				{
 					name: this.getFilenameAndExtension( path ),
 					path: path,
@@ -371,7 +371,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 				};
 			}
 		}
-		return result;	
+		return result;
 	}
 	async deleteDirectory( destinationPath, options, tree, count )
 	{
@@ -442,7 +442,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 	{
 		var result = [];
 		this.getDirArrayFromTree( tree, result );
-	
+
 		if ( options.sort )
 		{
 			result.sort( function( a, b )
@@ -512,7 +512,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			result = '0' + result;
 		return result;
 	}
-	copyData( destination, source, options = {} )	
+	copyData( destination, source, options = {} )
 	{
 		if ( !options.recursive )
 		{
@@ -531,7 +531,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 				destination[ d ] = prop;
 		}
 		return destination;
-	}	
+	}
 	async loadHJSON( path )
 	{
 		path = this.normalize( path );
@@ -616,7 +616,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			start++;
 			endCut = start;
 			while ( line.charAt( endCut ) != quote && endCut < line.length )
-				endCut++;			
+				endCut++;
 			end = Math.min( line.length, endCut + 1 )
 		}
 		else
@@ -641,7 +641,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 				line = line.substring( 0, start ) + line.substring( info.end );
 				if ( parameter.type == 'number' )
 					data[ parameter.name ] = parseInt( info.text );
-				else 
+				else
 					data[ parameter.name ] = info.text;
 			}
 		}
@@ -741,7 +741,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 				var struct = parent[ s ];
 				if ( struct.children.length == 0 )
 				{
-					pile.push( struct.text );			
+					pile.push( struct.text );
 				}
 				else
 				{
@@ -764,28 +764,28 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 				var start1 = html.indexOf( '<' + name + ' ', end );
 				var start2 =  html.indexOf( '<' + name + '>', end );
 				start1 = ( start1 < 0 ? html.length : start1 );
-				start2 = ( start2 < 0 ? html.length : start2 );			
+				start2 = ( start2 < 0 ? html.length : start2 );
 				if ( start1 >= html.length && start2 >= html.length )
 					break;
-	
+
 				if ( start1 < start2 )
 					startText = html.indexOf( '>', start1 + 1 ) + 1;
 				else
 					startText = start2 + name.length + 2;
 				start = Math.min( start1, start2 );
-				
+
 				var count = 1;
 				end = startText;
 				do
-				{		
+				{
 					var next1 = html.indexOf( '<' + name + ' ', end );
 					var next2 = html.indexOf( '<' + name + '>', end );
 					var next3 = html.indexOf( '</' + name + '>', end );
 					if ( next1 >= 0 )
 						next1 = html.indexOf( '>', next1 );
 					next1 = ( next1 < 0 ? html.length : next1 );
-					next2 = ( next2 < 0 ? html.length : next2 );			
-					next3 = ( next3 < 0 ? html.length : next3 );			
+					next2 = ( next2 < 0 ? html.length : next2 );
+					next3 = ( next3 < 0 ? html.length : next3 );
 					var next = Math.min( next1, Math.min( next2, next3 ) );
 					if ( next == html.length )
 						return null;
@@ -806,12 +806,12 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 				} while( true );
 				if ( end > start )
 				{
-					var data =  
-					{ 
-						type: name, 
-						start: start, 
-						end: end + name.length + 3, 
-						startText: startText, 
+					var data =
+					{
+						type: name,
+						start: start,
+						end: end + name.length + 3,
+						startText: startText,
 						endText: end,
 						children: []
 					};
@@ -856,8 +856,8 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		for ( var s = 0; s < sourceFiles.length; s++ )
 		{
 			var file = sourceFiles[ s ];
-			var found = newArray.find( 
-				function( element )		
+			var found = newArray.find(
+				function( element )
 				{
 					return file.name == element.name;
 				} );
@@ -884,7 +884,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 	format( prompt, args )
 	{
 		do
-		{		
+		{
 			var done = false;
 			var start = prompt.lastIndexOf( '{' );
 			while( start >= 0 )
@@ -915,7 +915,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			if ( timeString )
 			{
 				var currentdate = new Date();
-				var time = this.format( timeString, 
+				var time = this.format( timeString,
 				{
 					day: currentdate.getDate(),
 					month: currentdate.getMonth(),
@@ -945,7 +945,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			regex = [ regex ];
 		for ( var r = 0; r < regex.length; r++ )
 		{
-			var matches = text.match( regex[ r ] ); 
+			var matches = text.match( regex[ r ] );
 			if ( matches )
 				return matches;
 		}
@@ -963,26 +963,26 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			while( text.length < len )
 				text += chr;
 		}
-		else 
+		else
 		{
 			position = Math.min( Math.max( position, 0 ), text.length );
 			while( text.length < len )
 				text = text.substring( 0, position ) + chr + text.substring( position );
 		}
 		return text;
-	}	
+	}
 	getNumericValue( text )
 	{
 		var numbers = [ 'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
-						'ten', 'eleven', 'twelve', 'forteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 
-						'twenty', 'twenty-one', 'twenty-two', 'twenty-three', 'twenty-four', 'twenty-five', 'twenty-six', 'twenty-seven', 'twenty-eight', 'twenty-nine', 
-						'thirty', 'thirty-one', 'thirty-two', 'thirty-three', 'thirty-four', 'thirty-five', 'thirty-six', 'thirty-seven', 'thirty-eight', 'thirty-nine', 
-						'fourty', 'fourty-one', 'fourty-two', 'fourty-three', 'fourty-four', 'fourty-five', 'fourty-six', 'fourty-seven', 'fourty-eight', 'fourty-nine', 
-						'fifty', 'fifty-one', 'fifty-two', 'fifty-three', 'fifty-four', 'fifty-five', 'fifty-six', 'fifty-seven', 'fifty-eight', 'fifty-nine', 
-						'sixty', 'sixty-one', 'sixty-two', 'sixty-three', 'sixty-four', 'sixty-five', 'sixty-six', 'sixty-seven', 'sixty-eight', 'sixty-nine', 
-						'seventy', 'seventy-one', 'seventy-two', 'seventy-three', 'seventy-four', 'seventy-five', 'seventy-six', 'seventy-seven', 'seventy-eight', 'seventy-nine', 
-						'eighty', 'eighty-one', 'eighty-two', 'eighty-three', 'eighty-four', 'eighty-five', 'eighty-six', 'eighty-seven', 'eighty-eight', 'eighty-nine', 
-						'ninety', 'ninety-one', 'ninety-two', 'ninety-three', 'ninety-four', 'ninety-five', 'ninety-six', 'ninety-seven', 'ninety-eight', 'ninety-nine', 
+						'ten', 'eleven', 'twelve', 'forteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen',
+						'twenty', 'twenty-one', 'twenty-two', 'twenty-three', 'twenty-four', 'twenty-five', 'twenty-six', 'twenty-seven', 'twenty-eight', 'twenty-nine',
+						'thirty', 'thirty-one', 'thirty-two', 'thirty-three', 'thirty-four', 'thirty-five', 'thirty-six', 'thirty-seven', 'thirty-eight', 'thirty-nine',
+						'fourty', 'fourty-one', 'fourty-two', 'fourty-three', 'fourty-four', 'fourty-five', 'fourty-six', 'fourty-seven', 'fourty-eight', 'fourty-nine',
+						'fifty', 'fifty-one', 'fifty-two', 'fifty-three', 'fifty-four', 'fifty-five', 'fifty-six', 'fifty-seven', 'fifty-eight', 'fifty-nine',
+						'sixty', 'sixty-one', 'sixty-two', 'sixty-three', 'sixty-four', 'sixty-five', 'sixty-six', 'sixty-seven', 'sixty-eight', 'sixty-nine',
+						'seventy', 'seventy-one', 'seventy-two', 'seventy-three', 'seventy-four', 'seventy-five', 'seventy-six', 'seventy-seven', 'seventy-eight', 'seventy-nine',
+						'eighty', 'eighty-one', 'eighty-two', 'eighty-three', 'eighty-four', 'eighty-five', 'eighty-six', 'eighty-seven', 'eighty-eight', 'eighty-nine',
+						'ninety', 'ninety-one', 'ninety-two', 'ninety-three', 'ninety-four', 'ninety-five', 'ninety-six', 'ninety-seven', 'ninety-eight', 'ninety-nine',
 						]
 		text = text.trim().toLowerCase().split( ' ' ).join( '-' );
 		if ( this.getCharacterType( text.charAt( 0 ) ) == 'number' )
@@ -992,7 +992,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 				return value;
 			return -1;
 		}
-		var index = numbers.findIndex( 
+		var index = numbers.findIndex(
 			function( element )
 			{
 				return element == text;
@@ -1054,8 +1054,8 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			var month = words.find( function( element ) { return element == 'month' || element == 'months'; } );
 			var year = words.find( function( element ) { return element == 'month' || element == 'months'; } );
 			var number = words.find(
-				function( element ) 
-				{ 
+				function( element )
+				{
 					return self.getNumericValue( element ) >= 0;
 				} );
 			if ( number )
@@ -1075,13 +1075,13 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			else if ( month )
 			{
 				for ( var n = 0; n < number; n++ )
-		{
+				{
 					var m = start.getMonth() - 1;
 					if ( m > 0 )
-			{
+					{
 						start.setMonth( m, 1 );
 						end.setMonth( m, 1 );
-			}					
+					}
 					else
 					{
 						start.setFullYear( start.getYear() - 1, 0, 1 );
@@ -1090,15 +1090,15 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 				}
 				start.setHours( 0, 0, 0, 0 );
 				end.setHours( 23, 59, 59, 999 );
-		}
+			}
 			else if ( year )
-		{
+			{
 				start.setFullYear( start.getYear() - 1, 0, 1 );
 				end.setFullYear( end.getYear() - 1, 0, 1 );
 				start.setHours( 0, 0, 0, 0 );
 				end.setHours( 23, 59, 59, 999 );
+			}
 		}
-	}
 		return { start: start, end: end }
 	}
 	isStatsWithinInterval( stats, interval )
@@ -1134,9 +1134,9 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 	getTimestamp( matches, monthReplacement = 1 )
 	{
 		var [ _, month, day, year, hours, minutes, seconds, ampm ] = matches;
-	
+
 		// Convert month to number
-		var monthList = 
+		var monthList =
 		[
 			"JanuFebrMarsApriMay JuneJulyAuguSeptOctoNoveDece",
 			"JanvFevrMarsAvriMai JuinJuilAoutSeptOctoNoveDece",
@@ -1145,7 +1145,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		var nMonth;
 		month = month.substring( 0, 4 ).toLowerCase();
 		for ( var n = 0; n < monthList.length; n++ )
-		{		
+		{
 			var nMonth = monthList[ n ].toLowerCase().indexOf( month );
 			if ( nMonth >= 0 )
 			{
@@ -1156,7 +1156,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		}
 		if ( nMonth < 1 )
 			nMonth = monthReplacement;
-		month = nMonth;	
+		month = nMonth;
 		var isPM = ( ampm === 'pm' || ampm === 'PM' );
 		var newHours = ( isPM && hours !== '12' ) ? parseInt( hours ) + 12 : parseInt( hours );
 		/*
@@ -1180,7 +1180,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		minutes = this.checkUndefined( minutes, '00' );
 		seconds = this.checkUndefined( seconds, '00' );
 		milliseconds = this.checkUndefined( milliseconds, '000' );
-	
+
 		var date = new Date();
 		date.setFullYear( 2000, 1 );
 		date.setHours( parseInt( hours ) );
@@ -1234,7 +1234,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 	}
 	parse( path )
 	{
-		var result = 
+		var result =
 		{
 			root: '',
 			dir: '',
@@ -1307,11 +1307,11 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		return lines.join( '\n' );
 	}
 	isLowerCase( c )
-	{ 
+	{
 		return c >= 'a' && c <= 'z';
 	}
 	isUpperCase( c )
-	{ 
+	{
 		return c >= 'A' && c <= 'Z';
 	}
 	getMimeType( path, type )
@@ -1360,7 +1360,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 				return 'model/vrml';
 			case '.rtf':
 				return 'text/rtf';
-	
+
 			case '.mp4':
 				return type + '/mp4';
 			case '.ogg':
@@ -1385,15 +1385,15 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 				return 'text/plain';
 			case '.xml':
 				return 'text/xml';
-					
+
 			default:
-				return 
+				return
 		}
 	}
 	serializeIn( map, root )
 	{
 		var self = this;
-		var lastBulb = 'root';
+		var lastBranch = 'root';
 		function createObjects( o, map )
 		{
 			if ( o.oClass )
@@ -1402,20 +1402,20 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 				var oo;
 				if ( o.oClass != 'prompt' )
 				{
-					oo = new self.awi[ o.data.parentClass ][ o.data.classname ][ o.data.token ]( self.awi, { key: o.data.key, bulb: lastBulb, parent: o.data.parent, exits: o.data.exits, parameters: o.data.parameters } );
+					oo = new self.awi[ o.data.parentClass ][ o.data.classname ][ o.data.token ]( self.awi, { key: o.data.key, branch: lastBranch, parent: o.data.parent, exits: o.data.exits, parameters: o.data.parameters } );
 					if ( o.data.parentClass == 'newMemories' )
-						lastBulb = oo;
+						lastBranch = oo;
 				}
 				else
 				{
 					oo = self.awi.prompt;
-					lastBulb = oo;
+					lastBranch = oo;
 				}
 				switch ( o.oClass )
 				{
 					case 'bubble':
 						break;
-					case 'bulb':
+					case 'branch':
 						break;
 					case 'memory':
 						oo.currentBubble = o.data.currentBubble;
@@ -1575,7 +1575,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			map += '\t'.repeat( count ) + '},\n';
 			return map;
 		}
-		function saveBulb( o )
+		function saveBranch( o )
 		{
 			var map = '';
 			return map;
@@ -1599,12 +1599,12 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			map += '\t'.repeat( count ) + '},\n';
 			return map;
 		}
-		var saveMap = 
+		var saveMap =
 		{
 			'awi': function( o ) { return '\t'.repeat( count - 1 ) + ':{oClass:"awi","data":{""},\n'; },
 			'config': function( o ) { return '\t'.repeat( count - 1 ) + ':{oClass:"config","data":{""},\n'; },
 			'bubble': saveBubble,
-			'bulb': saveBulb,
+			'branch': saveBranch,
 			'memory': saveMemory,
 			'souvenir': saveSouvenir,
 			'prompt': savePrompt
@@ -1632,7 +1632,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 							map += saveMap[ oo.oClass ]( oo );
 							map += '\t'.repeat( count - 1 ) + '}},\n';
 						}
-						else 
+						else
 						{
 							for ( var pp in oo )
 							{

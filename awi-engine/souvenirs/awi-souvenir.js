@@ -4,9 +4,9 @@
 *          / _ \              (°°)       Intelligent
 *        / ___ \ [ \ [ \ [  ][   ]       Programmable
 *     _/ /   \ \_\ \/\ \/ /  |  | \      Personal Assistant
-* (_)|____| |____|\__/\__/ [_| |_] \     link: 
+* (_)|____| |____|\__/\__/ [_| |_] \     link:
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -19,9 +19,9 @@
 * @short Souvenir bubbles: stores and recall informations
 *
 */
-var awibubbles = require( '../bubbles/awi-bubbles' )
+var awibubble = require( '../bubbles/awi-bubble' )
 
-class Souvenir extends awibubbles.Bubble
+class Souvenir extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{
@@ -38,8 +38,8 @@ class Souvenir extends awibubbles.Bubble
 	{
 	}
 	async getContent( line, parameters, control )
-		{
-		}
+	{
+	}
 	async findSouvenirs( line, parameters, control )
 	{
 	}

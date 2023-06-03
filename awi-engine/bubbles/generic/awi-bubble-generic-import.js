@@ -19,9 +19,9 @@
 * @short Import command: import a file in the current project through the current editor connector
 *
 */
-var awibubbles = require( '../awi-bubbles' );
+var awibubble = require( '../awi-bubble' );
 
-class BubbleGenericImport extends awibubbles.Bubble
+class BubbleGenericImport extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{
@@ -50,7 +50,7 @@ class BubbleGenericImport extends awibubbles.Bubble
 		}
 		if ( /^\d+$/.test( parameters.userInput ) )
 		{
-			var fileList = this.bulb.getLastData( this, 'fileList' );
+			var fileList = this.branch.getLastData( this, 'fileList' );
 			if ( fileList && fileList.length > 0 )
 			{
 				var number = parseInt( parameters.userInput ) - 1;

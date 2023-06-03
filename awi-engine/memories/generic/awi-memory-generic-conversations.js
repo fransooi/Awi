@@ -16,7 +16,7 @@
 * @date first pushed on 10/11/2019
 * @version 0.2
 *
-* @short Conversations memory bulb
+* @short Conversations memory branch
 *
 */
 var awimemory = require( '../awi-memory' );

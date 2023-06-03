@@ -19,9 +19,9 @@
 * @short Input command: input missing parameters
 *
 */
-var awibubbles = require( '../awi-bubbles' )
+var awibubble = require( '../awi-bubble' )
 
-class BubbleGenericInput extends awibubbles.Bubble
+class BubbleGenericInput extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{

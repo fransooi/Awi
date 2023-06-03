@@ -4,9 +4,9 @@
 *          / _ \              (°°)       Intelligent
 *        / ___ \ [ \ [ \ [  ][   ]       Programmable
 *     _/ /   \ \_\ \/\ \/ /  |  | \      Personal Assistant
-* (_)|____| |____|\__/\__/ [_| |_] \     link: 
+* (_)|____| |____|\__/\__/ [_| |_] \     link:
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -28,17 +28,17 @@ class Config
 		this.systemConfig = config;
 		if ( typeof config.configurations == 'string' )
 			this.getConfigurationPath = function(){ return awi.utilities.normalize( config.configurations ) };
-		else 
+		else
 			this.getConfigurationPath = config.configurations;
 		if ( typeof config.engine == 'string' )
 			this.getEnginePath = function(){ return awi.utilities.normalize( config.engine ) };
 		else if ( Array.isArray( config.engine ) )
 			this.getEnginePath = function(){ 'http://run/data/awi-engine' };
-		else 
+		else
 			this.getEnginePath = config.engine;
 		if ( typeof config.data == 'string' )
 			this.getDataPath = function(){ return awi.utilities.normalize( config.data ) };
-		else 
+		else
 			this.getDataPath = config.data;
 		this.user = '';
 		this.configs = {};
@@ -56,7 +56,7 @@ class Config
 			if ( type == '' )
 				type = 'user-default';
 		}
-		else if ( type == 'personality' )	
+		else if ( type == 'personality' )
 			type = 'personality-' + this.configs[ this.user ].personality;
 		return this.configs[ type ];
 	}
@@ -69,9 +69,9 @@ class Config
 		if ( name != 'user' && name != 'system' )
 		{
 			this.configs[ name ] = config;
-			var personality = await this.loadConfig( 'personality-' + name );
+			var personality = await this.loadConfig( 'personality-' + config.personality );
 			personality.prompts[ 'user' ] = '.(' + config.firstName + ') ';
-			this.configs[ 'personality-' + name ] = personality;
+			this.configs[ 'personality-' + config.personality ] = personality;
 		}
 	}
 	checkUserConfig( name )
@@ -131,15 +131,15 @@ class Config
 			user = this.configs[ name ];
 			if ( !user )
 				return { success: false, error: 'awi:user-unknow:iwa' };
-			if ( this.configs[ 'personality-' + name ] )
-				personalities.push( this.configs[ 'personality-' + name ] );
+			if ( this.configs[ 'personality-' + user.personality ] )
+				personalities.push( { path: self.getConfigurationPath() + '/personality-' + user.personality, config: this.configs[ 'personality-' + user.personality ] } );
 			await this.awi.utilities.saveHJSON( this.getConfigurationPath() + '/' + name + '.hjson', this.configs[ name ] );
 			await this.awi.utilities.saveJSON( this.getConfigurationPath() + '/' + name + '.json', this.configs[ name ] );
-			personalities.forEach( 
+			personalities.forEach(
 				async function( element )
 				{
-					await self.awi.utilities.saveHJSON( self.getConfigurationPath() + '/personality-' + name + '.hjson', element );
-					await self.awi.utilities.saveJSON( self.getConfigurationPath() + '/personality-' + name + '.json', element );
+					await self.awi.utilities.saveHJSON( element.path + '.hjson' , element.config );
+					await self.awi.utilities.saveJSON( element.path + '.json', element.config );
 				} );
 		}
 		else
@@ -154,7 +154,7 @@ class Config
 	}
 	async loadConfigs()
 	{
-		var answer = await this.awi.system.getDirectory( this.getConfigurationPath(), { recursive: false, filters: [ '*.hjson' ] } );					
+		var answer = await this.awi.system.getDirectory( this.getConfigurationPath(), { recursive: false, filters: [ '*.hjson' ] } );
 		if ( answer.success )
 		{
 			var files = this.awi.utilities.getFileArrayFromTree( answer.data );
@@ -176,7 +176,7 @@ class Config
 	}
 	async loadConfig( type, callback )
 	{
-		var { originalType, type } = this.getConfigTypes( type )			
+		var { originalType, type } = this.getConfigTypes( type )
 		if ( !this.configs[ type ] && this.awi && this.awi.utilities )
 		{
 			var answer = await this.awi.utilities.loadHJSON( this.getConfigurationPath() + '/' + type + '.hjson' );
@@ -197,7 +197,7 @@ class Config
 							result: '.: ',
 							root: '.....',
 							question: '.? ',
-							information: '.! ',
+							information: '.(oo) ',
 							command: '.> ',
 							warning: '.warning: ',
 							error: '.error: ',
@@ -209,67 +209,67 @@ class Config
 							verbose2: '. ',
 							verbose3: '. ',
 						},
-						configs: 
+						configs:
 						{
 							win32:
 							{
 								paths:
 								{
-									image: { 
-										libraries: [ 'D:/Pictures' ], 
-										view: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
-										edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
-										run: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
-										filters: [ '*.png', '*.jpg', '*.jpeg', '*.gif', '*.psd' ] 
+									image: {
+										libraries: [ 'D:/Pictures' ],
+										view: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+										edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+										run: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+										filters: [ '*.png', '*.jpg', '*.jpeg', '*.gif', '*.psd' ]
 									},
-									video: { 
-										libraries: [ 'D:/Videos' ], 
-										view: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
-										edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
-										run: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
-										filters: [ '*.mp4', '*.avi', '*.mpeg', '*.ogg' ] 
+									video: {
+										libraries: [ 'D:/Videos' ],
+										view: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+										edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+										run: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+										filters: [ '*.mp4', '*.avi', '*.mpeg', '*.ogg' ]
 									},
-									audio: { 
-										libraries: [ 'D:/Music' ], 
-										view: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
-										edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
-										run: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
-										filters: [ '*.mp3', '*.wav', '*.ogg' ] 
+									audio: {
+										libraries: [ 'D:/Music' ],
+										view: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+										edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+										run: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+										filters: [ '*.mp3', '*.wav', '*.ogg' ]
 									},
-									document: { 
-										libraries: [ 'D:/Documents' ], 
-										view: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
-										edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
-										run: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
-										filters: [ '*.txt', '*.pdf', '*.docx', '*.doc', '*.xls', '*.xsls', '*.ppt', '*.odf' ] 
+									document: {
+										libraries: [ 'D:/Documents' ],
+										view: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+										edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+										run: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+										filters: [ '*.txt', '*.pdf', '*.docx', '*.doc', '*.xls', '*.xsls', '*.ppt', '*.odf' ]
 									},
-									source: { 
-										libraries: [ 'C:/Awi', 'C:/AOZ_Studio' ], 
-										view: { command: 'code "{file}"', cwd: '', type: 'exec' }, 
-										edit: { command: 'code "{file}"', cwd: '', type: 'exec' }, 
-										run: { command: 'code "{file}"', cwd: '', type: 'exec' }, 
-										filters: [ '*.js', '*.c', '*.cpp', '*.h', '*.hh', '*.py' ] 
+									source: {
+										libraries: [ 'C:/Awi', 'C:/AOZ_Studio' ],
+										view: { command: 'code "{file}"', cwd: '', type: 'exec' },
+										edit: { command: 'code "{file}"', cwd: '', type: 'exec' },
+										run: { command: 'code "{file}"', cwd: '', type: 'exec' },
+										filters: [ '*.js', '*.c', '*.cpp', '*.h', '*.hh', '*.py' ]
 									},
-									html: { 
-										libraries: [], 
-										view: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
-										edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
-										run: { command: 'explorer "{file}"', cwd: '', type: 'exec' }, 
-										filters: [ '*.html' ] 
+									html: {
+										libraries: [],
+										view: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+										edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+										run: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+										filters: [ '*.html' ]
 									},
-									executable: { 
-										libraries: [ 'C:/Program Files', 'C:/Program Files (x86)'], 
-										view: { command: 'start {file}', cwd: '"{dir}"', type: 'exec' }, 
-										edit: { command: 'start {file}', cwd: '"{dir}"', type: 'exec' }, 
-										run: { command: 'start {file}', cwd: '"{dir}"', type: 'exec' }, 
-										filters: [ '*.exe' ] 
+									executable: {
+										libraries: [ 'C:/Program Files', 'C:/Program Files (x86)'],
+										view: { command: 'start {file}', cwd: '"{dir}"', type: 'exec' },
+										edit: { command: 'start {file}', cwd: '"{dir}"', type: 'exec' },
+										run: { command: 'start {file}', cwd: '"{dir}"', type: 'exec' },
+										filters: [ '*.exe' ]
 									},
-									any: { 
-										libraries: [], 
-										view: { command: 'explorer {file}', cwd: '', type: 'exec' }, 
-										edit: { command: 'explorer {file}', cwd: '', type: 'exec' }, 
-										run: { command: 'explorer {file}', cwd: '', type: 'exec' }, 
-										filters: [ '*.*' ] 
+									any: {
+										libraries: [],
+										view: { command: 'explorer {file}', cwd: '', type: 'exec' },
+										edit: { command: 'explorer {file}', cwd: '', type: 'exec' },
+										run: { command: 'explorer {file}', cwd: '', type: 'exec' },
+										filters: [ '*.*' ]
 									}
 								}
 							},
@@ -287,39 +287,35 @@ class Config
 						lastName: '',
 						fullName: '',
 						personality: 'awi',
-						paths: 
-						{ 
-							aoz: 'C:/AOZ_Studio' 
+						paths:
+						{
+							aoz: 'C:/AOZ_Studio'
 						},
 						directConnection: true,
 						localServer: true,
 						aiKey: '',				// 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
 						isDegree: true,
 						fix: 3,
-						connectors: [ 'aoz', 'node', 'commandline' ],
-						editor: 'commandline',
-						language: 'aoz',
-						system: 'node',
 						debug: 0,
 						developperMode: true,
 						verbose: 1,
 						justify: 160,
-						verbosePrompts: 
+						verbosePrompts:
 						{
 							verbose1: [ 'importer1', 'memory1' ],
 							verbose2: [ 'importer2', 'memory2' ],
 							verbose3: [ 'importer3', 'memory3' ]
 						},
-						debugPrompts: 
+						debugPrompts:
 						{
 							debug1: [ 'prompt' ],
 							debug2: [ 'completion' ],
 							debug3: [ 'all' ]
 						},
-						takeNote: 
-						[ 
+						takeNote:
+						[
 							'Please take note: you are talking to {firstName}.',
-							'\nNot more than 50 words in any response.' 
+							'\nNot more than 50 words in any response.'
 						],
 					};
 					break;
@@ -329,11 +325,11 @@ class Config
 						name: 'Awi',
 						character: 'awi',
 						animations: false,
-						mood: 'a fun and competent style',
+						mood: 'with inpiring comments',
 						youAre: 'a great programmer',
 						whoUses: 'who is fluent in',
-						theProduct: 'AOZ Studio',
-						useTheProduct: 'refer to AOZ Basic and eventually Javascript',
+						theProduct: 'Javascript and node.js',
+						useTheProduct: 'refer to Javascript',
 						toDoSomething: 'for code and explanations.',
 						youLove: [ 'coding', 'making games', 'learning' ],
 						youLike: [ 'creativity', 'music', ],
@@ -388,7 +384,7 @@ class Config
 			if ( level > 0 && level <= 3 )
 			{
 				if ( level <= userConfig.debug )
-				{ 
+				{
 					return this.configs[ 'system' ].prompts[ type ];
 				}
 			}
@@ -400,20 +396,20 @@ class Config
 				return prompt;
 			return null;
 		}
-	
+
 		// Try main prompts
-		var config = this.configs[ 'personality-' + this.user ];
+		var userConfig = this.configs[ this.user ];
+		var config = this.configs[ 'personality-' + userConfig.personality ];
 		if ( config && config.prompts[ type ] )
 			return config.prompts[ type ];
-		
-		var userConfig = this.configs[ this.user ];
+
 		if ( !this.configs[ type ] )
 		{
 			for ( var v = userConfig.verbose; v >= 1; v-- )
 			{
-				var found = userConfig.verbosePrompts[ 'verbose' + v ].find( 
+				var found = userConfig.verbosePrompts[ 'verbose' + v ].find(
 					function( element )
-					{								
+					{
 						return element == type;
 					} );
 				if ( found )
@@ -422,9 +418,9 @@ class Config
 
 			if ( userConfig.debug > 0 )
 			{
-				var found = userConfig.debugPrompts[ 'debug' + userConfig.debug ].find( 
+				var found = userConfig.debugPrompts[ 'debug' + userConfig.debug ].find(
 					function( element )
-					{								
+					{
 						return element == 'all' || element == type;
 					} );
 				if ( found )
@@ -446,7 +442,7 @@ class Config
 			if ( type == '' )
 				type = 'user-default';
 		}
-		else if ( type == 'personality' )	
+		else if ( type == 'personality' )
 		{
 			if ( this.configs[ this.user ] )
 				type = 'personality-' + this.configs[ this.user ].personality;
@@ -458,8 +454,8 @@ class Config
 	}
 	getPersonality( name )
 	{
-		if ( !name )		
-			name = this.user;
+		if ( typeof name == 'undefined' || !name )
+			name = this.configs[ this.user ].personality;
 		return this.getConfig( 'personality-' + name );
 	}
 	getUserKey()
@@ -513,7 +509,7 @@ class Config
 	{
 		if ( value === false || value === true )
 			return value;
-		
+
 		var fix = this.getConfig( 'user' ).fix;
 		var decimalPart = value - Math.floor( value );
 		var result;
@@ -524,7 +520,7 @@ class Config
 			result = value.toFixed( fix );
 		else
 			result = value.toExponential( -fix );
-	
+
 		// Fix -0.00 problem...
 		if ( result.substring( 0, 3 ) == '-0.' )
 		{

@@ -19,9 +19,9 @@
 * @short Runacc command: run an accessory in the current editor if it contains
 *        accessories
 */
-var awibubbles = require( '../awi-bubbles' )
+var awibubble = require( '../awi-bubble' )
 
-class BubbleGenericRunacc extends awibubbles.Bubble
+class BubbleGenericRunacc extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{

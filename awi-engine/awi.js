@@ -4,9 +4,9 @@
 *          / _ \              (°°)       Intelligent
 *        / ___ \ [ \ [ \ [  ][   ]       Programmable
 *     _/ /   \ \_\ \/\ \/ /  |  | \      Personal Assistant
-* (_)|____| |____|\__/\__/ [_| |_] \     link: 
+* (_)|____| |____|\__/\__/ [_| |_] \     link:
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -54,9 +54,9 @@ class Awi
 	async connect( options )
 	{
 		var answers = {};
-			
+
 		if ( typeof this.systemConfig.engine != 'string' )
-		{			
+		{
 			var files = this.systemConfig.engine;
 
 			// Start connectors... System must be first.
@@ -105,7 +105,7 @@ class Awi
 								name = files[ f ].substring( files[ f ].lastIndexOf( '-' ) + 1 );
 								if ( !this.connectors[ classname ] || !this.connectors[ classname ][ name ] )
 								{
-									//var exports = window.awi[ classname ]; 	
+									//var exports = window.awi[ classname ];
 									var exports = window.awi[ 'awi-connector-' + classname + '-' + name ];
 									this.connectors[ classname ] = ( typeof this.connectors[ classname ] == 'undefined' ? {} : this.connectors[ classname ] );
 									this.connectors[ classname ][ name ] = new exports.Connector( this, {} );
@@ -117,7 +117,7 @@ class Awi
 									done = true;
 								}
 							}
-						}	
+						}
 					} while( done )
 				}
 			}
@@ -169,7 +169,7 @@ class Awi
 				}
 			}
 		}
-		else 
+		else
 		{
 			// Start connectors... System must be first.
 			for ( var c = 0; c < this.systemConfig.connectors.length; c++ )
@@ -207,7 +207,7 @@ class Awi
 				var filter = connector.name.substring( dot + 1 );
 				if ( filter.indexOf( '*' ) >= 0 || filter.indexOf( '?' ) >= 0 )
 				{
-					var answer = await this.system.getDirectory( this.config.getEnginePath() + '/connectors/' + classname, { recursive: true, filters: [ '*.js' ] } );					
+					var answer = await this.system.getDirectory( this.config.getEnginePath() + '/connectors/' + classname, { recursive: true, filters: [ '*.js' ] } );
 					var files = this.utilities.getFileArrayFromTree( answer.data );
 					for ( var f = 0; f < files.length; f++ )
 					{
@@ -225,7 +225,7 @@ class Awi
 						var answer = await instance.connect( connector.options );
 						answers[ cName ] = typeof answers[ answer.data.classname ] == 'undefined' ? [] : answers[ answer.data.classname ];
 						answers[ cName ] = { success: answer.success, data: answer.data };
-					}	
+					}
 				}
 			}
 
@@ -242,7 +242,7 @@ class Awi
 				var classpos = name.lastIndexOf( '-', namepos - 1 );
 				var classname = name.substring( classpos + 1, namepos );
 				name = name.substring( namepos + 1 );
-				var found = classList.find( 
+				var found = classList.find(
 					function( element )
 					{
 						return element == classname;
@@ -250,10 +250,10 @@ class Awi
 				)
 				if ( found )
 				{
-				this.bubbles[ classname ] = ( typeof this.bubbles[ classname ] == 'undefined' ? {} : this.bubbles[ classname ] );
+					this.bubbles[ classname ] = ( typeof this.bubbles[ classname ] == 'undefined' ? {} : this.bubbles[ classname ] );
 					this.bubbles[ classname ][ name ] = new exports.Bubble( this, { key: this.utilities.getUniqueIdentifier( {}, name, f ), parent: '' } );
-				this.newBubbles[ classname ] = ( typeof this.newBubbles[ classname ] == 'undefined' ? {} : this.newBubbles[ classname ] );
-				this.newBubbles[ classname ][ name ] = exports.Bubble;
+					this.newBubbles[ classname ] = ( typeof this.newBubbles[ classname ] == 'undefined' ? {} : this.newBubbles[ classname ] );
+					this.newBubbles[ classname ][ name ] = exports.Bubble;
 				}
 			}
 
@@ -303,7 +303,7 @@ class Awi
 		// Is everyone connected?
 		this.connected = true;
 		for ( var d in answers )
-		{ 
+		{
 			for ( var dd = 0; dd < answers[ d ].length; dd++ )
 			{
 				if ( !answers[ d ][ dd ].success )
@@ -372,7 +372,7 @@ class Awi
 				newText += text[ t ] + '\n';
 		}
 		text = newText;
-		
+
 		// Remove names at start of line.
 		var personality = this.getPersonality();
 		var user = this.getConfig( 'user' );
@@ -394,7 +394,7 @@ class Awi
 			this.editor.print( this, message.split( '\n' ), { user: 'systemwarning' } );
 	}
 	async prompt( prompt, data, control )
-	{	
+	{
 		var callback = control.callback;
 		var extra = control.extra;
 		control.callback = null;
@@ -422,7 +422,7 @@ class Awi
 		//var path = this.config.getConfigurationPath() + '/' + user + '-';
 		//return await this.system.writeFile( path + 'conversations.js', conversations, { encoding: 'utf8' } );
 	}
-	async load( user )
+	async loadUser( user )
 	{
 		user = typeof user == 'undefined' ? this.config.user : user;
 
@@ -434,22 +434,22 @@ class Awi
 		var conversations;
 		answer = await this.system.exists( path + 'conversations.js' );
 		if ( answer.success )
-			{
+		{
 			answer = await this.system.readFile( path + 'conversations.js', { encoding: 'utf8' } );
 			if ( answer.success )
-		{
-				conversations = answer.data;
-			try
 			{
-				conversations = Function( conversations );
-				conversations = conversations();
+				conversations = answer.data;
+				try
+				{
+					conversations = Function( conversations );
+					conversations = conversations();
 					this.utilities.serializeIn( conversations.root, {} );
 					return { success: true };
+				}
+				catch( e )
+				{
+				}
 			}
-			catch( e )
-			{
-			}
-		}
 			return { success: false, error: 'awi:cannot-load-conversations:iwa' };
 		}
 		return { success: true };
@@ -560,7 +560,7 @@ class Awi
 				break;
 		}
 		if ( directExtracted || indirectExtracted )
-			return { success: 'found', data: { directExtracted: directExtracted, indirectExtracted: indirectExtracted } };v
+			return { success: 'found', data: { directExtracted: directExtracted, indirectExtracted: indirectExtracted } };
 		return { success: 'notfound', data: { directExtracted: '', indirectExtracted: '' } };
 	}
 }

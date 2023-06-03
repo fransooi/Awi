@@ -1,3 +1,7 @@
+20230603 Saving of personality and memories
+20230603 Class Branch now really derived from Bubble
+20230603 Class Bulb now called "Branch"
+
 20230527 loadJavascript in utilities to load external utilities
 20230527 new "Debug" bubble
 20230527 final debugging of serialization

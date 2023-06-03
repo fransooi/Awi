@@ -4,9 +4,9 @@
 *          / _ \              (°°)       Intelligent
 *        / ___ \ [ \ [ \ [  ][   ]       Programmable
 *     _/ /   \ \_\ \/\ \/ /  |  | \      Personal Assistant
-* (_)|____| |____|\__/\__/ [_| |_] \     link: 
+* (_)|____| |____|\__/\__/ [_| |_] \     link:
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -19,7 +19,7 @@
 * @short Handle a prompt in the current editor
 *
 */
-var awibulbs = require( './bubbles/awi-bulbs' );
+var awibranch = require( './bubbles/awi-branch' );
 
 class Prompt
 {
@@ -28,7 +28,6 @@ class Prompt
 		this.awi = awi;
 		this.oClass = 'prompt';
 		this.connector = awi.connectors.editors.current;
-		this.personality = typeof options.personality != 'undefined' ? options.personality : 'awi';
 		this.playing = false;
 		this.viewing = false;
 		this.lineActivated = false;
@@ -43,30 +42,30 @@ class Prompt
 		this.promptThis = this;
 		this.questionCount = 1;
 
-		this.types = 
+		this.types =
 		{
-			png: { importTo: [ '/resources/1.images', '/resources/images', '/resources/1.Images', '/resources/Images' ], displayName: 'images' },  
-			jpg: { importTo: [ '/resources/1.images', '/resources/images', '/resources/1.Images', '/resources/Images' ], displayName: 'images' },  
-			jpeg: { importTo: [ '/resources/1.images', '/resources/images', '/resources/1.Images', '/resources/Images' ], displayName: 'images' },  
-			mp3: { importTo: [ '/resources/5.samples', '/resources/5.sounds', '/resources/5.Samples', '/resources/5.Sounds', '/resources/Sounds', '/resources/Samples' ], displayName: 'sounds' }, 
-			wav: { importTo: [ '/resources/5.samples', '/resources/5.sounds', '/resources/5.Samples', '/resources/5.Sounds', '/resources/Sounds', '/resources/Samples' ], displayName: 'sounds' }, 
+			png: { importTo: [ '/resources/1.images', '/resources/images', '/resources/1.Images', '/resources/Images' ], displayName: 'images' },
+			jpg: { importTo: [ '/resources/1.images', '/resources/images', '/resources/1.Images', '/resources/Images' ], displayName: 'images' },
+			jpeg: { importTo: [ '/resources/1.images', '/resources/images', '/resources/1.Images', '/resources/Images' ], displayName: 'images' },
+			mp3: { importTo: [ '/resources/5.samples', '/resources/5.sounds', '/resources/5.Samples', '/resources/5.Sounds', '/resources/Sounds', '/resources/Samples' ], displayName: 'sounds' },
+			wav: { importTo: [ '/resources/5.samples', '/resources/5.sounds', '/resources/5.Samples', '/resources/5.Sounds', '/resources/Sounds', '/resources/Samples' ], displayName: 'sounds' },
 			mp4: { importTo: [ '/resources/assets', '/resources/Assets' ], displayName: 'assets' },
 			_assets_: { importTo: [ '/resources/assets' ], displayName: 'assets' }
-		}				 
-		this.animations = 
+		}
+		this.animations =
 		{
-			awi: 		
+			awi:
 			{
 				type: 'oneline',
 				anims:
 				{
-					thinking: 
+					thinking:
 					{
 						speed: 5,
 						loop: -1,
 						definition: [ '(...)' ]
-					},					
-					neutral: 
+					},
+					neutral:
 					{
 						speed: 3,
 						loop: -1,
@@ -90,7 +89,7 @@ class Prompt
 						loop: -1,
 						definition: [ '(??)' ]
 					},
-					waiting: 
+					waiting:
 					{
 						speed: 4,
 						loop: -1,
@@ -98,22 +97,22 @@ class Prompt
 						cling: 5,
 						definition: [ '(.)', '(..)', '(...)', '(..)' ]
 					},
-					winkLeft: 
+					winkLeft:
 					{
 						speed: 1,
 						loop: 1,
 						definition: [ '(-°)' ]
 					},
-					winkRight: 
+					winkRight:
 					{
 						speed: 1,
 						loop: 1,
 						definition: [ '(°-)' ]
 					},
 				}
-			}	
+			}
 		}
-		this.bulb = new awibulbs.Bulb( this.awi, { parent: 'prompt' } )
+		this.branch = new awibranch.Branch( this.awi, { parent: 'prompt' } )
 	}
 	async play( line, data, control )
 	{
@@ -125,9 +124,9 @@ class Prompt
 	}
 	async prompt( line, data, control )
 	{
-		if ( this.bulb.working || this.noCommand )
+		if ( this.branch.working || this.noCommand )
 		 	return;
-		
+
 		if ( !this.promptOn )
 		{
 			this.promptOn = true;
@@ -146,7 +145,7 @@ class Prompt
 				line += line2;
 				this.connector.deleteLine( control.range.start.row + 1 );
 				this.connector.setLine( control.range.start.row, line );
-			}				
+			}
 			this.connector.decorateLine( control.range.start.row, 'user' );
 		}
 
@@ -179,15 +178,15 @@ class Prompt
 				{
 					var answer = await this.awi.config.setUser( userName );
 					if ( answer.success )
-					{						
-						answer = await this.awi.load( userName );
+					{
+						answer = await this.awi.loadUser( userName );
 						if ( answer.success )
 						{
-						logged = true;
-							line = '';//'Please say hello to ' + userName + ' with a short joke...';
-						this.awi.editor.print( this, 'User changed to ' + userName + '\n', { user: 'information' } );
-					}
-					else
+							logged = true;
+							line = 'Please say hello to ' + userName + ' with a short joke about programming...';
+							this.awi.editor.print( this, 'User changed to ' + userName + '\n', { user: 'information' } );
+						}
+						else
 							this.awi.editor.print( this, 'Cannot load memories...\n', { user: 'error' } );
 					}
 					else
@@ -199,7 +198,7 @@ class Prompt
 				var list = this.awi.config.getUserList();
 				if ( list.length == 0 )
 				{
-					line = 'PlayWelcome';
+					line = 'Welcome';
 				}
 				else
 				{
@@ -219,17 +218,17 @@ class Prompt
 		}
 
 		// A normal bubble...
-		line = this.bulb.addBubbleFromLine( line, {} );
+		line = this.branch.addBubbleFromLine( line, {} );
 		control.start = 'current';
 		control.questionCount = this.questionCount++;
-		var answer = await this.bulb.play( line, data, control );
+		var answer = await this.branch.play( line, data, control );
 		control.questionCount = undefined;
-			if ( answer.success && answer.data == 'noprompt' )
-				this.awi.editor.waitForInput( '' );
-			else
-				this.awi.editor.waitForInput( this.awi.config.getPrompt( 'user' ) );
-			return answer;
-		}
+		if ( answer.success && answer.data == 'noprompt' )
+			this.awi.editor.waitForInput( '' );
+		else
+			this.awi.editor.waitForInput( this.awi.config.getPrompt( 'user' ) );
+		return answer;
+	}
 	async getParameters( parameters, data, control = {} )
 	{
 		var data = {};
@@ -237,7 +236,7 @@ class Prompt
 		var answer = { success: true, data: {} };
 		for ( var p = 0 ; p < parameters.length; p++ )
 		{
-			var bubble = this.bulb.newBubble( { token: 'input', classname: 'generic', parent: 'prompt', parameters: {} }, [], control );
+			var bubble = this.branch.newBubble( { token: 'input', classname: 'generic', parent: 'prompt', parameters: {} }, [], control );
 			var parameter = { inputInfo: this.awi.utilities.getBubbleParams( parameters[ p ] ) };
 			answer = await bubble.play( '', parameter, control );
 			if ( !answer.success )
@@ -263,7 +262,7 @@ class Prompt
 			if ( this.handleNoCommand )
 			{
 				clearInterval( self.handleNoCommand );
-				this.handleNoCommand = null;				
+				this.handleNoCommand = null;
 			}
 			this.noCommand = true;
 			this.handleNoCommand = setTimeout( function()
@@ -328,7 +327,7 @@ class Prompt
 	{
 		return this.editorConnector.viewFile( file.path, options );
 	}
-	
+
 
 	// Comment selected code
 	commentSelectedCode( source )
@@ -355,7 +354,7 @@ class Prompt
 				this.editorConnector.extractTokens( source, {}, function( response, tokens )
 				{
 					if ( response )
-					{						
+					{
 						var source = saveSource.split( '\r\n' ).join( '\n' ).split( '\n' );
 
 						// Remove comments and empty lines...
@@ -376,7 +375,7 @@ class Prompt
 						}
 
 						// Generate prompt
-						var prompt = this.awi.utilities.format( self.awiManager.getPrompt( 'ai-comment-code-prompt' ), 
+						var prompt = this.awi.utilities.format( self.awiManager.getPrompt( 'ai-comment-code-prompt' ),
 						{
 							name: this.awi.getConfig( 'user' ).awiMame,
 							mood: this.awi.getConfig( 'user' ).awiMood,
@@ -391,7 +390,7 @@ class Prompt
 							{
 								var result = data.data.data.choices[ 0 ].text.trim();
 
-								// Parse results and create the remarks								
+								// Parse results and create the remarks
 								var temp = result.split( '\n' );
 								result = [];
 								for ( var l = 0; l < temp.length; l++ )
@@ -421,7 +420,7 @@ class Prompt
 										plus = plus.substring( 1 ).trim();
 
 									// Count the tabs of original source
-									var tab = 0;									
+									var tab = 0;
 									var code = lines[ l ];
 									for ( var p = 0; p < code.length; p++ )
 									{

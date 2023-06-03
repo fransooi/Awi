@@ -3,10 +3,10 @@
 *            / \
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
-*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
+*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal
 * (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -19,10 +19,10 @@
 * @short Code command: create a javascript function
 *
 */
-var awibubbles = require( '../awi-bubbles' )
+var awibubble = require( '../awi-bubble' )
 var awimessages = require( '../../awi-messages' )
 
-class BubbleJavascriptCode extends awibubbles.Bubble
+class BubbleJavascriptCode extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{
@@ -31,7 +31,7 @@ class BubbleJavascriptCode extends awibubbles.Bubble
 		this.token = 'code';
 		this.classname = 'javascript';
 		this.properties.action = 'writes an Aoz Basic procedure';
-		this.properties.inputs = [ 
+		this.properties.inputs = [
 			{ codeName: 'the name of the procedure to create, the name should be meaningful.', type: 'string', clear: true },
 			{ codeParameters: 'the list of parameters with meaningful names, separated by commas. If your function needs a callback, add it at the end...', type: 'string', clear: true },
 			{ codeSteps: 'the various tasks the procedure should do, one per line.\nStay simple, in order not too many details...\nEmpty line to quit.', type: 'array.string', clear: true },
@@ -59,7 +59,7 @@ class BubbleJavascriptCode extends awibubbles.Bubble
 		{
 			if ( params.codeCallback )
 				params += 'callback';
-			else				
+			else
 				params = 'there is no parameters.';
 		}
 		else if ( params.codeCallback )

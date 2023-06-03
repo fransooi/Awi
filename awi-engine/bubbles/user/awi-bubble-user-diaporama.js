@@ -3,10 +3,10 @@
 *            / \
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
-*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
+*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal
 * (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -19,9 +19,9 @@
 * @short Bin command: convert to binary
 *
 */
-var awibubbles = require( '../awi-bubbles' )
+var awibubble = require( '../awi-bubble' )
 
-class BubbleUserDiaporama extends awibubbles.Bubble
+class BubbleUserDiaporama extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{
@@ -37,11 +37,11 @@ class BubbleUserDiaporama extends awibubbles.Bubble
 	}
 	async play( line, parameters, control )
 	{
-		return await super.play( line, parameters, control );		
+		return await super.play( line, parameters, control );
 	}
 	async playback( line, parameters, control )
 	{
-		return await super.playback( line, parameters, control );		
+		return await super.playback( line, parameters, control );
 	}
 	async transpile( line, data, control )
 	{

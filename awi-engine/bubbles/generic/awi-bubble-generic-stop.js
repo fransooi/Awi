@@ -19,9 +19,9 @@
 * @short Stop command: stop a media playing in the current editor
 *
 */
-var awibubbles = require( '../awi-bubbles' );
+var awibubble = require( '../awi-bubble' );
 
-class BubbleGenericStop extends awibubbles.Bubble
+class BubbleGenericStop extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{

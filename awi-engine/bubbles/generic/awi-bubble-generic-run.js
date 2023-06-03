@@ -19,9 +19,9 @@
 * @short Run command: run an executable in the current system connector
 *
 */
-var awibubbles = require( '../awi-bubbles' )
+var awibubble = require( '../awi-bubble' )
 
-class BubbleGenericRun extends awibubbles.Bubble
+class BubbleGenericRun extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{
@@ -41,7 +41,7 @@ class BubbleGenericRun extends awibubbles.Bubble
 		await super.play( line, parameters, control );
 		if ( /^\d+$/.test( parameters.userInput ) )
 		{
-			var files = this.bulb.getLastData( this, 'fileList' );
+			var files = this.branch.getLastData( this, 'fileList' );
 			if ( files && files.length > 0 )
 			{
 				var number = parseInt( parameters.userInput ) - 1;

@@ -19,9 +19,9 @@
 * @short Bin command: convert to binary
 *
 */
-var awibubbles = require( '../awi-bubbles' )
+var awibubble = require( '../awi-bubble' )
 
-class BubbleGenericBin extends awibubbles.Bubble
+class BubbleGenericBin extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{

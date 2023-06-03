@@ -19,9 +19,9 @@
 * @short Help command: provides help about the awi-engine
 *
 */
-var awibubbles = require( '../awi-bubbles' );
+var awibubble = require( '../awi-bubble' );
 
-class BubbleGenericHelp extends awibubbles.Bubble
+class BubbleGenericHelp extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{

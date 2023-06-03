@@ -16,7 +16,7 @@
 * @date first pushed on 10/11/2019
 * @version 0.2
 *
-* @short Video memory bulb
+* @short Video memory branch
 *
 */
 var awimemory = require( '../awi-memory' );
@@ -67,11 +67,11 @@ class MemoryGenericAudios extends awimemory.Memory
 			this.awi.editor.print( this, 'Audio file: ' + content.audioInfo.path, { user: 'memory2' } );
 			this.awi.editor.print( this, 'Recorded on the: ' + content.audioInfo.date.text, { user: 'memory2' } );
 			this.awi.editor.print( this, '', { user: 'memory2' } );
-					}
+		}
 		return answer;
-			}
+	}
 	async playback( line, parameter, control )
-				{
+	{
 		super.playback( line, parameter, control );
 	}
 }

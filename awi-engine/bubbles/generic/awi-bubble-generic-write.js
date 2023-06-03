@@ -19,10 +19,10 @@
 * @short Code command: create code in the current language connector
 *
 */
-var awibubbles = require( '../awi-bubbles' )
+var awibubble = require( '../awi-bubble' )
 var awimessages = require( '../../awi-messages' )
 
-class BubbleGenericWrite extends awibubbles.Bubble
+class BubbleGenericWrite extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{

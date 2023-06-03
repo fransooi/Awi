@@ -19,9 +19,9 @@
 * @short Welcome: displays welcome message, always called first. Can display nothing.
 *        Can display animations, can depend on mood/news etc.
 */
-var awibubbles = require( '../awi-bubbles' );
+var awibubble = require( '../awi-bubble' );
 
-class BubbleGenericWelcome extends awibubbles.Bubble
+class BubbleGenericWelcome extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{

@@ -19,9 +19,9 @@
 * @short Hex command: convert to hexadecimal
 *
 */
-var awibubbles = require( '../awi-bubbles' )
+var awibubble = require( '../awi-bubble' )
 
-class BubbleGenericHex extends awibubbles.Bubble
+class BubbleGenericHex extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{

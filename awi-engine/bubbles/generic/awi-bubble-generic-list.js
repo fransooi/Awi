@@ -19,9 +19,9 @@
 * @short Find command: find files in the registered users directories
 *
 */
-var awibubbles = require( '../awi-bubbles' )
+var awibubble = require( '../awi-bubble' )
 
-class BubbleGenericList extends awibubbles.Bubble
+class BubbleGenericList extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{

@@ -19,9 +19,9 @@
 * @short Quit: save conversations and memories and quits Awi.
 *
 */
-var awibubbles = require( '../awi-bubbles' )
+var awibubble = require( '../awi-bubble' )
 
-class BubbleGenericQuit extends awibubbles.Bubble
+class BubbleGenericQuit extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{

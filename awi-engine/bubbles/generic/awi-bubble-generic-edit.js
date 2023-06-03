@@ -19,9 +19,9 @@
 * @short Play command: play a media file in the current editor
 *
 */
-var awibubbles = require( '../awi-bubbles' );
+var awibubble = require( '../awi-bubble' );
 
-class BubbleGenericEdit extends awibubbles.Bubble
+class BubbleGenericEdit extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{
@@ -40,7 +40,7 @@ class BubbleGenericEdit extends awibubbles.Bubble
 		await super.play( line, parameters, control );
 		if ( /^\d+$/.test( parameters.userInput ) )
 		{
-			var files = this.bulb.getLastData( this, 'fileList' );
+			var files = this.branch.getLastData( this, 'fileList' );
 			if ( files && fileList.length > 0 )
 			{
 				var number = parseInt( parameters.userInput ) - 1;

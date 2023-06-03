@@ -16,7 +16,7 @@
 * @date first pushed on 10/11/2019
 * @version 0.2
 *
-* @short Messenger memory bulb
+* @short Messenger memory branch
 *
 */
 var awimemory = require( '../awi-memory' );
@@ -48,9 +48,9 @@ class MemoryGenericMessenger extends awimemory.Memory
 	}
 	async getContent( line, parameters, control )
 	{
-			var souvenir = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
+		var souvenir = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
 		if ( souvenir )
-			{
+		{
 			this.awi.editor.print( this, 'Conversation between ' + souvenir.parameters.senderName + ' and ' + souvenir.parameters.receiverName + ',', { user: 'memory2' } );
 			this.awi.editor.print( this, 'On the ' + souvenir.parameters.date, { user: 'memory2' } );
 		}
@@ -59,9 +59,9 @@ class MemoryGenericMessenger extends awimemory.Memory
 	async findSouvenirs( line, parameters, control )
 	{
 		return await super.findSouvenirs( line, parameters, control );
-		}
+	}
 	async playback( line, parameter, control )
-		{
+	{
 		super.playback( line, parameter, control );
 	}
 }

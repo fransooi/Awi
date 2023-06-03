@@ -4,9 +4,9 @@
 *          / _ \              (°°)       Intelligent
 *        / ___ \ [ \ [ \ [  ][   ]       Programmable
 *     _/ /   \ \_\ \/\ \/ /  |  | \      Personal Assistant
-* (_)|____| |____|\__/\__/ [_| |_] \     link: 
+* (_)|____| |____|\__/\__/ [_| |_] \     link:
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -16,12 +16,12 @@
 * @date first pushed on 10/11/2019
 * @version 0.2
 *
-* @short Memory bulb
+* @short Memory branch
 *
 */
-var awibulbs = require( '../bubbles/awi-bulbs' )
+var awibranch = require( '../bubbles/awi-branch' )
 
-class Memory extends awibulbs.Bulb
+class Memory extends awibranch.Branch
 {
 	constructor( awi, options = {} )
 	{
@@ -33,7 +33,7 @@ class Memory extends awibulbs.Bulb
 		this.classname = 'memory';
 		this.oClass = 'memory';
 		this.bubbleHash = {};
-		}
+	}
 	async play( line, parameters, control, nested )
 	{
 		return parameters;
@@ -58,47 +58,47 @@ class Memory extends awibulbs.Bulb
 		return { success: 'notfound' };
 	}
 	async getContent( line, parameters, control )
-		{
+	{
 		var content = [];
 		var souvenir = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
 		while ( souvenir )
-			{
+		{
 			var answer = await souvenir.getContent( line, parameters, control );
 			if ( answer.success )
 				content.push( answer.data );
 			souvenir = this.getBubble( souvenir.properties.exits[ 'success' ] );
-			}
+		}
 		if ( content.length )
 			return { success: 'found', content: content };
 		return { success: 'notfound' };
-		}
+	}
 	async findSouvenirs( line, parameters, control )
-		{
+	{
 		var directSouvenirs = [];
 		var indirectSouvenirs = [];
 		var souvenir = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
 		while( souvenir )
-			{
+		{
 			var info1 = this.awi.utilities.matchTwoStrings( souvenir.parameters.receiverName, line, { caseInsensitive: true } );
 			if ( info1.result >= 0.5 )
-				{
+			{
 				if ( parameters.senderName )
-					{
+				{
 					var info2 = this.awi.utilities.matchTwoStrings( souvenir.parameters.senderName, parameters.senderName, { caseInsensitive: true } );
 					if ( info2.result == 1 )
 						directSouvenirs.push( souvenir );
 				}
 				else
-						{
+				{
 					directSouvenirs.push( souvenir );
-						}
-					}
+				}
+			}
 			else
-						{
+			{
 				var answer = await souvenir.findSouvenirs( line, parameters, control );
 				if ( answer.success == 'found' )
 					indirectSouvenirs.push( souvenir );
-					}
+			}
 			souvenir = this.getBubble( souvenir.properties.exits[ 'success' ] );
 		} while ( souvenir );
 		var directContent = [];
@@ -121,11 +121,11 @@ class Memory extends awibulbs.Bulb
 					indirect: { souvenirs: indirectSouvenirs, content: indirectContent }
 				} };
 		return { success: 'notfound' };
-				}
+	}
 	addMemory( memory, control = {} )
 	{
 		return super.addBubble( memory, control );
-			}
+	}
 	addMemories( memories, parameters = {}, control = {} )
 	{
 		return super.addBubble( memories, parameters, control );

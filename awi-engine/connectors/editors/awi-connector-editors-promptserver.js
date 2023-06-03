@@ -3,15 +3,15 @@
 *            / \
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
-*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
+*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal
 * (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
 * ----------------------------------------------------------------------------
-* @file awi-connector-editors-aozruntime.js
+* @file awi-connector-editors-promptserver.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
 * @version 0.2
@@ -52,7 +52,7 @@ class ConnectorEditorPromptServer extends awiconnector.Connector
 //			{
 //				self.waitForInput( self.awi.config.getPrompt( 'user' ) );
 //			}, 1000 );
-			wsConnectionPending.on( 'message', 
+			wsConnectionPending.on( 'message',
 				function( json )
 				{
 					var message = JSON.parse( json );
@@ -77,7 +77,7 @@ class ConnectorEditorPromptServer extends awiconnector.Connector
 						}
 					}
 				} );
-			wsConnectionPending.on( 'close', 
+			wsConnectionPending.on( 'close',
 				function( reasonCode, description )
 				{
 					console.log( 'User disconnected.' );
@@ -88,7 +88,7 @@ class ConnectorEditorPromptServer extends awiconnector.Connector
 		this.connected = true;
 		this.connectAnswer.success = true;
 		return this.connectAnswer;
-	}	
+	}
 	async doConnect( message, connection )
 	{
 		if ( message.data.key && !this.connections[ message.key ] )
@@ -105,8 +105,8 @@ class ConnectorEditorPromptServer extends awiconnector.Connector
 			var response =
 			{
 				responseTo: 'connect',
-				data: 
-				{ 
+				data:
+				{
 					handle: handle
 				}
 			}
@@ -137,14 +137,14 @@ class ConnectorEditorPromptServer extends awiconnector.Connector
 	{
 		this.inputEnabled = false;
 	}
-	waitForInput( line ) 
+	waitForInput( line )
 	{
 		this.inputEnabled = true;
-			console.log( 'Waiting for input from ' + line );
-			var message = 
-			{
+		console.log( 'Waiting for input from ' + line );
+		var message =
+		{
 			type: 'waitForInput',
-			data: 
+			data:
 			{
 				text: line
 			}
@@ -152,7 +152,7 @@ class ConnectorEditorPromptServer extends awiconnector.Connector
 		if ( this.wsConnection )
 		{
 			var self = this;
-			setTimeout( 
+			setTimeout(
 				function()
 		{
 					self.wsConnection.send( JSON.stringify( message ) );
@@ -230,7 +230,7 @@ class ConnectorEditorPromptServer extends awiconnector.Connector
 			}
 			}
 			console.log( 'Sending response: ' + result );
-			this.wsConnection.send( JSON.stringify( response ) );	
+			this.wsConnection.send( JSON.stringify( response ) );
 		}
 	}
 	decorateLine( row, user )
@@ -295,7 +295,7 @@ class ConnectorEditorPromptServer extends awiconnector.Connector
 	}
 	setRow( row )
 	{
-	}	
+	}
 	moveUp( nTimes )
 	{
 	}

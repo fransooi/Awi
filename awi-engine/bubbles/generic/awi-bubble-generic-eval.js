@@ -19,9 +19,9 @@
 * @short Eval command: perform a calculation
 *
 */
-var awibubbles = require( '../awi-bubbles' )
+var awibubble = require( '../awi-bubble' )
 
-class BubbleGenericEval extends awibubbles.Bubble
+class BubbleGenericEval extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{

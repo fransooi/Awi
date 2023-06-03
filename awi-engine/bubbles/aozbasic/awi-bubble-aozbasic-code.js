@@ -3,10 +3,10 @@
 *            / \
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
-*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
+*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal
 * (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -19,10 +19,10 @@
 * @short Code command: create a javascript function
 *
 */
-var awibubbles = require( '../awi-bubbles' )
+var awibubble = require( '../awi-bubble' )
 var awimessages = require( '../../awi-messages' )
 
-class BubbleAozBasicCode extends awibubbles.Bubble
+class BubbleAozBasicCode extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{
@@ -31,7 +31,7 @@ class BubbleAozBasicCode extends awibubbles.Bubble
 		this.token = 'code';
 		this.classname = 'aozbasic';
 		this.properties.action = 'writes a javascript function';
-		this.properties.inputs = [ 
+		this.properties.inputs = [
 			{ codeName: 'the name of the procedure to create.\n The name should contain the function.', type: 'string', clear: true },
 			{ codeParameters: 'the list of parameters, separated by a comma.\n The name should indicate the content.', type: 'string', clear: true },
 			{ codeSteps: 'the various bubbles the procedure should do, one per line.\n Stay simple, in ordern not too many details...\nEmpty line to quit.', clear: true },
@@ -79,13 +79,13 @@ Now the code:
 		{
 			if ( parameters.codeCallback )
 				parameters += 'callback';
-			else				
+			else
 				parameters = 'there is no parameters.';
 		}
 		else if ( parameters.codeCallback )
 			parameters += ',callback';
 
-		var prompt = awimessages.generatePrompt( this.getEditable( 'prompt' ), 
+		var prompt = awimessages.generatePrompt( this.getEditable( 'prompt' ),
 		{
 			name: this.awi.getConfig( 'user' ).awiName,
 			mood: this.awi.getConfig( 'user' ).awiName,

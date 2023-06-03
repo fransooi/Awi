@@ -19,9 +19,9 @@
 * @short Debug command: manage debugging
 *
 */
-var awibubbles = require( '../awi-bubbles' )
+var awibubble = require( '../awi-bubble' )
 
-class BubbleGenericDebug extends awibubbles.Bubble
+class BubbleGenericDebug extends awibubble.Bubble
 {
 	constructor( awi, options = {} )
 	{

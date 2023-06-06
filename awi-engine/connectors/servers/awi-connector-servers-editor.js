@@ -94,6 +94,7 @@ class ConnectorServerEditor extends awiconnector.Connector
 			config: message.data.config,
 			toAsk: [],
 			resultText: [],
+			resultTextClean: [],
 			self: this,
 			awi: this };
 		this.editors[ handle ] = editor;
@@ -132,6 +133,46 @@ class ConnectorServerEditor extends awiconnector.Connector
 	async command_ask( editor, message )
 	{
 		editor.resultText = [];
+		editor.resultTextClean = [];
+		if ( editor.inputDisabled == 0 )
+		{
+			if ( editor.reroute )
+				editor.reroute( message.data.prompt, {}, { editor: editor } );
+			else
+				editor.awi.prompt.prompt( message.data.prompt, {}, { editor: editor } );
+		}
+		else
+		{
+			editor.toAsk.push( message );
+			if ( editor.toAsk.length == 1 )
+			{
+				editor.handleAsk = setInterval(
+					function()
+					{
+						if ( editor.inputDisabled == 0 )
+						{
+							if ( editor.toAsk.length > 0 )
+							{
+								var message = editor.toAsk.pop();
+								if ( editor.reroute )
+									editor.reroute( message.data.prompt, {}, { editor: editor } );
+								else
+									editor.awi.prompt.prompt( message.data.prompt, {}, { editor: editor } );
+							}
+							else
+							{
+								clearInterval( editor.handleAsk );
+								editor.handleAsk = null;
+							}
+						}
+					}, 100 );
+			}
+		}
+	}
+	async command_askAudio( editor, message )
+	{
+		editor.resultText = [];
+		editor.resultTextClean = [];
 		if ( editor.inputDisabled == 0 )
 		{
 			if ( editor.reroute )
@@ -180,7 +221,10 @@ class ConnectorServerEditor extends awiconnector.Connector
 			{
 				console.log( prompt + lines[ l ] );
 				if ( editor )
+				{
 					editor.resultText.push( prompt + lines[ l ] );
+					editor.resultTextClean.push( lines[ l ] );
+				}
 			}
 		}
 		for ( var t = 0; t < text.length; t++ )
@@ -192,7 +236,10 @@ class ConnectorServerEditor extends awiconnector.Connector
 			{
 				console.log( prompt + line );
 				if ( editor )
+				{
 					editor.resultText.push( prompt + line );
+					editor.resultTextClean.push( lines[ l ] );
+				}
 			}
 		}
 	}
@@ -225,18 +272,13 @@ class ConnectorServerEditor extends awiconnector.Connector
 			editor.inputDisabled = 0;
 			var response = {
 				data: {
-					text: editor.resultText.join( '\n' )
+					text: editor.resultText.join( '\n' ),
+					textClean: editor.resultTextClean.join( '\n' )
 				} };
 			this.reply( editor, response );
 			editor.resultText = [];
+			editor.resultTextClean = [];
 		}
-		/*
-		var message = {
-			type: 'waitForInput',
-			data: {
-				text: line
-			} };
-		this.sendMessage( handle, JSON.stringify( message ) ); */
 	}
 	close( editor, options = {} )
 	{

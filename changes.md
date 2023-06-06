@@ -1,3 +1,5 @@
+20230606 Beginning of implementation of interpretation of audio files as commands
+20230606 Server now send two texts: one with prompts and cariage returns, one with just the texte
 20230606 Made it work as a server with multiple connections
 20230606 Changed version to 0.3
 20230606 Connection to Awi extension in Aoz Studio

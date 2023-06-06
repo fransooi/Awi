@@ -106,7 +106,7 @@ class Config
 			if ( answer.success )
 			{
 				control.editor.self.setPrompt( control.editor, '.(' + user + ') ' );
-				this.awi.editor.print( control.editor, '\n' + answer.data.prompt + ' running.', { user: 'information' } );
+				//this.awi.editor.print( control.editor, '\n' + answer.data.prompt + ' running.', { user: 'information' } );
 			}
 			return answer;
 		}

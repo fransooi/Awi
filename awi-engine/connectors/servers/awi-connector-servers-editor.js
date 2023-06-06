@@ -120,6 +120,7 @@ class ConnectorServerEditor extends awiconnector.Connector
 	}
 	reply( editor, response )
 	{
+		response.handle = editor.lastMessage.handle;
 		response.responseTo = editor.lastMessage.command;
 		response.callbackId = editor.lastMessage.callbackId;
 		editor.connection.send( JSON.stringify( response ) );

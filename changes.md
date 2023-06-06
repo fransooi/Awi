@@ -1,3 +1,4 @@
+20230606 Made it work as a server with multiple connections
 20230606 Changed version to 0.3
 20230606 Connection to Awi extension in Aoz Studio
 20230606 Creation of a new session for each connection

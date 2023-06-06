@@ -157,7 +157,7 @@ n: {n}`, parameters );
 			catch( e )
 			{
 				answer.success = false;
-				answer.error = e;
+				answer.error = e.message;
 				return answer;
 			}
 

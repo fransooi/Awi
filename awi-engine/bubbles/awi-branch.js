@@ -106,7 +106,7 @@ class Branch extends awibubble.Bubble
 			}
 			else if ( answer.error )
 			{
-				this.awi.editor.print( control.editor, answer.error.split( '\n' ), { user: 'error' } );
+				this.awi.editor.print( control.editor, answer.error, { user: 'error' } );
 				exit = 'end';
 			}
 			this.pathway = this.pathway.substring( 0, this.pathway.lastIndexOf( '.' ) );

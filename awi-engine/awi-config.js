@@ -100,6 +100,8 @@ class Config
 		if ( config )
 		{
 			this.user = user.toLowerCase().trim();
+			var personality = this.configs[ this.user ].personality;
+			this.loadConfig( 'personality-' + personality );
 			var answer = await this.awi.client.connect( this.awi.client.options );
 			if ( answer.success )
 			{

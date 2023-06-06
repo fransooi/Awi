@@ -14,7 +14,7 @@
 * @file awi-memory-awi-error.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Memory error branch
 *

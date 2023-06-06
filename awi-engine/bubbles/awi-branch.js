@@ -14,8 +14,8 @@
 * @file awi-branch.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
-*-
+* @version 0.3
+*
 * @short A tree of bubbles that works as a bubble: a branch.
 *
 */
@@ -93,7 +93,7 @@ class Branch extends awibubble.Bubble
 						bubble.data = answer.data;
 						data = answer.data;
 					}
-					else
+					else if ( answer.data )
 					{
 						for ( var o = 0; o < bubble.properties.outputs.length; o++ )
 						{
@@ -106,7 +106,7 @@ class Branch extends awibubble.Bubble
 			}
 			else if ( answer.error )
 			{
-				this.awi.editor.print( this, answer.error.split( '\n' ), { user: 'error' } );
+				this.awi.editor.print( control.editor, answer.error.split( '\n' ), { user: 'error' } );
 				exit = 'end';
 			}
 			this.pathway = this.pathway.substring( 0, this.pathway.lastIndexOf( '.' ) );

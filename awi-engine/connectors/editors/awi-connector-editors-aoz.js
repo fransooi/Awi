@@ -3,10 +3,10 @@
 *            / \
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
-*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
+*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal
 * (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -14,7 +14,7 @@
 * @file awi-connector-editors-aoz.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Connector to Aoz editor (under progress)
 *
@@ -56,7 +56,7 @@ class ConnectorEditorAozRuntime extends awiconnector.Connector
 	{
 		this.inputEnabled = false;
 	}
-	waitForInput( line ) 
+	waitForInput( line )
 	{
 		this.inputEnabled = true;
 		if ( line )
@@ -184,7 +184,7 @@ class ConnectorEditorAozRuntime extends awiconnector.Connector
 	}
 	setRow( row )
 	{
-	}	
+	}
 	moveUp( nTimes )
 	{
 	}

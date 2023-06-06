@@ -14,7 +14,7 @@
 * @file awi-bubble-generic-error.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Error management bubble
 *

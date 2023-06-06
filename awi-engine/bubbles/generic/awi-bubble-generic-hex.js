@@ -14,7 +14,7 @@
 * @file awi-bubble-generic-hex.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Hex command: convert to hexadecimal
 *
@@ -42,10 +42,10 @@ class BubbleGenericHex extends awibubble.Bubble
 		if ( answer.success )
 		{
 			var result = '$' + this.awi.utilities.toHex( answer.data, 8 );
-			this.awi.editor.print( this, [ result ], { user: 'result' } );
+			this.awi.editor.print( control.editor, [ result ], { user: 'result' } );
 			return { success: true, data: result };
 		}
-		this.awi.editor.print( this, [ answer.error ], { user: 'awi' } );
+		this.awi.editor.print( control.editor, [ answer.error ], { user: 'awi' } );
 		return answer;
 	}
 	async playback( line, parameter, control )

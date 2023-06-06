@@ -3,10 +3,10 @@
 *            / \
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
-*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
+*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal
 * (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -14,7 +14,7 @@
 * @file awi-connector-editors-adobe.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Future connector to Adobe software (puppets actors etc.)
 *
@@ -32,117 +32,102 @@ class ConnectorEditorCommandline extends awiconnector.Connector
 		this.classname = 'editor';
 		this.version = '0.2';
 		this.connected = false;
-		this.inputEnabled = false;
-		this.inputHandle = null;
-		this.reroute = undefined;
-		this.range = { start: { row: 0, column: 0 }, end: { row: 0, column: 0 } };
-		this.readline = readline.createInterface(
-		{
-			input: process.stdin,
-			output: process.stdout,
-		} );			
-		var self = this;
-		var control = {};
-		var data = {};
-		this.readline.on( 'line', function( input )
-		{
-			if ( self.inputEnabled )
-			{
-				if ( self.reroute )
-					self.reroute( input, data, control );
-				else
-					self.awi.prompt.prompt( input, data, control );
-			}
-		} );
+		this.editors = {};
 	}
 	async connect( options )
 	{
 		super.connect( options );
+		this.default = this.addEditor();
 		this.connected = true;
 		this.connectAnswer.success = true;
 		return this.connectAnswer;
-	}	
-	rerouteInput( route )
-	{
-		this.reroute = route;
 	}
-	disableInput()
+	addEditor()
 	{
-		this.inputEnabled = false;
-		this.readline.pause();
-	}
-	waitForInput( line, options = {} ) 
-	{
-		//if ( !this.inputEnabled )		
+		var rline = readline.createInterface(
 		{
-			/*
-			var self = this;
-			if ( this.inputHandle )
-				clearTimeout( this.inputHandle );
-			this.inputHandle = setTimeout(
-				function()
-				{
-					self.inputEnabled = true;
-					self.inputHandle = null;
-				}, 250 );
-			*/
-			this.inputEnabled = true;
-			if ( line )
-				this.readline.setPrompt( line );
-			this.readline.prompt( true );
-			return;
-		}
-		//if ( options.toPrint )
-		//	this.readline.setPrompt( options.toPrint );
+			input: process.stdin,
+			output: process.stdout,
+		} );
+		var handle = this.awi.utilities.getUniqueIdentifier( this.editors, 'cmd', 0 );
+		var editor = {
+			handle: handle,
+			readline: rline,
+			inputEnabled: false,
+			reroute: undefined,
+			self: this,
+			awi: this };
+		this.editors[ handle ] = editor;
+
+		var self = this;
+		rline.on( 'line', function( input )
+		{
+			if ( editor.inputEnabled )
+			{
+				if ( editor.reroute )
+					editor.reroute( input, {}, { editor: editor } );
+				else
+					self.awi.prompt.prompt( input, {}, { editor: editor } );
+			}
+		} );
+		return editor;
 	}
-	close()
+
+	rerouteInput( editor, route )
+	{
+		editor.reroute = route;
+	}
+	disableInput( editor )
+	{
+		editor.inputEnabled = false;
+		editor.readline.pause();
+	}
+	setPrompt( editor, prompt )
+	{
+		editor.readline.setPrompt( prompt );
+	}
+	waitForInput( editor, options = {} )
+	{
+		editor.inputEnabled = true;
+		editor.readline.prompt( true );
+		return;
+	}
+	saveInputs( editor )
+	{
+		editor.pushedInputs = editor.inputDisabled;
+		editor.inputDisabled = 1;
+	}
+	restoreInputs( editor )
+	{
+		editor.inputDisabled = editor.inputDisabled;
+	}
+	close( editor )
 	{
 	}
-	fillPaths( paths )
+	wait( editor, onOff, options = {} )
 	{
-		for ( var p in paths )
-			paths[ p ] = this.atom.aozConfig.installInformation.runPaths[ p ];
-	}
-	activateEvents()
-	{
-		this.eventsActivated = true;
-	}
-	deactivateEvents()
-	{
-		this.eventsActivated = false;
-	}
-	blockCursor( onOff, callback, extra )
-	{
-		// Block the cursor on the command line
-		this.blockCursorOn = onOff;
-	}
-	wait( onOff, options = {} )
-	{
-		this.waitingOn = onOff;
+		editor.waitingOn = onOff;
 	}
 	interpretLine( line )
 	{
 		return line;
 	}
-	print( parent, text, options = {} )
+	print( editor, text, options = {} )
 	{
 		options.user = typeof options.user == 'undefined' ? 'awi' : options.user;
-		
+
 		var prompt = this.awi.config.getPrompt( options.user );
 		if ( !prompt )
 			return;
-		var row = 0;
+
 		if ( typeof text == 'string' )
 			text = text.split( '\n' );
 		var justify = this.awi.getConfig( 'user' ).justify;
-		var self = this;
 		function printLinesDown( lines )
 		{
 			for ( var l = 0; l < lines.length; l++ )
 			{
-				self.readline.write( prompt + lines[ l ] + '\n' );
-				//console.log( prompt + lines[ l ] );
-				row++;
+				editor.readline.write( prompt + lines[ l ] + '\n' );
 			}
 		}
 		for ( var t = 0; t < text.length; t++ )
@@ -152,85 +137,9 @@ class ConnectorEditorCommandline extends awiconnector.Connector
 				printLinesDown( this.awi.utilities.justifyText( line, justify ) );
 			else
 			{
-				this.readline.write( prompt + line + '\n' );
-				row++;
+				editor.readline.write( prompt + line + '\n' );
 			}
 		}
-	}
-	decorateLine( row, user )
-	{
-	}
-	getStartPrompt( range )
-	{
-		return range;
-	}
-	createCheckpoint( range )
-	{
-		return range;
-	}
-	startAnimation( characterName, animationName, options = {} )
-	{
-	}
-	printAnimation( characterName, animationName, options = {} )
-	{
-	}
-	stopAnimation()
-	{
-	}
-	playVideo( path, options = {} )
-	{
-	}
-	playAudio( path, options = {} )
-	{
-	}
-	viewFile( file, options )
-	{
-	}
-	getLine( row )
-	{
-		return '';
-	}
-	setLine( row, text, options = {} )
-	{
-	}
-	insertLine( row, text/*, options = {} */)
-	{
-	}
-	deleteLine( row, options = {} )
-	{
-	}
-	getRow()
-	{
-		return 0;
-	}
-	getColumn()
-	{
-		return 0;
-	}
-	getPosition()
-	{
-		return [ 0, 0 ];
-	}
-	setPosition( row, column )
-	{
-	}
-	setColumn( column )
-	{
-	}
-	setRow( row )
-	{
-	}	
-	moveUp( nTimes )
-	{
-	}
-	moveDown( nTimes )
-	{
-	}
-	moveLeft( nTimes )
-	{
-	}
-	moveRight( nTimes )
-	{
 	}
 }
 module.exports.Connector = ConnectorEditorCommandline;

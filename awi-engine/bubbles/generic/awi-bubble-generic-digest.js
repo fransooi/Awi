@@ -14,7 +14,7 @@
 * @file awi-bubble-generic-digest.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Digest command: digest the content of the toDigest directory
 *
@@ -46,10 +46,11 @@ class BubbleGenericDigest extends awibubble.Bubble
 		var self = this;
 
 		// Import one message listdigest
-		async function importMessages( todo, options )
+		async function importMessages( todo, control )
 		{
 			var importer = self.awi.getConnector( 'importers', 'messenger', {} );
-			var answer = await importer.import( todo.htmlPath, parameters.senderName, todo.receiverNameCompressed, { result: todo, from: todo.from } );
+			control.from = todo.from;
+			var answer = await importer.import( todo.htmlPath, parameters.senderName, todo.receiverNameCompressed, control );
 			if ( answer.success )
 			{
 				todo.done = true;
@@ -145,7 +146,7 @@ class BubbleGenericDigest extends awibubble.Bubble
 		{
 			for ( var td = 0; td < todo.length; td++ )
 			{
-				var tobedone = await importMessages( todo[ td ], {} );
+				var tobedone = await importMessages( todo[ td ], control );
 				if ( !tobedone.error )
 				{
 					if ( tobedone.souvenirs.length > 0 )
@@ -182,7 +183,8 @@ class BubbleGenericDigest extends awibubble.Bubble
 			for ( var f = 0; f < files.length; f++ )
 			{
 				var file = files[ f ];
-				answer = await importer.import( file.path, parameters.senderName, { type: 'videos' } );
+				control.type = 'videos';
+				answer = await importer.import( file.path, parameters.senderName, control );
 				if ( answer.success )
 				{
 					valid.push( ...answer.data.souvenirs );
@@ -222,7 +224,7 @@ class BubbleGenericDigest extends awibubble.Bubble
 			for ( var f = 0; f < files.length; f++ )
 			{
 				var file = files[ f ];
-				answer = await importer.import( file.path, parameters.senderName, {} );
+				answer = await importer.import( file.path, parameters.senderName, control );
 				if ( answer.success )
 				{
 					valid.push( ...answer.data.souvenirs );
@@ -274,13 +276,14 @@ class BubbleGenericDigest extends awibubble.Bubble
 				}
 				if ( !exist.success )
 				{
-					this.awi.editor.print( this, 'Cannot import files of type "' + type + '".', { user: 'error' } );
-					this.awi.editor.print( this, 'Supported import types: audio, video, messenger, and more to come!', { user: 'awi' } );
+					this.awi.editor.print( control.editor, 'Cannot import files of type "' + type + '".', { user: 'error' } );
+					this.awi.editor.print( control.editor, 'Supported import types: audio, video, messenger, and more to come!', { user: 'awi' } );
 					return { success: false, data: 'awi:cannot-import:iwa' };
 				}
 				if ( this[ type ] )
 				{
-					var info = await this[ type ]( path, parameters, { store: true } );
+					control.store = true;
+					var info = await this[ type ]( path, parameters, control );
 					result.valid.push( ...info.valid );
 					result.invalid.push( ...info.invalid );
 				}
@@ -299,7 +302,8 @@ class BubbleGenericDigest extends awibubble.Bubble
 						{
 							if ( this[ file.name ] )
 							{
-								var info = await this[ file.name ]( file.path, parameters, { store: true } );
+								control.store = true;
+								var info = await this[ file.name ]( file.path, parameters, control );
 								result.valid.push( ...info.valid );
 								result.invalid.push( ...info.invalid );
 							}
@@ -307,12 +311,12 @@ class BubbleGenericDigest extends awibubble.Bubble
 					}
 				}
 			}
-			this.awi.editor.print( this, result.valid.length +' souvenirs added.', { user: 'information' } );
+			this.awi.editor.print( control.editor, result.valid.length +' souvenirs added.', { user: 'information' } );
 			if ( result.invalid.length > 0 )
 			{
-				this.awi.editor.print( this, 'These items could not be imported...', { user: 'warning' } );
+				this.awi.editor.print( control.editor, 'These items could not be imported...', { user: 'warning' } );
 				for ( var i = 0; i < result.invalid.length; i++ )
-					this.awi.editor.print( this, ' - ' +  result.invalid[ i ], { user: 'warning' } );
+					this.awi.editor.print( control.editor, ' - ' +  result.invalid[ i ], { user: 'warning' } );
 			}
 			return { success: true, data: { receiverName: parameters.receiverName, souvenirs: result.valid } };
 		}

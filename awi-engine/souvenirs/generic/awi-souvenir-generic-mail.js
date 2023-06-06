@@ -14,7 +14,7 @@
 * @file awi-souvenir-awi-mail.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Mail souvenir
 *
@@ -54,8 +54,8 @@ class SouvenirGenericMail extends awisouvenir.Souvenir
 	}
 	async getContent( line, parameters, control )
 	{
-		this.awi.editor.print( this, this.parameters.text, { user: 'memory3' } );
-		this.awi.editor.print( this, '------------------------------------------------------------', { user: 'memory3' } );
+		this.awi.editor.print( control.editor, this.parameters.text, { user: 'memory3' } );
+		this.awi.editor.print( control.editor, '------------------------------------------------------------', { user: 'memory3' } );
 		return {
 			success: 'found',
 			data: {

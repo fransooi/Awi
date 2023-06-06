@@ -14,7 +14,7 @@
 * @file awi-bubble-javascript-code.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Code command: create a javascript function
 *
@@ -73,7 +73,7 @@ class BubbleJavascriptCode extends awibubble.Bubble
 			{ name: 'parameters', content: params },
 			{ name: 'description', content: description },
 		], control );
-		this.awi.editor.print( this, prompt, { user: 'prompt' } );
+		this.awi.editor.print( control.editor, prompt, { user: 'prompt' } );
 		var answer = await this.sendCompletion( prompt, false, control );
 		if ( answer.success )
 		{
@@ -92,7 +92,7 @@ class BubbleJavascriptCode extends awibubble.Bubble
 				else if ( line.indexOf( '<START-CODE>' ) >= 0 )
 					copying = true;
 			}
-			this.awi.editor.print( this, destcode, { user: 'code' } );
+			this.awi.editor.print( control.editor, destcode, { user: 'code' } );
 			return { success: true, data: destcode };
 		}
 	}

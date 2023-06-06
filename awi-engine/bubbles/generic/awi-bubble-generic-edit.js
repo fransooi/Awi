@@ -14,7 +14,7 @@
 * @file awi-bubble-generic-play.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Play command: play a media file in the current editor
 *
@@ -41,7 +41,7 @@ class BubbleGenericEdit extends awibubble.Bubble
 		if ( /^\d+$/.test( parameters.userInput ) )
 		{
 			var files = this.branch.getLastData( this, 'fileList' );
-			if ( files && fileList.length > 0 )
+			if ( files && files.length > 0 )
 			{
 				var number = parseInt( parameters.userInput ) - 1;
 				if ( number >= 0 && number < files.length )
@@ -68,13 +68,13 @@ class BubbleGenericEdit extends awibubble.Bubble
 			return await this.awi.system.playFile( files[ 0 ].path, type, 'edit', { } );
 
 		var result = [];
-		this.awi.editor.print( this, [ 'I have found these files to edit:' ], { user: 'information' } );
+		this.awi.editor.print( control.editor, [ 'I have found these files to edit:' ], { user: 'information' } );
 		for ( var l = 0; l < files.length; l++ )
 			result.push( ( l + 1 ) + '. ' + files[ l ].name );
-		this.awi.editor.print( this, result, { user: 'information' } );
+		this.awi.editor.print( control.editor, result, { user: 'information' } );
 		var param = await this.awi.prompt.getParameters( [
 			{ choice: 'Please enter a number between 1 and ' + files.length, type: 'number', interval: [ 1, files.length ], optional: false, default: 0 },
-			] );
+			], control );
 		if ( param.success )
 			return await this.awi.system.playFile( files[ param.data.choice - 1 ].path, type, 'edit', { } );
 		return param;

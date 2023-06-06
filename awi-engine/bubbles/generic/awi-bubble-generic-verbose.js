@@ -14,7 +14,7 @@
 * @file awi-bubble-generic-bin.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Bin command: convert to binary
 *
@@ -46,15 +46,15 @@ class BubbleGenericVerbose extends awibubble.Bubble
 			if ( verbose != oldVerbose )
 			{
 				if ( verbose <= oldVerbose )
-					this.awi.editor.print( this, 'OK I will talk less from now on...', { user: 'root' } );
+					this.awi.editor.print( control.editor, 'OK I will talk less from now on...', { user: 'root' } );
 				else
-					this.awi.editor.print( this, 'OK I will talk more from now on...', { user: 'root' } );
+					this.awi.editor.print( control.editor, 'OK I will talk more from now on...', { user: 'root' } );
 				this.awi.config.setVerbose( verbose );
 			}
 		}
 		else
 		{
-			this.awi.editor.print( this, [ answer.error ], { user: 'error' } );
+			this.awi.editor.print( control.editor, [ answer.error ], { user: 'error' } );
 		}
 		return answer;
 	}

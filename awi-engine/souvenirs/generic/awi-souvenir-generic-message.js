@@ -14,7 +14,7 @@
 * @file awi-souvenir-awi-message.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Message souvenir
 *
@@ -53,9 +53,9 @@ class SouvenirGenericMessage extends awisouvenir.Souvenir
 	}
 	async getContent( line, parameters, control )
 	{
-		this.awi.editor.print( this, this.parameters.senderName + ' said: ' + this.parameters.senderText, { user: 'memory3' } );
-		this.awi.editor.print( this, this.parameters.receiverName + ' said: ' + this.parameters.receiverText, { user: 'memory3' } );
-		this.awi.editor.print( this, '------------------------------------------------------------', { user: 'memory3' } );
+		this.awi.editor.print( control.editor, this.parameters.senderName + ' said: ' + this.parameters.senderText, { user: 'memory3' } );
+		this.awi.editor.print( control.editor, this.parameters.receiverName + ' said: ' + this.parameters.receiverText, { user: 'memory3' } );
+		this.awi.editor.print( control.editor, '------------------------------------------------------------', { user: 'memory3' } );
 		return {
 			success: 'found',
 			data: {	messageInfo: this.parameters } };

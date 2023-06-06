@@ -3,10 +3,10 @@
 *            / \
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
-*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
+*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal
 * (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -14,7 +14,7 @@
 * @file awi-connector-systems-node.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Connector to Node
 */
@@ -41,7 +41,7 @@ class ConnectorSystemNode extends awiconnector.Connector
 		this.version = '0.2';
 		this.rootPath = '';
 		this.getAssociation = promisify( regedit.list );
-		this.assetsTypes = 
+		this.assetsTypes =
 		{
 			image: [ '.png', '.jpg', '.jpeg' ],
 			sound: [ '.wav', '.mp3', '.ogg' ],
@@ -51,13 +51,13 @@ class ConnectorSystemNode extends awiconnector.Connector
 			text: [ '.txt', '*.asc' ],
 			document: [ '.docx', '*.doc', '*.rtf' ],
 		}
-		this.sourceDirectories = 
+		this.sourceDirectories =
 		{
 			win32:
 			{
 				assets: [ '*Desktop', '*Documents', '*Pictures', '*Music', '*Downloads', '*Videos' ],
-			}			
-		};		
+			}
+		};
 	}
 	quit()
 	{
@@ -76,7 +76,7 @@ class ConnectorSystemNode extends awiconnector.Connector
 		{
 			var result = [];
 			path = self.awi.utilities.normalize( path );
-		
+
 			var answer = await self.readdir( path + '/' );
 			if ( !answer.success )
 				return null;
@@ -112,7 +112,7 @@ class ConnectorSystemNode extends awiconnector.Connector
 						{
 							if ( options.recursive )
 							{
-								var newFile =  
+								var newFile =
 								{
 									name: files[ f ],
 									path: sPath,
@@ -279,7 +279,7 @@ class ConnectorSystemNode extends awiconnector.Connector
 		var stdErr = '';
 		var result;
 		var info = this.awi.utilities.parse( path );
-		var vars = 
+		var vars =
 		{
 			root: info.root,
 			dir: info.dir,
@@ -301,8 +301,8 @@ class ConnectorSystemNode extends awiconnector.Connector
 						var result = false;
 						var cwd = this.getPath( actionInfo.cwd, vars );
 						var command = this.getPath( actionInfo.command, vars );
-						var process = exec( command, { cwd: cwd }, 
-							function( error, stdo, stde ) 
+						var process = exec( command, { cwd: cwd },
+							function( error, stdo, stde )
 							{
 								if ( !error )
 								{
@@ -318,15 +318,15 @@ class ConnectorSystemNode extends awiconnector.Connector
 						if ( process )
 							return { success: true, data: path };
 						break;
-					case 'startbat':	
+					case 'startbat':
 						var result = false;
 						var cwd = this.getPath( actionInfo.cwd, vars );
 						var command = this.getPath( actionInfo.command, vars );
 						command = ppath.normalize( this.awi.config.getDataPath() + '/start.bat ' + command );
 						console.log( 'command: ' + command );
 						console.log( 'cwd: ' + cwd );
-						var process = exec( command, { cwd: cwd }, 
-							function( error, stdo, stde ) 
+						var process = exec( command, { cwd: cwd },
+							function( error, stdo, stde )
 							{
 								if ( !error )
 								{
@@ -433,7 +433,7 @@ class ConnectorSystemNode extends awiconnector.Connector
 			options.input = sourcePath;
 			options.output = destinationPath;
 			await extractaudio( options );
-			return { success: true, data: destinationPath };		
+			return { success: true, data: destinationPath };
 		}
 		catch( e )
 		{
@@ -445,7 +445,7 @@ class ConnectorSystemNode extends awiconnector.Connector
 		return { success: false, error: 'awi:no-accessories-on-this-system:iwas' };
 	}
 	async getAccessoryList( path, options )
-	{	
+	{
 		return { success: false, error: 'awi:no-accessories-on-this-system:iwas' };
 	}
 	async readFile( path, options )

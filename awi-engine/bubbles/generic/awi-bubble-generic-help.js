@@ -14,7 +14,7 @@
 * @file awi-bubble-generic-help.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Help command: provides help about the awi-engine
 *
@@ -107,7 +107,7 @@ Commands may or may not call Awi for a response.
 		if ( !text )
 			text = this.findEditable( 'welcome' );
 		text = text.content.split( '\r\n' ).join( '\n' ).split( '\n' )
-		this.awi.editor.print( this, text, { user: 'awi' } );
+		this.awi.editor.print( control.editor, text, { user: 'awi' } );
 		return { success: true, data: text };
 	}
 	async playback( line, parameter, control )

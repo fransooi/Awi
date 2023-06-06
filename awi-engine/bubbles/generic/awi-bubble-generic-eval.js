@@ -14,7 +14,7 @@
 * @file awi-bubble-generic-eval.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Eval command: perform a calculation
 *
@@ -42,11 +42,11 @@ class BubbleGenericEval extends awibubble.Bubble
 		var answer = await this.awi.language.doEval( parameters.userInput, {} );
 		if ( answer.success )
 		{
-			this.awi.editor.print( this, [ '' + answer.data ], { user: 'result' } );
+			this.awi.editor.print( control.editor, [ '' + answer.data ], { user: 'result' } );
 		}
 		else
 		{
-			this.awi.editor.print( this, [ answer.error ], { user: 'awi' } );
+			this.awi.editor.print( control.editor, [ answer.error ], { user: 'awi' } );
 		}
 		return answer;
 	}

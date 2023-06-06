@@ -14,7 +14,7 @@
 * @file awi-bubble-generic-input.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Input command: input missing parameters
 *
@@ -35,6 +35,7 @@ class BubbleGenericInput extends awibubble.Bubble
 		this.properties.brackets = false;
 		this.properties.tags = [ 'generic', 'user', 'input' ];
 	}
+	/*
 	async getParameters( parameters, data, control = {} )
 	{
 		var data = {};
@@ -48,6 +49,7 @@ class BubbleGenericInput extends awibubble.Bubble
 		}
 		return { success: true, data: data };
 	}
+	*/
 	async play( line, parameters, control )
 	{
 		await super.play( line, parameters, control );
@@ -96,11 +98,11 @@ class BubbleGenericInput extends awibubble.Bubble
 				text = '\nPlease enter ' + description
 				break;
 		}
-		this.awi.editor.print( this, text.split( '\n' ), { user: 'question' } );
+		this.awi.editor.print( control.editor, text.split( '\n' ), { user: 'question' } );
 
 		var self = this;
 		var finished = false;
-		this.awi.editor.rerouteInput(
+		this.awi.editor.rerouteInput( control.editor,
 			function( line )
 			{
 				var start = 0;
@@ -154,8 +156,7 @@ class BubbleGenericInput extends awibubble.Bubble
 								break;
 							}
 							firstResult.push( result );
-							var p = prompt + ( firstResult.length+ 1 ) + '. ';
-							self.awi.editor.waitForInput( p, { toPrint: p } );
+							self.awi.editor.waitForInput( control.editor, { force: true } );
 							return;
 						case 'choices':
 							result = parseInt( result );
@@ -166,7 +167,7 @@ class BubbleGenericInput extends awibubble.Bubble
 							{
 								text.push(  + parameters.inputInfo.default + '.' );
 								self.awi.editor.print( this, 'Please enter a number between 1 and ' + parameters.inputInfo.choices.length, { user: 'awi' } );
-								self.awi.editor.waitForInput( prompt, { toPrint: prompt } );
+								self.awi.editor.waitForInput( control.editor, { force: true } );
 								return;
 							}
 							else
@@ -187,7 +188,7 @@ class BubbleGenericInput extends awibubble.Bubble
 								{
 									text.push( 'Please answer yes or no...' );
 									self.awi.editor.print( this, text, { user: 'awi' } );
-									self.awi.editor.waitForInput( prompt, { toPrint: prompt } );
+									self.awi.editor.waitForInput( control.editor, { force: true } );
 									return;
 								}
 							}
@@ -207,7 +208,7 @@ class BubbleGenericInput extends awibubble.Bubble
 							break;
 					}
 				}
-				self.awi.editor.rerouteInput();
+				self.awi.editor.rerouteInput( control.editor );
 				finished = true;
 			} );
 
@@ -215,7 +216,7 @@ class BubbleGenericInput extends awibubble.Bubble
 		var prompt = this.awi.config.getPrompt( 'question' );
 		if ( firstType == 'array' )
 			prompt += '1. ';
-		this.awi.editor.waitForInput( prompt, { toPrint: prompt } );
+		this.awi.editor.waitForInput( control.editor );
 		return new Promise( ( resolve ) =>
 		{
 			const checkPaused = () =>

@@ -14,7 +14,7 @@
 * @file awi-memory-videos.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Video memory branch
 *
@@ -53,9 +53,9 @@ class MemoryGenericAudios extends awimemory.Memory
 		var answer = await super.getContent( line, parameters, control );
 		if ( answer.success == 'found' )
 		{
-			this.awi.editor.print( this, 'Audio file: ' + answer.data.audioInfo.path, { user: 'memory2' } );
-			this.awi.editor.print( this, 'Recorded on the: ' + answer.data.audioInfo.date, { user: 'memory2' } );
-			this.awi.editor.print( this, '', { user: 'memory2' } );
+			this.awi.editor.print( control.editor, 'Audio file: ' + answer.data.audioInfo.path, { user: 'memory2' } );
+			this.awi.editor.print( control.editor, 'Recorded on the: ' + answer.data.audioInfo.date, { user: 'memory2' } );
+			this.awi.editor.print( control.editor, '', { user: 'memory2' } );
 		}
 	}
 	async findSouvenirs( line, parameters, control )
@@ -64,9 +64,9 @@ class MemoryGenericAudios extends awimemory.Memory
 		if ( answer.success == 'found' )
 		{
 			var content = ( typeof answer.data.direct.content[ 0 ] == 'undefined' ? answer.data.indirect.content[ 0 ] : answer.data.direct.content[ 0 ] );
-			this.awi.editor.print( this, 'Audio file: ' + content.audioInfo.path, { user: 'memory2' } );
-			this.awi.editor.print( this, 'Recorded on the: ' + content.audioInfo.date.text, { user: 'memory2' } );
-			this.awi.editor.print( this, '', { user: 'memory2' } );
+			this.awi.editor.print( control.editor, 'Audio file: ' + content.audioInfo.path, { user: 'memory2' } );
+			this.awi.editor.print( control.editor, 'Recorded on the: ' + content.audioInfo.date.text, { user: 'memory2' } );
+			this.awi.editor.print( control.editor, '', { user: 'memory2' } );
 		}
 		return answer;
 	}

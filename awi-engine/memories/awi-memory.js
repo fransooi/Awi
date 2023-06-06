@@ -14,7 +14,7 @@
 * @file awi-memory.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Memory branch
 *
@@ -55,7 +55,7 @@ class Memory extends awibranch.Branch
 		}
 		if ( content.length )
 			return { success: 'found', content: content };
-		return { success: 'notfound' };
+		return { success: 'notfound', content: [] };
 	}
 	async getContent( line, parameters, control )
 	{
@@ -70,7 +70,7 @@ class Memory extends awibranch.Branch
 		}
 		if ( content.length )
 			return { success: 'found', content: content };
-		return { success: 'notfound' };
+		return { success: 'notfound', content: [] };
 	}
 	async findSouvenirs( line, parameters, control )
 	{
@@ -120,7 +120,7 @@ class Memory extends awibranch.Branch
 					direct: { souvenirs: directSouvenirs, content: directContent },
 					indirect: { souvenirs: indirectSouvenirs, content: indirectContent }
 				} };
-		return { success: 'notfound' };
+		return { success: 'notfound', data: { direct: {}, indirect: {} } };
 	}
 	addMemory( memory, control = {} )
 	{

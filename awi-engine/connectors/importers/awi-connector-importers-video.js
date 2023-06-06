@@ -3,10 +3,10 @@
 *            / \
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
-*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
+*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal
 * (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -14,7 +14,7 @@
 * @file awi-connector-importers-video.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Import video content: srt
 *
@@ -36,16 +36,17 @@ class ConnectorImporterVideo extends awiconnector.Connector
 		super.connect( options );
 		this.connectAnswer.success = true;
 		return this.connectAnswer;
-	}	
-	async import( path, senderName, options = {} )
+	}
+	async import( path, senderName, control = {} )
 	{
-		var destinationPath = this.awi.config.getDataPath() + '/digested/audios/' + this.awi.utilities.parse( path ).name + '.mp3';	
-		this.awi.editor.print( this, 'Extracting audio from ' + path + '.', { user: 'importer1' } )
+		var destinationPath = this.awi.config.getDataPath() + '/digested/audios/' + this.awi.utilities.parse( path ).name + '.mp3';
+		this.awi.editor.print( control.editor, 'Extracting audio from ' + path + '.', { user: 'importer1' } )
 		var answer = await this.awi.system.extractAudio( path, destinationPath, {} );
 		if ( answer.success )
 		{
 			var importer = this.awi.getConnector( 'importers', 'audio', {} );
-			return await importer.import( destinationPath, senderName, { typeSouvenir: 'video' } );
+			control.typeSouvenir = 'video';
+			return await importer.import( destinationPath, senderName, control );
 		}
 		return answer;
 	}

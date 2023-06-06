@@ -14,7 +14,7 @@
 * @file awi-bubble-generic-stop.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Stop command: stop a media playing in the current editor
 *
@@ -38,7 +38,7 @@ class BubbleGenericStop extends awibubble.Bubble
 	async play( line, parameters, control )
 	{
 		await super.play( line, parameters, control );
-		return await this.awi.editor.stop( this, parameters.userInput );
+		return await this.awi.editor.stop( control.editor, parameters.userInput );
 	}
 	async playback( line, parameters, control )
 	{

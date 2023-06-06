@@ -14,7 +14,7 @@
 * @file awi-memory-awi-messenger.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Messenger memory branch
 *
@@ -51,8 +51,8 @@ class MemoryGenericMessenger extends awimemory.Memory
 		var souvenir = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
 		if ( souvenir )
 		{
-			this.awi.editor.print( this, 'Conversation between ' + souvenir.parameters.senderName + ' and ' + souvenir.parameters.receiverName + ',', { user: 'memory2' } );
-			this.awi.editor.print( this, 'On the ' + souvenir.parameters.date, { user: 'memory2' } );
+			this.awi.editor.print( control.editor, 'Conversation between ' + souvenir.parameters.senderName + ' and ' + souvenir.parameters.receiverName + ',', { user: 'memory2' } );
+			this.awi.editor.print( control.editor, 'On the ' + souvenir.parameters.date, { user: 'memory2' } );
 		}
 		return await super.getContent( line, parameters, control );
 	}

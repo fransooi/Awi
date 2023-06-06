@@ -14,7 +14,7 @@
 * @file awi-bubble-generic-chat.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Chat bubble
 *
@@ -123,12 +123,12 @@ class BubbleGenericChat extends awibubble.Bubble
 			{ name: 'task-question', content: parameters.userInput },
 		], control );
 		control.answerCount = undefined;
-		this.awi.editor.print( this, prompt, { user: 'prompt' } );
+		this.awi.editor.print( control.editor, prompt, { user: 'prompt' } );
 		var answer = await this.sendCompletion( prompt, false, control );
 		if ( answer.success )
 		{
 			var text =  this.awi.cleanResponse( answer.data.text );
-			this.awi.editor.print( this, text, { user: 'awi' } );
+			this.awi.editor.print( control.editor, text, { user: 'awi' } );
 			answer.data = text;
 			this.empty = false;
 		}

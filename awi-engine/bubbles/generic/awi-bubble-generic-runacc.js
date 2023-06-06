@@ -14,7 +14,7 @@
 * @file awi-bubble-generic-import.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Runacc command: run an accessory in the current editor if it contains
 *        accessories
@@ -58,14 +58,14 @@ class BubbleGenericRunacc extends awibubble.Bubble
 				}
 				if ( accInfos.length ==  0 )
 				{
-					this.awi.editor.print( this, [ 'Sorry I cannot find ' + parameters.userInput ], { user: 'information' } );
+					this.awi.editor.print( control.editor, [ 'Sorry I cannot find ' + parameters.userInput ], { user: 'information' } );
 					return { success: false, data: data, error: 'awi:acc-not-found:iwa', error1: parameters.userInput }
 				}
 				if ( accInfos.length == 1 )
 				{
 					return await this.awi.system.runAccessory( accInfos[ 0 ].accFile );
 				}
-				var param = await this.awi.prompt.getParameters( [ { choice: 'the accessory to run, between 1 and' + accInfos.length, type: 'number' } ] );
+				var param = await this.awi.prompt.getParameters( [ { choice: 'the accessory to run, between 1 and' + accInfos.length, type: 'number' } ], control );
 				if ( param.success )
 				{
 					var acc = accInfos[ param.data.choice ];

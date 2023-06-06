@@ -14,7 +14,7 @@
 * @file awi-bubble-generic-code.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Code command: create a javascript function
 *
@@ -214,7 +214,7 @@ Now the code:
 			{
 				destCode = this.awi.utilities.replaceStringInText( destCode, 'console.log', 'aoz.print' );
 				data.code = destCode.split( '\n' );
-				this.awi.editor.print( self, data.code, { user: 'code' } );
+				this.awi.editor.print( control.editor, data.code, { user: 'code' } );
 				return { success: true, data: destCode };
 			}
 			return { success: false, data: result, error: 'awi:no-code-produced:iwa' };

@@ -14,7 +14,7 @@
 * @file awi-memory-awi-photos.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Photo memory branch
 *
@@ -51,8 +51,8 @@ class MemoryGenericPhotos extends awimemory.Memory
 		var souvenir = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
 		if ( souvenir )
 		{
-			this.awi.editor.print( this, 'Photo file: ' + souvenir.parameters.path, { user: 'memory2' } );
-			this.awi.editor.print( this, 'Taken on the ' + souvenir.parameters.date, { user: 'memory2' } );
+			this.awi.editor.print( control.editor, 'Photo file: ' + souvenir.parameters.path, { user: 'memory2' } );
+			this.awi.editor.print( control.editor, 'Taken on the ' + souvenir.parameters.date, { user: 'memory2' } );
 		}
 		return await super.getContent( line, parameters, control );
 	}

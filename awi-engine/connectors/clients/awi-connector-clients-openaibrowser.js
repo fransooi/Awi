@@ -3,10 +3,10 @@
 *            / \
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
-*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
+*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal
 * (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -14,17 +14,17 @@
 * @file awi-connector-servers-browser.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Connector to code ran from navigator (indirect file-system).
 *        Read/write subject to authorisation from user in config,
 *        with directory selection. Any write operation will necessit
 *        a "control.levelOfTrust" over a certain limit, with of course
-*        heavy secrity at the bottom, with possible questions relatiung 
-*        to memory that relates to recent event etc. Three necessary 
+*        heavy secrity at the bottom, with possible questions relatiung
+*        to memory that relates to recent event etc. Three necessary
 *        for total security, from my of today's understanding of Transformers,
 *        5 = total lock with motivation to stay locked.
-* 
+*
 *
 */
 var awiconnector = require( '../awi-connector' );
@@ -44,7 +44,7 @@ class ConnectorClientOpenAiBrowser extends awiconnector.Connector
 		super.connect( options );
 		this.connectAnswer.success = true;
 		return this.connectAnswer;
-	}	
+	}
 	async sendCompletion( prompt, stream, control )
 	{
 		prompt = prompt.trim();
@@ -66,14 +66,14 @@ max_tokens: {max_tokens}
 temperature: {temperature}
 top_p: {top_p}
 n: {n}`, parameters );
-			this.awi.editor.print( this, debug.split( '\n' ), { user: 'completion' } );
+			this.awi.editor.print( control.editor, debug.split( '\n' ), { user: 'completion' } );
 		}
 
 		var apiKey = this.awi.config.getUserKey();
-		var response = await fetch( "https://api.openai.com/v1/completions", 
+		var response = await fetch( "https://api.openai.com/v1/completions",
 		{
 			method: "POST",
-			headers: 
+			headers:
 			{
 				'Accept': 'application/json',
 				'Content-Type': 'application/json',

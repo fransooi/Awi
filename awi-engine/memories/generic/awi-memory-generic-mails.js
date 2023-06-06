@@ -14,7 +14,7 @@
 * @file awi-memory-awi-mails.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Mails memory branch
 *
@@ -51,8 +51,8 @@ class MemoryGenericMails extends awimemory.Memory
 		var souvenir = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
 		if ( souvenir )
 		{
-			this.awi.editor.print( this, 'Mail between: ' + souvenir.parameters.senderName + ' and ' + souvenir.parameters.receiverName, { user: 'memory2' } );
-			this.awi.editor.print( this, 'On the ' + souvenir.parameters.date, { user: 'memory2' } );
+			this.awi.editor.print( control.editor, 'Mail between: ' + souvenir.parameters.senderName + ' and ' + souvenir.parameters.receiverName, { user: 'memory2' } );
+			this.awi.editor.print( control.editor, 'On the ' + souvenir.parameters.date, { user: 'memory2' } );
 		}
 		return await super.getContent( line, parameters, control );
 	}

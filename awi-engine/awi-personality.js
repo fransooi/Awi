@@ -4,9 +4,9 @@
 *          / _ \              (°°)       Intelligent
 *        / ___ \ [ \ [ \ [  ][   ]       Programmable
 *     _/ /   \ \_\ \/\ \/ /  |  | \      Personal Assistant
-* (_)|____| |____|\__/\__/ [_| |_] \     link: 
+* (_)|____| |____|\__/\__/ [_| |_] \     link:
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -14,7 +14,7 @@
 * @file awi-personality.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Handle various personalities / create adapted prompts
 *
@@ -26,7 +26,7 @@ class Personality
 	{
 		this.awi = awi;
 		this.name = 'Awi';
-		this.oClass = 'personality';		
+		this.oClass = 'personality';
 		this.options = options;
 		this.currentPrompt = 'prompt-generic';
 
@@ -40,7 +40,7 @@ class Personality
 		this.memories[ 'photos' ] = new this.awi.newMemories.generic.photos( this.awi, { key: this.awi.utilities.getUniqueIdentifier( {}, 'photos', 6 ), parent: '' } );
 		this.memories[ 'videos' ] = new this.awi.newMemories.generic.videos( this.awi, { key: this.awi.utilities.getUniqueIdentifier( {}, 'videos', 7 ), parent: '' } );
 
-		this.prompts = 
+		this.prompts =
 		{
 'prompt-hello': `
 Your name is {name}.
@@ -77,7 +77,7 @@ Please take the following context into consideration before executing the task. 
 'prompt-generic-conversation':`
 Please read first the conversation with the user. Conversation:
 {conversation}
-`, 
+`,
 'prompt-generic-memories':`
 Here are some memories about the subject, please consider them in your response. Memories:
 {memories}
@@ -85,15 +85,15 @@ Here are some memories about the subject, please consider them in your response.
 'prompt-generic-task-question#1':`
 Now the task:
 Answer question: {task-question}
-`, 
+`,
 'prompt-generic-task-question#2':`
 Now the task:
 Answer question: {task-question}
-`, 
+`,
 'prompt-generic-task-question#last':`
 Now the task:
 Answer question: {task-question}
-`, 
+`,
 //////////////////////////////////////////////////////////////////
 'code':`
 Your name is {name}.
@@ -111,9 +111,9 @@ Task:
 Please create Javascript code based on this description:
 {description}
 Now the code:
-`, 
-'code-returns': `	
-It returns ` 			
+`,
+'code-returns': `
+It returns `
 		}
 	}
 	setPrompt( prompt )
@@ -129,7 +129,7 @@ It returns `
 	{
 		if ( temperature < 0 )
 			this.temperature = this.awi.getPersonality().temperature;
-		else 
+		else
 			this.temperature = temperature;
 		return true;
 	}
@@ -178,7 +178,7 @@ It returns `
 		var variables = this.awi.utilities.copyObject( this.awi.getPersonality() );
 		if ( this.awi.getConfig( 'user' ).firstName == '' )
 			return '';
-		
+
 		variables.firstName = this.awi.getConfig( 'user' ).firstName;
 		variables.lastName = this.awi.getConfig( 'user' ).lastName;
 		variables.fullName = this.awi.getConfig( 'user' ).fullName;
@@ -193,7 +193,7 @@ It returns `
 			if ( !prompt )
 				prompt = this.prompts[ token ];
 		}
-		
+
 		if ( prompt )
 		{
 			for ( var d = 0; d < newData.length; d++ )

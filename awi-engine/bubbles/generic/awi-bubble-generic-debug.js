@@ -14,7 +14,7 @@
 * @file awi-bubble-generic-debug.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Debug command: manage debugging
 *
@@ -45,13 +45,13 @@ class BubbleGenericDebug extends awibubble.Bubble
 			var oldDebug = this.awi.config.getDebug();
 			if ( debug != oldDebug )
 			{
-				this.awi.editor.print( this, 'Setting debug level to ' + debug, { user: 'root' } );
+				this.awi.editor.print( control.editor, 'Setting debug level to ' + debug, { user: 'root' } );
 				this.awi.config.setDebug( debug );
 			}
 		}
 		else
 		{
-			this.awi.editor.print( this, [ answer.error ], { user: 'error' } );
+			this.awi.editor.print( control.editor, [ answer.error ], { user: 'error' } );
 		}
 		return answer;
 	}

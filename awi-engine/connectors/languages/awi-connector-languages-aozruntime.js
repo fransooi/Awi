@@ -3,10 +3,10 @@
 *            / \
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
-*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
+*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal
 * (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -14,7 +14,7 @@
 * @file awi-connector-languages-aozruntime.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Connector to AOZ Runtime language (can be used for interanl commands)
 *
@@ -53,12 +53,12 @@ class ConnectorLanguageAozRuntime extends awiconnector.Connector
 					return -1;
 				return 0;
 			} );
-	
+
 			this.connected = true;
-			this.connectAnswer.success = true;			
+			this.connectAnswer.success = true;
 		} while( false )
 		return this.connectAnswer;
-	}	
+	}
 	getImportPaths()
 	{
 		var toScan = []
@@ -91,7 +91,7 @@ class ConnectorLanguageAozRuntime extends awiconnector.Connector
 			json: [ '.json' ],
 			text: [ '.txt', '*.asc' ],
 		}
-		
+
 		var type = options.type;
 		if ( !type )
 		{
@@ -108,7 +108,7 @@ class ConnectorLanguageAozRuntime extends awiconnector.Connector
 				}
 				if ( type )
 					break;
-			}			
+			}
 		}
 		if ( !type )
 			return { success: false, data: {}, error: 'awi:import-type-not-supported:iwa' }
@@ -129,8 +129,8 @@ class ConnectorLanguageAozRuntime extends awiconnector.Connector
 	}
 	async doEval( line, options = {} )
 	{
-		var mathWords = 
-		[			
+		var mathWords =
+		[
 			{ name: 'round', token: 'Math.round' },
 			{ name: 'ceil', token: 'Math.ceil' },
 			{ name: 'floor', token: 'Math.floor' },

@@ -14,7 +14,7 @@
 * @file awi-bubble-generic-saveconfig.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Quit: save conversations and memories and quits Awi.
 *
@@ -43,7 +43,7 @@ class BubbleGenericQuit extends awibubble.Bubble
 		if ( answer.success )
 
 			this.awi.system.quit();
-		this.awi.editor.print( this, 'Cannot save memories and conversations. Please check your setup.' );
+		this.awi.editor.print( control.editor, 'Cannot save memories and conversations. Please check your setup.' );
 		return answer;
 	}
 	async playback( line, parameters, control )

@@ -14,7 +14,7 @@
 * @file awi-souvenir-awi-error.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Souvenir error bubble
 *
@@ -47,8 +47,8 @@ class SouvenirGenericError extends awisouvenir.Souvenir
 	}
 	async getContent( line, parameters, control )
 	{
-		this.awi.editor.print( this, 'Error souvernir!', { user: 'memory3' } );
-		this.awi.editor.print( this, '------------------------------------------------------------', { user: 'memory3' } );
+		this.awi.editor.print( control.editor, 'Error souvernir!', { user: 'memory3' } );
+		this.awi.editor.print( control.editor, '------------------------------------------------------------', { user: 'memory3' } );
 		return {
 			success: 'found',
 			data: {

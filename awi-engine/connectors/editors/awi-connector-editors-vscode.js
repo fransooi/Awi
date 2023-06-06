@@ -3,10 +3,10 @@
 *            / \
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
-*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
+*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal
 * (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -14,7 +14,7 @@
 * @file awi-connector-editors-vscode.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Future connector to VsCode editor
 *
@@ -65,7 +65,7 @@ class ConnectorEditorVscode extends awiconnector.Connector
 	print( text, options )
 	{
 		var self = this;
-		var user = typeof options.user == 'undefined' ? 'user' : options.user;		
+		var user = typeof options.user == 'undefined' ? 'user' : options.user;
 		var row = this.getRow();
 		if ( this.printUp )
 		{
@@ -163,7 +163,7 @@ class ConnectorEditorVscode extends awiconnector.Connector
 	}
 	setRow( row )
 	{
-	}	
+	}
 	moveUp( nTimes )
 	{
 	}

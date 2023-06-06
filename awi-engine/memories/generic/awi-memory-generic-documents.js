@@ -14,7 +14,7 @@
 * @file awi-memory-awi-documents.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Document memory branch
 *
@@ -53,8 +53,8 @@ class MemoryGenericDocuments extends awimemory.Memory
 		var souvenir = this.getBubble( this.getBubble( 'root' ).properties.exits[ 'success' ] );
 		if ( souvenir )
 		{
-			this.awi.editor.print( this, 'Document file: ' + souvenir.parameters.path, { user: 'memory2' } );
-			this.awi.editor.print( this, 'Creation date: ' + souvenir.parameters.date + '.', { user: 'memory2' } );
+			this.awi.editor.print( control.editor, 'Document file: ' + souvenir.parameters.path, { user: 'memory2' } );
+			this.awi.editor.print( control.editor, 'Creation date: ' + souvenir.parameters.date + '.', { user: 'memory2' } );
 		}
 		return await super.getContent( line, parameters, control );
 	}

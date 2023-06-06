@@ -3,10 +3,10 @@
 *            / \
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
-*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
+*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal
 * (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -14,7 +14,7 @@
 * @file awi-connector-systems-aozruntime.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Connector to Aoz runtime
 */
@@ -33,7 +33,7 @@ class ConnectorSystemAozRuntime extends awiconnector.Connector
 		this.connected = false;
 		this.commandComplete = false;
 		this.commandAnswer = null;
-		this.directories = [ 'drive', 'applications', 'tutorials', 'games', 'demos' ];		
+		this.directories = [ 'drive', 'applications', 'tutorials', 'games', 'demos' ];
 		/*
 		this.awi.config.getEnginePath =
 			function()
@@ -57,15 +57,15 @@ class ConnectorSystemAozRuntime extends awiconnector.Connector
 	async waitForCommandEnd()
 	{
 		var self = this;
-		return new Promise( ( resolve ) => 
+		return new Promise( ( resolve ) =>
 		{
-			const checkCompletion = () => 
+			const checkCompletion = () =>
 			{
-					if ( self.commandAnswer )
-					{
-						clearInterval( handle );
-						resolve( self.commandAnswer );
-					}
+				if ( self.commandAnswer )
+				{
+					clearInterval( handle );
+					resolve( self.commandAnswer );
+				}
 			};
 			checkCompletion();
 		} );
@@ -81,7 +81,7 @@ class ConnectorSystemAozRuntime extends awiconnector.Connector
 		if ( typeof options.encoding == 'utf8' )
 			opts.encoding = 'utf8';
 		var descriptor = this.aoz.filesystem.getFile( path, { mustExist: true } );
-		this.aoz.filesystem.loadFile( descriptor, opts, 
+		this.aoz.filesystem.loadFile( descriptor, opts,
 			function( response, data )
 			{
 				if ( response )
@@ -99,7 +99,7 @@ class ConnectorSystemAozRuntime extends awiconnector.Connector
 	{
 		var self = this;
 		var descriptor = this.aoz.filesystem.getFile( path, { mustExist: false } );
-		this.aoz.filesystem.saveFile( descriptor, data, { encoding: options.encoding }, 
+		this.aoz.filesystem.saveFile( descriptor, data, { encoding: options.encoding },
 			function( response, data )
 			{
 				if ( response )
@@ -123,7 +123,7 @@ class ConnectorSystemAozRuntime extends awiconnector.Connector
 				if ( response )
 				{
 					descriptor = self.aoz.filesystem.getFile( destinationPath, { mustExist: false } );
-					self.aoz.filesystem.saveFile( descriptor, data, {}, 
+					self.aoz.filesystem.saveFile( descriptor, data, {},
 						function( response )
 						{
 							if ( response )
@@ -167,7 +167,7 @@ class ConnectorSystemAozRuntime extends awiconnector.Connector
 		return { success: false, error: 'awi:no-accessories-on-this-system:iwas' };
 	}
 	async getAccessoryList( path, options )
-	{	
+	{
 		return { success: false, error: 'awi:no-accessories-on-this-system:iwas' };
 	}
 	async readdir( path, options )
@@ -186,7 +186,7 @@ class ConnectorSystemAozRuntime extends awiconnector.Connector
 	{
 		var self = this;
 		var descriptor = this.aoz.filesystem.getFile( path, { mustExist: true } );
-		this.aoz.filesystem.stat( descriptor, {}, 
+		this.aoz.filesystem.stat( descriptor, {},
 			function( response, data )
 			{
 				if ( response )
@@ -204,7 +204,7 @@ class ConnectorSystemAozRuntime extends awiconnector.Connector
 	{
 		var self = this;
 		var descriptor = this.aoz.filesystem.getFile( path, { mustExist: true } );
-		this.aoz.filesystem.exist( descriptor, {}, 
+		this.aoz.filesystem.exist( descriptor, {},
 			function( response, data )
 			{
 				if ( response )

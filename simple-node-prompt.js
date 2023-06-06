@@ -14,7 +14,7 @@
 * @file simple-node-prompt.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Starts Awi as simple command line prompt 
 *
@@ -23,14 +23,13 @@ var awiawi = require( './awi-engine/awi' );
 async function startAwi( prompt, config )
 {
 	var data = {};
-	var control = {};
 	var awi = new awiawi.Awi( config );
 	var answer = await awi.connect( {} );
 	if ( answer.success )
 	{
 		setTimeout( async function()
 		{
-			await awi.prompt.prompt( prompt, data, control );
+			await awi.prompt.prompt( prompt, data, { editor: awi.editor.default } );
 		}, 1000 )
 	}
 }

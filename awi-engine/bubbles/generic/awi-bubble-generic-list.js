@@ -14,7 +14,7 @@
 * @file awi-bubble-generic-find.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Find command: find files in the registered users directories
 *
@@ -49,10 +49,10 @@ class BubbleGenericList extends awibubble.Bubble
 			var result = [];
 			if ( files.length > 0 )
 			{
-				this.awi.editor.print( this, [ 'I have found the following files:' ], { noJustify: true, user: 'information' } );
+				this.awi.editor.print( control.editor, [ 'I have found the following files:' ], { noJustify: true, user: 'information' } );
 				for ( var l = 0; l < files.length; l++ )
 					result.push( ( l + 1 ) + '. ' + files[ l ].path );
-				this.awi.editor.print( this, result, { noJustify: true, user: 'information' } );
+				this.awi.editor.print( control.editor, result, { noJustify: true, user: 'information' } );
 				return { success: true, data: files };
 			}
 		}

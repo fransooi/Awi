@@ -14,7 +14,7 @@
 * @file awi-bubble-generic-bin.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Bin command: convert to binary
 *
@@ -43,12 +43,12 @@ class BubbleGenericBin extends awibubble.Bubble
 		if ( answer.success )
 		{
 			var result = '%' + this.awi.utilities.toBin( answer.data, 16 );
-			this.awi.editor.print( this, [ result ], { user: 'result' } );
+			this.awi.editor.print( control.editor, [ result ], { user: 'result' } );
 			answer.data = result;
 		}
 		else
 		{
-			this.awi.editor.print( this, [ answer.error ], { user: 'error' } );
+			this.awi.editor.print( control.editor, [ answer.error ], { user: 'error' } );
 		}
 		return ( answer );
 	}

@@ -14,7 +14,7 @@
 * @file awi-bubble-generic-view.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short View command: view a media file in the current editor
 *
@@ -67,14 +67,14 @@ class BubbleGenericView extends awibubble.Bubble
 		if ( files.length == 1 )
 			return await this.awi.system.playFile( files[ 0 ].path, type, 'view', { } );
 
-		this.awi.editor.print( this, [ 'You can view these files: ' ], { user: 'information' } );
+		this.awi.editor.print( control.editor, [ 'You can view these files: ' ], { user: 'information' } );
 		var result = [];
 		for ( var f = 0; f < files.length; f++ )
 			result.push( ( f + 1 ) + '. ' + files[ f ].path );
-		this.awi.editor.print( this, result, { user: 'information' } );
+		this.awi.editor.print( control.editor, result, { user: 'information' } );
 		var param = await this.awi.prompt.getParameters( [
 			{ choice: 'Please enter a number between 1 and ' + files.length, type: 'number', interval: [ 1, files.length ], optional: false, default: 0 },
-			] );
+			], control );
 		if ( param.success )
 			return await this.awi.system.playFile( files[ param.data.choice - 1 ].path, type, 'view', { } );
 		return answer;

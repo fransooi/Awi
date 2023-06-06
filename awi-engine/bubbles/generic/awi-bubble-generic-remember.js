@@ -14,7 +14,7 @@
 * @file awi-bubble-generic-remember.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Remember command: dig a specific topid out of the memory
 *
@@ -52,14 +52,14 @@ class BubbleGenericRemember extends awibubble.Bubble
 		if ( answer.success == 'found' )
 		{
 			if ( answer.data.direct.souvenirs.length > 0 )
-				this.awi.editor.print( this, 'Found ' + answer.data.direct.souvenirs.length + ' direct souvenir(s).', { user: 'information' } );
+				this.awi.editor.print( control.editor, 'Found ' + answer.data.direct.souvenirs.length + ' direct souvenir(s).', { user: 'information' } );
 			else
-				this.awi.editor.print( this, 'No direct souvenir found.', { user: 'information' } );
+				this.awi.editor.print( control.editor, 'No direct souvenir found.', { user: 'information' } );
 
 			if ( parameters.scanLevel > 1 && answer.data.indirect.souvenirs.length > 0 )
-				this.awi.editor.print( this, 'Found ' + answer.data.indirect.souvenirs.length + ' indirect souvenir(s).', { user: 'information' } );
+				this.awi.editor.print( control.editor, 'Found ' + answer.data.indirect.souvenirs.length + ' indirect souvenir(s).', { user: 'information' } );
 			else
-				this.awi.editor.print( this, 'No indirect souvenir found.', { user: 'information' } );
+				this.awi.editor.print( control.editor, 'No indirect souvenir found.', { user: 'information' } );
 
 			this.awi.remember( line, answer.data.direct, answer.data.indirect );
 			return { success: 'success', data: answer.data }

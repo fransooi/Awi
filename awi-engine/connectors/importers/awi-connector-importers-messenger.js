@@ -3,10 +3,10 @@
 *            / \
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
-*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
+*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal
 * (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -14,7 +14,7 @@
 * @file awi-connector-importers-messenger.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Connector to Messenger HTML backup files
 *
@@ -36,7 +36,7 @@ class ConnectorImporterMessenger extends awiconnector.Connector
 		super.connect( options );
 		this.connectAnswer.success = true;
 		return this.connectAnswer;
-	}	
+	}
 
 
 	extractTokens( source, callback, extra )
@@ -46,12 +46,12 @@ class ConnectorImporterMessenger extends awiconnector.Connector
 	{
 
 	}
-	async import( path, senderName, receiverNameCompressed, options = {} )
+	async import( path, senderName, receiverNameCompressed, control = {} )
 	{
 		receiverNameCompressed = receiverNameCompressed.split( ' ' ).join( '' );
-		
-		options.minimumTextLength = ( typeof options.minimumTextLength == 'undefined' ? 20 : options.minimumTextLength );
-		options.from = ( typeof options.from == 'undefined' ? 'from inbox' : options.from );
+
+		control.minimumTextLength = ( typeof control.minimumTextLength == 'undefined' ? 20 : control.minimumTextLength );
+		control.from = ( typeof control.from == 'undefined' ? 'from inbox' : control.from );
 		var answer = await this.awi.utilities.loadIfExist( path, { encoding: 'utf8' } );
 		var html = answer.data;
 		if ( !html )
@@ -82,47 +82,47 @@ class ConnectorImporterMessenger extends awiconnector.Connector
 			{
 				var senderText = self.awi.utilities.removeDuplicatedLines( self.awi.system.decodeText( texts.sender ) );
 				var receiverText = self.awi.utilities.removeDuplicatedLines( self.awi.system.decodeText( texts.receiver ) );
-				if ( senderText.length >= options.minimumTextLength || receiverText.length >= options.minimumTextLength )
+				if ( senderText.length >= control.minimumTextLength || receiverText.length >= control.minimumTextLength )
 				{
 					var nWordsSender = senderText.split( ' ' ).length;
 					var nWordsReceiver = receiverText.split( ' ' ).length;
 					self.awi.editor.print( self, senderName + ' said: ' + senderText, { user: 'importer2' } );
 					self.awi.editor.print( self, receiverName + ' said: ' + receiverText, { user: 'importer2' } );
-						var text = [
+					var text = [
 						' - ' + nWordsSender + nWordsReceiver + ' words,',
-							' - ' + videos.length + ' video' + ( videos.length < 2 ? ',' : 's,' ),
-							' - ' + audios.length + ' audio clip' + ( audios.length < 2 ? ',' : 's,' ),
-							' - ' + images.length + ' image' + ( images.length < 2 ? ',' : 's,' ),
-							' - ' + links.length + ' link' + ( links.length < 2 ? '.' : 's.' ),
-						];
+						' - ' + videos.length + ' video' + ( videos.length < 2 ? ',' : 's,' ),
+						' - ' + audios.length + ' audio clip' + ( audios.length < 2 ? ',' : 's,' ),
+						' - ' + images.length + ' image' + ( images.length < 2 ? ',' : 's,' ),
+						' - ' + links.length + ' link' + ( links.length < 2 ? '.' : 's.' ),
+					];
 					self.awi.editor.print( self, text, { user: 'importer3' } );
-						self.awi.editor.print( self, '---------------------------------------------------------' , { user: 'importer2' } );
+					self.awi.editor.print( self, '---------------------------------------------------------' , { user: 'importer2' } );
 					var souvenir = new self.awi.newSouvenirs.generic.message( self.awi,
-						{ 
+					{
 						key: self.awi.utilities.getUniqueIdentifier( {}, 'souvenir_messenger', Math.floor( Math.random() * 1000000 ), '', 5, 5 ),
 						parent: '',
-							parameters: 
-							{
+						parameters:
+						{
 							path: path,
 							senderName: senderName,
 							receiverName: receiverName,
 							date: date,
 							senderText: senderText,
 							receiverText: receiverText,
-								videos: videos,
-								audios: audios,
-								images: images,
+							videos: videos,
+							audios: audios,
+							images: images,
 							links: links
 						}
 					} );
 					souvenirs.push( souvenir );
-					}
-					texts = { sender: '', receiver: '' };
-					videos = [];
-					audios = [];
-					images = [];
-					photos = [];
-					links = [];
+				}
+				texts = { sender: '', receiver: '' };
+				videos = [];
+				audios = [];
+				images = [];
+				photos = [];
+				links = [];
 				date = { time: 0, text: '', info: {} }
 			}
 			for ( var d = 0; d < data.length; d++ )
@@ -155,8 +155,8 @@ class ConnectorImporterMessenger extends awiconnector.Connector
 					}
 					if ( line == receiverName || line == senderName )
 					{
-					if ( line == senderName )
-						currentName = 'sender';
+						if ( line == senderName )
+							currentName = 'sender';
 						else
 							currentName = 'receiver';
 						texts[ currentName ] = currentText;
@@ -165,21 +165,21 @@ class ConnectorImporterMessenger extends awiconnector.Connector
 							saveMemories();
 						continue;
 					}
-						line = line.trim();
-						if ( line.length > 8 )
+					line = line.trim();
+					if ( line.length > 8 )
+					{
+						var content = this.awi.utilities.extractLinks( line );
+						if ( content.found )
 						{
-							var content = this.awi.utilities.extractLinks( line );
-							if ( content.found )
-							{
-								videos.push( ...content.videos );
-								audios.push( ...content.audios );
-								images.push( ...content.images );
-								images.push( ...content.photos );
-								links.push( ...content.links );
-							}
-							var text = this.awi.utilities.cleanLinks( content.line );
-							if ( text )
-							{
+							videos.push( ...content.videos );
+							audios.push( ...content.audios );
+							images.push( ...content.images );
+							images.push( ...content.photos );
+							links.push( ...content.links );
+						}
+						var text = this.awi.utilities.cleanLinks( content.line );
+						if ( text )
+						{
 							currentText += text + ' ';
 						}
 					}
@@ -187,7 +187,7 @@ class ConnectorImporterMessenger extends awiconnector.Connector
 			}
 			saveMemories();
 			if ( souvenirs.length > 0 )
-				this.awi.editor.print( self, 'Imported conversation with ' + receiverName, { user: 'importer1' } );
+				this.awi.editor.print( control.editor, 'Imported conversation with ' + receiverName, { user: 'importer1' } );
 		}
 		return { success: true, data: { souvenirs: souvenirs } };
 	}

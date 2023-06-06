@@ -1,3 +1,10 @@
+20230606 Changed version to 0.3
+20230606 Connection to Awi extension in Aoz Studio
+20230606 Creation of a new session for each connection
+20230606 Completion of Awi server editor connector
+20230606 Cleaning of editor/parent relationships
+
+20230603 Inclusion of node_modules in repository, allowing immediate run after clone
 20230603 Saving of personality and memories
 20230603 Class Branch now really derived from Bubble
 20230603 Class Bulb now called "Branch"

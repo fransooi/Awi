@@ -3,10 +3,10 @@
 *            / \
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
-*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
+*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal
 * (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -14,7 +14,7 @@
 * @file awi-connector-servers-node.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Connector to open-ai via Open-AI node library
 *
@@ -41,18 +41,19 @@ class ConnectorClientOpenAiNode extends awiconnector.Connector
 	async connect( options )
 	{
 		super.connect( options );
-		var key = this.awi.config.getUserKey();
-		if ( key != '' )
+		if ( !this.openai )
 		{
-			this.configuration = new Configuration(
+			var key = this.awi.config.getUserKey();
+			if ( key != '' )
 			{
-				apiKey: key,
-			} );		  
-			this.openai = new OpenAIApi( this.configuration );
-			this.connectAnswer.success = true;
-			return this.connectAnswer;
+				this.configuration = new Configuration(
+				{
+					apiKey: key,
+				} );
+				this.openai = new OpenAIApi( this.configuration );
+			}
 		}
-		this.connectAnswer.success = false;
+		this.connectAnswer.success = this.openai ? true : false;
 		this.connectAnswer.nonFatal = true;
 		return this.connectAnswer;
 	}
@@ -65,7 +66,7 @@ class ConnectorClientOpenAiNode extends awiconnector.Connector
 			var parameters = this.awi.utilities.getControlParameters( control,
 			{
 				model: 'whisper-1',
-				response_format: 'json', 
+				response_format: 'json',
 				temperature: 0,
 				language: 'en'
 			} );
@@ -76,7 +77,7 @@ model: {model}
 temperature: {temperature}
 response_format: {response_format}
 language: {language}`, parameters );
-			this.awi.editor.print( this, debug.split( '\n' ), { user: 'completion' } );
+			this.awi.editor.print( control.editor, debug.split( '\n' ), { user: 'completion' } );
 
 			var response;
 			try
@@ -138,20 +139,20 @@ max_tokens: {max_tokens}
 temperature: {temperature}
 top_p: {top_p}
 n: {n}`, parameters );
-				this.awi.editor.print( this, debug.split( '\n' ), { user: 'completion' } );
+				this.awi.editor.print( control.editor, debug.split( '\n' ), { user: 'completion' } );
 			}
 			var response;
 			try
 			{
 				response = await this.openai.createCompletion(
-			{
-				prompt: prompt,
-				model: "text-davinci-003",
-				max_tokens: parameters.max_tokens,
-				temperature: parameters.temperature,
-				top_p: 1,
-				n: parameters.n
-			} );		
+				{
+					prompt: prompt,
+					model: "text-davinci-003",
+					max_tokens: parameters.max_tokens,
+					temperature: parameters.temperature,
+					top_p: 1,
+					n: parameters.n
+				} );
 			}
 			catch( e )
 			{
@@ -159,7 +160,7 @@ n: {n}`, parameters );
 				answer.error = e;
 				return answer;
 			}
-	
+
 			if ( !response.error )
 			{
 				answer.success = true;

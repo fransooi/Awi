@@ -14,7 +14,7 @@
 * @file awi-bubble.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Main bubble class from which all elements are derived.
 *
@@ -65,26 +65,21 @@ class Bubble
 		}
 		return null;
 	}
-	async sendCompletion( prompt, stream, options )
+	async sendCompletion( prompt, stream, control )
 	{
-		this.awi.editor.wait( this, true );
-		var answer = await this.awi.client.sendCompletion( prompt, stream, options );
-		this.awi.editor.wait( this, false );
+		this.awi.editor.wait( control.editor, true );
+		var answer = await this.awi.client.sendCompletion( prompt, stream, control );
+		this.awi.editor.wait( control.editor, false );
 		return answer;
 	}
 	async play( line, parameters, control )
 	{
 		this.useCount++;
-		this.awi.editor.print( this, [ "Playing bubble " + this.name ], { user: 'bubble' } );
+		this.awi.editor.print( control.editor, [ "Playing bubble " + this.name ], { user: 'bubble' } );
 
 		if ( line.indexOf( '{awi:' ) == 0 )
 			return { success: true };
 
-		if ( control.range )
-		{
-			this.startPrompt = this.awi.editor.getStartPrompt( control.range );
-			this.checkpoint = this.awi.editor.createCheckpoint();
-		}
 		if ( typeof parameters == 'undefined' )
 			return this.parameters;
 

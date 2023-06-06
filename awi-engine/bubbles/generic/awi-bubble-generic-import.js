@@ -14,7 +14,7 @@
 * @file awi-bubble-generic-import.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Import command: import a file in the current project through the current editor connector
 *
@@ -69,22 +69,22 @@ class BubbleGenericImport extends awibubble.Bubble
 		var files = this.awi.utilities.removeDuplicatesFromFiles( answer.data );
 		if ( files.length == 0 )
 		{
-			this.awi.editor.print( this, [ 'No asset found with that name...' ], { user: 'information' } );
+			this.awi.editor.print( control.editor, [ 'No asset found with that name...' ], { user: 'information' } );
 			return { success: false, error: 'awi:no-file-list-found:iwa' };
 		}
 		if ( files.length == 1 )
 			return await importFile( files[ 0 ].path );
 		var result = [];
-		this.awi.editor.print( this, [ 'I have found these assets:' ], { user: 'information' } );
+		this.awi.editor.print( control.editor, [ 'I have found these assets:' ], { user: 'information' } );
 		for ( var l = 0; l < files.length; l++ )
 			result.push( ( l + 1 ) + '. ' + files[ l ].name );
-		this.awi.editor.print( this, result, { user: 'information' } );
+		this.awi.editor.print( control.editor, result, { user: 'information' } );
 		var param = await this.awi.prompt.getParameters( [ {
 			token: 'input',
 			classname: 'generic',
 			parameters: [ { name: 'choice',	description: 'Please enter a number between 1 and ' + files.length, type: 'number',	interval: [ 1, files.length ] } ],
 			options: { }
-		} ] );
+		} ], control );
 		if ( param.success )
 			return await importFile( files[ param.data.userInput - 1 ].path );
 		return { success: false, error: 'awi:cancelled:iwa', data: {} };

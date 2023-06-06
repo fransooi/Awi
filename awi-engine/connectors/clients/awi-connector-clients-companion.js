@@ -3,10 +3,10 @@
 *            / \
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
-*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
+*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal
 * (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -14,7 +14,7 @@
 * @file awi-connector-servers-server.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Connector to Open-Ai via companion server
 *
@@ -42,34 +42,34 @@ class ConnectorClientCompanion extends awiconnector.Connector
 		this.handleTimeout = 0;
 		this.handleSendInterval = 0;
 		this.tryConnectings = [];
-		this.waitingConnectings = false;		
+		this.waitingConnectings = false;
 		this.messageCount = 0;
 	}
-	async connect( options ) 
+	async connect( options )
 	{
 		super.connect( options );
-		if ( this.connected ) 
-		 	return; 
+		if ( this.connected )
+		 	return;
 
 		this.connectAnswer = null;
-		doConnect( {}, 
+		doConnect( {},
 			function( response, data )
 			{
 				this.connectAnswer = data;
 			}, extra );
 
-		return new Promise( ( resolve ) => 
+		return new Promise( ( resolve ) =>
 		{
-			const checkConnection = () => 
+			const checkConnection = () =>
 			{
-				if ( this.connectedAnswer ) 
+				if ( this.connectedAnswer )
 				{
 					resolve( this.connectedAnswer );
-				} 
+				}
 			};
 			checkConnection();
 		} );
-	}	
+	}
 	async doConnect( options = {}, callback, extra )
 	{
 		if ( this.connected )
@@ -82,7 +82,7 @@ class ConnectorClientCompanion extends awiconnector.Connector
 			callback( false, {}, extra );
 			return false;
 		}
-		
+
 		var self = this;
 		self.connecting = true;
 		function onOpen()
@@ -99,7 +99,7 @@ class ConnectorClientCompanion extends awiconnector.Connector
 				}
 			}, 500 );
 
-			var message = 
+			var message =
 			{
 				command: 'connect',
 				name: 'aoz',
@@ -108,12 +108,12 @@ class ConnectorClientCompanion extends awiconnector.Connector
 			self.sendMessage( message, false, function( success, data, extra  )
 			{
 				if ( success )
-				{					
+				{
 					self.connectionHandle = data.handle;
 					var coded = '';
 					var code = data.code;
 					var aikey = self.awi.config.getUserKey();
-					if ( typeof aikey == 'undefined' || aikey == '' )	
+					if ( typeof aikey == 'undefined' || aikey == '' )
 					{
 						if ( !options.noErrors )
 							self.awi.alert( 'Please insert your OpenAI key...' );
@@ -122,8 +122,8 @@ class ConnectorClientCompanion extends awiconnector.Connector
 						return;
 					}
 					for ( var c = 0; c < aikey.length; c++ )
-						coded += String.fromCharCode( aikey.charCodeAt( c ) ^ code.charCodeAt( c ) );		
-					var message = 
+						coded += String.fromCharCode( aikey.charCodeAt( c ) ^ code.charCodeAt( c ) );
+					var message =
 					{
 						handle: self.connectionHandle,
 						command: 'openAPI',
@@ -182,7 +182,7 @@ class ConnectorClientCompanion extends awiconnector.Connector
 			self.waiting = false;
 			self.wsClient.close();
 			self.wsClient = null;
-			callback( false, 'awi:network_error:iwa', self.systemCallbackExtra );	
+			callback( false, 'awi:network_error:iwa', self.systemCallbackExtra );
 			if ( !options.noErrors )
 				self.awi.alert( 'Awi server disconnected...', false, null );
 		}
@@ -193,12 +193,12 @@ class ConnectorClientCompanion extends awiconnector.Connector
 	}
 	sendCompletion( prompt, stream, callback, extra )
 	{
-		var message = 
+		var message =
 		{
 			handle: this.connectionHandle,
 			command: 'callAPI',
 			name: 'openai',
-			data: 
+			data:
 			{
 				command: 'createCompletion',
 				options: {
@@ -210,7 +210,7 @@ class ConnectorClientCompanion extends awiconnector.Connector
 				}
 			}
 		};
-		this.sendMessageAndCallback( { message: message, callback: 
+		this.sendMessageAndCallback( { message: message, callback:
 			function( success, answer, options )
 			{
 				if ( answer.response && answer.data.response )

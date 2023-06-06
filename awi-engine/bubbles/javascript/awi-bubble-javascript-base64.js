@@ -14,7 +14,7 @@
 * @file awi-bubble-generic-bin.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Bin command: convert to binary
 *
@@ -82,14 +82,14 @@ class BubbleProgrammingBase64 extends awibubble.Bubble
 		if ( files.length == 1 )
 			return convert( files[ 0 ].path );
 
-		this.awi.editor.print( this, [ 'You can convert these files: ' ], { user: 'information' } );
+		this.awi.editor.print( control.editor, [ 'You can convert these files: ' ], { user: 'information' } );
 		var result = [];
 		for ( var f = 0; f < files.length; f++ )
 			result.push( ( f + 1 ) + '. ' + files[ f ].path );
-		this.awi.editor.print( this, result, { user: 'information' } );
-		var param = await this.awi.prompt.getParameters( [
+		this.awi.editor.print( control.editor, result, { user: 'information' } );
+		var param = await this.awi.prompt.getParameters( control.editor, [
 			{ choice: 'Please enter a number between 1 and ' + files.length, type: 'number', interval: [ 1, files.length ], optional: false, default: 0 },
-			] );
+			], control );
 		if ( param.success )
 			return convert( files[ param.data.choice - 1 ].path );
 		return answer;

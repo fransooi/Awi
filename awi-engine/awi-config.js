@@ -14,7 +14,7 @@
 * @file awi-config.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Configuration management
 *
@@ -94,7 +94,7 @@ class Config
 		}
 		return list;
 	}
-	async setUser( user )
+	async setUser( user, control )
 	{
 		var config = this.checkUserConfig( user );
 		if ( config )
@@ -102,7 +102,10 @@ class Config
 			this.user = user.toLowerCase().trim();
 			var answer = await this.awi.client.connect( this.awi.client.options );
 			if ( answer.success )
-				this.awi.editor.print( this, '\n' + answer.data.prompt + ' running.', { user: 'information' } )
+			{
+				control.editor.self.setPrompt( control.editor, '.(' + user + ') ' );
+				this.awi.editor.print( control.editor, '\n' + answer.data.prompt + ' running.', { user: 'information' } );
+			}
 			return answer;
 		}
 		else
@@ -115,7 +118,10 @@ class Config
 				this.user = user.toLowerCase().trim();
 				var answer = await this.awi.client.connect( this.awi.client.options );
 				if ( answer.success )
-					this.awi.editor.print( this, '\n' + answer.data.prompt + ' running.' )
+				{
+					control.editor.self.setPrompt( control.editor, '.(' + user + ') ' );
+					this.awi.editor.print( control.editor, '\n' + answer.data.prompt + ' running.' )
+				}
 				return answer;
 			}
 		}

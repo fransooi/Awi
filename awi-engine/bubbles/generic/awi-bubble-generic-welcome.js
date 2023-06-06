@@ -14,7 +14,7 @@
 * @file awi-bubble-generic-welcome.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Welcome: displays welcome message, always called first. Can display nothing.
 *        Can display animations, can depend on mood/news etc.
@@ -45,7 +45,7 @@ class BubbleGenericWelcome extends awibubble.Bubble
 				{ firstname: 'Please enter your first name: ', type: 'string', optional: false, default: '' },
 				{ lastname: 'Please enter your last name: ', type: 'string', optional: false, default: '' },
 				{ aikey: 'Please enter your open-ai key: ', type: 'string', optional: false, default: '' },
-				] );
+				], control );
 			if ( param.success )
 			{
 				var config = this.awi.config.getNewUserConfig();
@@ -57,13 +57,13 @@ class BubbleGenericWelcome extends awibubble.Bubble
 				var answer = await this.awi.config.saveConfigs();
 				if ( answer.success )
 				{
-					this.awi.editor.print( this, 'User configuration "' + config.firstName + '" successfully created in ' + this.awi.config.getConfigurationPath() );
-					this.awi.editor.print( this, 'Please now type "' + config.firstName + '" to login...' );
+					this.awi.editor.print( control.editor, 'User configuration "' + config.firstName + '" successfully created in ' + this.awi.config.getConfigurationPath() );
+					this.awi.editor.print( control.editor, 'Please now type "' + config.firstName + '" to login...' );
 					var prompt = this.awi.config.getPrompt( 'question' );
-					this.awi.editor.waitForInput( prompt, { toPrint: prompt } );
+					this.awi.editor.waitForInput( control.editor );
 					return { success: true, data: {} };
 				}
-				this.awi.editor.print( this, 'Sorry I need these information to run.' );
+				this.awi.editor.print( control.editor, 'Sorry I need these information to run.' );
 				return { success: false, error: 'awi:config-not-set:iwa' };
 			}
 		}

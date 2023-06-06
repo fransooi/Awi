@@ -14,7 +14,7 @@
 * @file awi-souvenir-awi-audio.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Audio souvenir
 *
@@ -43,9 +43,9 @@ class SouvenirGenericAudio extends awisouvenir.Souvenir
 	}
 	async getContent( line, parameters, control )
 	{
-		this.awi.editor.print( this, 'Text: ' + this.parameters.text, { user: 'memory3' } );
-		this.awi.editor.print( this, 'Start: ' + this.parameters.start.text + ', end: ' + this.parameters.end.text, { user: 'memory3' } );
-		this.awi.editor.print( this, '------------------------------------------------------------', { user: 'memory3' } );
+		this.awi.editor.print( control.editor, 'Text: ' + this.parameters.text, { user: 'memory3' } );
+		this.awi.editor.print( control.editor, 'Start: ' + this.parameters.start.text + ', end: ' + this.parameters.end.text, { user: 'memory3' } );
+		this.awi.editor.print( control.editor, '------------------------------------------------------------', { user: 'memory3' } );
 		return {
 			success: 'found',
 			data: {	audioInfo: this.parameters }

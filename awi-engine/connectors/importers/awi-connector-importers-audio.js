@@ -3,10 +3,10 @@
 *            / \
 *          / _ \               (°°)       Intelligent
 *        / ___ \ [ \ [ \  [ \ [   ]       Programmable
-*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal 
+*     _/ /   \ \_\  \/\ \/ /  |  | \      Personal
 * (_)|____| |____|\__/\__/  [_| |_] \     Assistant
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -14,7 +14,7 @@
 * @file awi-connector-importers-audio.js
 * @author FL (Francois Lionet)
 * @date first pushed on 10/11/2019
-* @version 0.2
+* @version 0.3
 *
 * @short Import audio file content
 *
@@ -36,16 +36,16 @@ class ConnectorImporterAudio extends awiconnector.Connector
 		super.connect( options );
 		this.connectAnswer.success = true;
 		return this.connectAnswer;
-	}	
-	async import( path, senderName, options = {} )
-	{		
-		this.awi.editor.print( this, 'Transcripting audio to text from file ' + path + '.', { user: 'importer1' } )
+	}
+	async import( path, senderName, control = {} )
+	{
+		this.awi.editor.print( control.editor, 'Transcripting audio to text from file ' + path + '.', { user: 'importer1' } )
 		var transcription = await this.awi.client.createTranscription( '', path, { response_format: 'srt' } );
 		if ( transcription.success )
 		{
 			var stats = await this.awi.system.stat( path );
 			stats = stats.data;
-			var typeSouvenir = typeof options.typeSouvenir != 'undefined' ? options.typeSouvenir : 'audio';
+			var typeSouvenir = typeof control.typeSouvenir != 'undefined' ? control.typeSouvenir : 'audio';
 			var numberOfSouvenirs = 0;
 
 			// Convert SRT to array
@@ -71,23 +71,23 @@ class ConnectorImporterAudio extends awiconnector.Connector
 				}
 				var key = this.awi.utilities.getUniqueIdentifier( {}, typeSouvenir, Math.floor( Math.random() * 100 ) );
 				var souvenir = new this.awi.newSouvenirs.generic[ typeSouvenir ]( this.awi, { key: key, parent: '', parameters:
-					{
+				{
 					senderName: senderName,
 					receiverName: '',
 					path: path,
-						text: text,
+					text: text,
 					date: this.awi.utilities.getTimestampFromStats( stats ),
-						start: start,
+					start: start,
 					end: end
 				} } );
 				souvenirs.push( souvenir );
 				numberOfSouvenirs++;
 				l += ll;
-				this.awi.editor.print( this, 'From: ' + start.text + ' to ' + end.text , { user: 'importer3' } )
-				this.awi.editor.print( this, text, { user: 'importer3' } )				
-				this.awi.editor.print( this, '--------------------------------------------------------------------------------', { user: 'importer3' } )
+				this.awi.editor.print( control.editor, 'From: ' + start.text + ' to ' + end.text , { user: 'importer3' } )
+				this.awi.editor.print( control.editor, text, { user: 'importer3' } )
+				this.awi.editor.print( control.editor, '--------------------------------------------------------------------------------', { user: 'importer3' } )
 			}
-			this.awi.editor.print( this, 'Number of lines: ' + numberOfSouvenirs , { user: 'importer2' } )
+			this.awi.editor.print( control.editor, 'Number of lines: ' + numberOfSouvenirs , { user: 'importer2' } )
 			return { success: true, data: { souvenirs: souvenirs } };
 		}
 		return transcription;

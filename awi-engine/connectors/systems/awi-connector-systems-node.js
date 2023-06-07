@@ -58,9 +58,15 @@ class ConnectorSystemNode extends awiconnector.Connector
 				assets: [ '*Desktop', '*Documents', '*Pictures', '*Music', '*Downloads', '*Videos' ],
 			}
 		};
+		try 
+		{
+			this.tempDirectoryPath = fs.mkdtempSync( ppath.join( os.tmpdir(), 'awi' ) );
+		} catch { }
 	}
 	quit()
 	{
+		if ( this.tempDirectoryPath )
+			awi.utilities.deleteDirectory( this.tempDirectoryPath, { recursive: true, keepRoot: false } );
 		process.exit( 0 );
 	}
 	async connect( options )
@@ -528,6 +534,17 @@ class ConnectorSystemNode extends awiconnector.Connector
 	async exists( path )
 	{
 		return { success: fs.existsSync( path ), data: {} };
+	}
+	async getTempPath( base, extension )
+	{
+		while( true )
+		{
+			var name = base + '_' + Math.floor( Math.random() * 100000 ) + '.' + extension;
+			var path = this.awi.utilities.normalize( this.tempDirectoryPath + '/' + name );
+			var answer = await this.exists( path );
+			if ( !answer.success )
+				return path;
+		}
 	}
 	hJsonParse( hjsonString )
 	{

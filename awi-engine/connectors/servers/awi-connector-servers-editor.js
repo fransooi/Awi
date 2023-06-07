@@ -171,6 +171,10 @@ class ConnectorServerEditor extends awiconnector.Connector
 	}
 	async command_askAudio( editor, message )
 	{
+		var buffer = this.awi.utilities.convertStringToArrayBuffer( message.data.promptAudio );
+		var path = await this.awi.system.getTempPath( 'ask', 'webm' );
+		await this.awi.system.writeFile( path, buffer, {} );
+/*
 		editor.resultText = [];
 		editor.resultTextClean = [];
 		if ( editor.inputDisabled == 0 )
@@ -207,6 +211,7 @@ class ConnectorServerEditor extends awiconnector.Connector
 					}, 100 );
 			}
 		}
+*/
 	}
 	print( editor, text, options = {} )
 	{

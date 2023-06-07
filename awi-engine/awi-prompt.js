@@ -169,7 +169,7 @@ class Prompt
 						if ( answer.success )
 						{
 							logged = true;
-							line = 'Please say hello to ' + userName + ' with a short joke about programming...';
+							line = '';	//'Please say hello to ' + userName + ' with a short joke about programming...';
 							this.awi.editor.print( control.editor, 'User changed to ' + userName + '\n', { user: 'information' } );
 						}
 						else

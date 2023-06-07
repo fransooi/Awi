@@ -1,3 +1,4 @@
+20230607 Work on speech to text
 20230606 Beginning of implementation of interpretation of audio files as commands
 20230606 Server now send two texts: one with prompts and cariage returns, one with just the texte
 20230606 Made it work as a server with multiple connections

@@ -58,10 +58,12 @@ class ConnectorSystemNode extends awiconnector.Connector
 				assets: [ '*Desktop', '*Documents', '*Pictures', '*Music', '*Downloads', '*Videos' ],
 			}
 		};
+/*
 		try 
 		{
 			this.tempDirectoryPath = fs.mkdtempSync( ppath.join( os.tmpdir(), 'awi' ) );
 		} catch { }
+*/
 	}
 	quit()
 	{

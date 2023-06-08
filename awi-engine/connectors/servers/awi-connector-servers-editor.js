@@ -169,49 +169,37 @@ class ConnectorServerEditor extends awiconnector.Connector
 			}
 		}
 	}
-	async command_askAudio( editor, message )
+	async command_understand( editor, message )
 	{
-		var buffer = this.awi.utilities.convertStringToArrayBuffer( message.data.promptAudio );
-		var path = await this.awi.system.getTempPath( 'ask', 'webm' );
-		await this.awi.system.writeFile( path, buffer, {} );
-/*
-		editor.resultText = [];
-		editor.resultTextClean = [];
-		if ( editor.inputDisabled == 0 )
+		var buffer = editor.awi.utilities.convertStringToArrayBuffer( message.data.promptAudio );
+		var view = new Uint8Array( buffer );
+		//var path = await editor.awi.system.getTempPath( 'ask', 'webm' );
+		var path = '/home/francois/temp/sound.webm';
+		var answer = await editor.awi.system.writeFile( path, view, {} );
+		if ( answer.success )
 		{
-			if ( editor.reroute )
-				editor.reroute( message.data.prompt, {}, { editor: editor } );
-			else
-				editor.awi.prompt.prompt( message.data.prompt, {}, { editor: editor } );
-		}
-		else
-		{
-			editor.toAsk.push( message );
-			if ( editor.toAsk.length == 1 )
+			var transcription = await editor.awi.client.createTranscription( '', path, { response_format: 'srt' } );
+			if ( transcription.success )
 			{
-				editor.handleAsk = setInterval(
-					function()
+				// Convert SRT to text
+				var lines = transcription.data.split( '\n' );
+				var prompt = '';
+				for ( var l = 0; l < lines.length; l++ )
+				{
+					var number = parseInt( lines[ l ] );
+					if ( isNaN( number ) || number == 0 )
+						break;
+					for ( var ll = 2; ll + l < lines.length; ll++ )
 					{
-						if ( editor.inputDisabled == 0 )
-						{
-							if ( editor.toAsk.length > 0 )
-							{
-								var message = editor.toAsk.pop();
-								if ( editor.reroute )
-									editor.reroute( message.data.prompt, {}, { editor: editor } );
-								else
-									editor.awi.prompt.prompt( message.data.prompt, {}, { editor: editor } );
-							}
-							else
-							{
-								clearInterval( editor.handleAsk );
-								editor.handleAsk = null;
-							}
-						}
-					}, 100 );
+						if ( !lines[ ll + l ] )
+							break;
+						prompt += lines[ ll + l ] + ' ';
+					}
+				}
+				message.data.prompt = prompt;
+				await this.command_ask( editor, message );
 			}
 		}
-*/
 	}
 	print( editor, text, options = {} )
 	{

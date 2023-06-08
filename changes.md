@@ -1,3 +1,6 @@
+20230608 New server command "understand", parsing an audio file
+20230608 Server side complete and working
+
 20230607 Work on speech to text
 20230606 Beginning of implementation of interpretation of audio files as commands
 20230606 Server now send two texts: one with prompts and cariage returns, one with just the texte

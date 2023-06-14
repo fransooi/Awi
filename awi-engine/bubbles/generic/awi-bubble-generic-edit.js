@@ -29,55 +29,64 @@ class BubbleGenericEdit extends awibubble.Bubble
 		this.name = 'Edit';
 		this.token = 'edit';
 		this.classname = 'generic';
-		this.properties.action = 'a file file';
-		this.properties.inputs = [ { userInput: 'the name of the file to edit', type: 'string' } ];
-		this.properties.outputs = [ { fileEdited: 'the last file edited', type: 'path' } ];
-		this.properties.brackets = false;
-		this.properties.tags = [ 'editor', 'media' ];
+		this.properties.action = 'edit a file';
+		this.properties.inputs = [
+			{ file: 'the file to edit', type: 'string' },
+			{ date: 'the date when the file was created', type: 'string', optional: true },
+			{ time: 'the time when the file was created', type: 'string', optional: true },
+			{ input: 'description of the content to search for', type: 'string', optional: true },
+			];
+		this.properties.outputs = [ { files: 'the last list of files', type: 'path.string.array' },
+									{ fileEdited: 'the last file to be ran', type: 'path' } ];
+		this.properties.parser = {
+			verb: [ 'edit', 'modify', 'change', 'correct' ],
+			file: [], date: [], time: [], input: [] };
+		this.properties.select = [ [ 'verb' ] ];
 	}
 	async play( line, parameters, control )
 	{
-		await super.play( line, parameters, control );
-		if ( /^\d+$/.test( parameters.userInput ) )
+		var self = this;
+		async function playIt( file, files )
 		{
-			var files = this.branch.getLastData( this, 'fileList' );
+			var play = await self.awi.system.playFile( file, 'edit', control );
+			if ( play.success )
+			{
+				if ( typeof files != 'undefined' )
+					return { success: true, data: { files: files, fileEdited: file } };
+				return { success: true, data: { fileEdited: file } };
+			}
+		}
+
+		await super.play( line, parameters, control );
+		if ( /^\d+$/.test( line ) )
+		{
+			var files = this.branch.getLastData( this, 'files' );
 			if ( files && files.length > 0 )
 			{
-				var number = parseInt( parameters.userInput ) - 1;
+				var number = parseInt( line ) - 1;
 				if ( number >= 0 && number < files.length )
-				{
-					var type = this.awi.system.getFileType( files[ number ].path );
-					return await this.awi.system.playFile( files[ number ].path, type, 'edit', { } );
-				}
+					return await playIt( files[ number ] );
 				return { success: false, error: 'awi:not-found:iwa' };
 			}
 		}
-		var path = this.awi.utilities.normalize( parameters.userInput )
-		var answer = await this.awi.system.exists( path );
-		if ( answer.success )
-			return this.awi.system.playFile( path, type, 'edit', { } );
-
-		var type = this.awi.system.getFileType( parameters.userInput );
-		var paths = this.awi.system.getPaths( type );
-		var answer = await this.awi.system.findFile( paths, parameters.userInput, { } );
-		if ( !answer.success || answer.data.length == 0 )
+		var answer = await this.awi.system.findFiles( line, parameters, control );
+		if ( !answer.success )
 			return { success: false, error: 'awi:not-found:iwa' };
 
-		var files = answer.data;
-		if ( files.length == 1 )
-			return await this.awi.system.playFile( files[ 0 ].path, type, 'edit', { } );
+		if ( answer.success === '1' )
+			return await playIt( answer.data[ 0 ], answer.data );
 
 		var result = [];
-		this.awi.editor.print( control.editor, [ 'I have found these files to edit:' ], { user: 'information' } );
-		for ( var l = 0; l < files.length; l++ )
-			result.push( ( l + 1 ) + '. ' + files[ l ].name );
+		this.awi.editor.print( control.editor, [ 'You can edit these files: ' ], { user: 'information' } );
+		for ( var f = 0; f < answer.data.length; f++ )
+			result.push( ( f + 1 ) + '. ' + answer.data[ f ].path );
 		this.awi.editor.print( control.editor, result, { user: 'information' } );
 		var param = await this.awi.prompt.getParameters( [
-			{ choice: 'Please enter a number between 1 and ' + files.length, type: 'number', interval: [ 1, files.length ], optional: false, default: 0 },
+			{ choice: 'Please enter a number between 1 and ' + answer.data.length, type: 'number', interval: [ 1, answer.data.length ], optional: false, default: 0 },
 			], control );
 		if ( param.success )
-			return await this.awi.system.playFile( files[ param.data.choice - 1 ].path, type, 'edit', { } );
-		return param;
+			return await playIt( answer.data[ param.data.choice - 1 ], answer.data );
+		return answer;
 	}
 	async playback( line, parameters, control )
 	{

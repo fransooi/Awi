@@ -31,15 +31,17 @@ class BubbleGenericEval extends awibubble.Bubble
 		this.token = 'eval';
 		this.classname = 'generic';
 		this.properties.action = 'converts a string to a number';
-		this.properties.inputs = [ { userInput: 'the expression to convert', type: 'string' } ];
+		this.properties.inputs = [ { evaluation: 'the expression to convert', type: 'string' } ];
 		this.properties.outputs = [ { evalValue: 'the last evaluated expression', type: 'number' } ];
-		this.properties.brackets = true;
-		this.properties.tags = [ 'mathematics', 'education', 'programming' ];
+		this.properties.parser = {
+			verb: [ 'eval', 'evaluate', 'calculate', 'calc' ],
+			evaluation: [ 'numeric' ] };
+		this.properties.select = [ [ 'verb' ] ];
 	}
 	async play( line, parameters, control )
 	{
 		await super.play( line, parameters, control );
-		var answer = await this.awi.language.doEval( parameters.userInput, {} );
+		var answer = await this.awi.language.doEval( '' + parameters.evaluation, {} );
 		if ( answer.success )
 		{
 			this.awi.editor.print( control.editor, [ '' + answer.data ], { user: 'result' } );

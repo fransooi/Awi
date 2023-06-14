@@ -79,6 +79,7 @@ class ConnectorServerEditor extends awiconnector.Connector
 			} );
 		}
 		this.connected = true;
+		this.connectAnswer.data.token = this.classname;
 		this.connectAnswer.success = true;
 		return this.connectAnswer;
 	}

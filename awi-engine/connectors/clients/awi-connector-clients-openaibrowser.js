@@ -36,12 +36,14 @@ class ConnectorClientOpenAiBrowser extends awiconnector.Connector
 		super( awi, options );
 		this.token = 'openaibrowser';
 		this.name = 'OpenAi Browser';
+		this.token = 'client';
 		this.classname = 'client';
 		this.version = '0.2.1';
 	}
 	async connect( options )
 	{
 		super.connect( options );
+		this.connectAnswer.data.token = this.classname;
 		this.connectAnswer.success = true;
 		return this.connectAnswer;
 	}

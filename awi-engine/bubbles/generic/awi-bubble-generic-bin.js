@@ -30,16 +30,20 @@ class BubbleGenericBin extends awibubble.Bubble
 		this.token = 'bin';
 		this.classname = 'generic';
 		this.properties.action = 'converts an expression to a binary number';
-		this.properties.inputs = [ { userInput: 'the expression to convert to binary', type: 'string' } ];
-		this.properties.outputs = [ { bin: 'the expression converted to binary', type: 'number' } ];
-		this.properties.brackets = true;
-		this.properties.tags = [ 'conversions', 'mathematics', 'education', 'programming' ];
+		this.properties.inputs = [ { evaluation: 'the expression to convert to binary', type: 'string' } ];
+		this.properties.outputs = [ { binValue: 'the expression converted to binary', type: 'number' } ];
+		this.properties.parser = {
+			verb: [ 'convert', 'transform', 'calculate' ],
+			adjective: [ 'binary' ],
+			questionWord: [ 'what' ],
+			evaluation: [ 'numeric' ] };
+		this.properties.select = [ [ 'verb', 'adjective' ], [ 'questionWord', 'adjective' ] ];
 	}
 	async play( line, parameters, control )
 	{
 		await super.play( line, parameters, control );
 
-		var answer = await this.awi.language.doEval( parameters.userInput, {} );
+		var answer = await this.awi.language.doEval( '' + parameters.evaluation, {} );
 		if ( answer.success )
 		{
 			var result = '%' + this.awi.utilities.toBin( answer.data, 16 );

@@ -30,10 +30,12 @@ class BubbleGenericHelp extends awibubble.Bubble
 		this.token = 'help';
 		this.classname = 'generic';
 		this.properties.action = 'provide help about using awi';
-		this.properties.inputs = [ { userInput: 'the desired topic', type: 'string', optional: true, default: '' } ];
+		this.properties.inputs = [ { input: 'the desired topic', type: 'string', optional: true, default: '' } ];
 		this.properties.outputs = [ { helpTopic: 'help about the topic', type: 'string' } ];
-		this.properties.brackets = false;
-		this.properties.tags = [ 'system', 'help' ];
+		this.properties.parser = {
+			verb: [ 'help' ],
+			input: [] };
+		this.properties.select = [ [ 'verb' ] ];
 		this.properties.editables =
 		[
 			{ name: 'welcome', type: 'text', content: `
@@ -103,7 +105,7 @@ Commands may or may not call Awi for a response.
 	async play( line, parameters, control )
 	{
 		await super.play( line, parameters, control );
-		var text = this.findEditable( parameters.userInput );
+		var text = this.findEditable( parameters.input );
 		if ( !text )
 			text = this.findEditable( 'welcome' );
 		text = text.content.split( '\r\n' ).join( '\n' ).split( '\n' )

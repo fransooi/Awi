@@ -1,0 +1,111 @@
+version 2.3.2 (2019-09-25 [25 Elul 5779])
+  Hebrew language corrections [avrAhituv]
+
+version 2.3.1 (2019-02-11 [6 Adar 1 5779])
+  Fix HDate after, etc methods when setting location
+
+version 2.3.0 (2019-02-11 [6 Adar 1 5779])
+  Add isSedra method to HDate
+  Fix dependency issues
+  Fix bug of latitude longitude mismatch [haimkastner]
+  Fix spellings -- חיי שרה [icarpis]
+  Fix spellings -- כסלו
+  Fix Yom Yerushalayim date
+  Fix last Shabbat of year not being listed as Shabbat holiday
+
+version 2.2.6 (2017-10-29 [10 Cheshvan 5778])
+	Fix monthFromName not recognizing טבת
+	Fix monthFromName treating אדר2 as Adar1
+	Move source files to /src/ directory
+
+version 2.2.5 (2017-07-02 [8 Tamuz 5777])
+	Fix dependencies [shuki770]
+
+version 2.2.4 (2017-05-17 [21 Iyyar 5777])
+	Fixed previous date issue with suncalc workaround [ybudweiser]
+	Add HDate.tachanun_uf() function
+	Mangle variable names in minified JS
+
+version 2.2.3 (2017-02-14 [18 Shvat 5777])
+	Daf Yomi- renamed Hebrew names for Gmara according to Shas Vilna [gnudles]
+	Daf Yomi- fixed errors in cycles 1-7 ... (division instead of modulo) [gnudles]
+	Fix typo in Daf Yomi [asafbe]
+	Don't crash on each startup [dredozubov]
+	Fix year parsing from hebrew [ilyagelman]
+	Write build script in JavaScript
+	Tachanun is said at Mincha on 8 Tishrei -- return 7
+	Don't blow up calculating molad for Tishrei
+
+version 2.2.2 (2016-04-18 [10 Nisan 5776])
+	Fix little bug caused by last-minute change breaking findParsha()
+
+version 2.2.1 (2016-04-17 [9 Nisan 5776])
+	Copy lat and long properties when using HDate().next() and prev()
+	Make Hebcal().findParsha() not care about spelling format
+	Fix HDate().getTishreiMonth() returning 0 in Elul
+	HDate().setMonth() will wrap the year
+	Tell Node not to keep the process open while listening for events
+
+version 2.2.0 (2014-06-29 [1 Tamuz 5774])
+	Add Event().routine() method
+	Default HDate().holidays() to not return routine events
+	Always set event based on years
+	Remove holidays.IGNORE_YEAR
+	Fix bug with giving a name to HDate().setMonth()
+	Add HDate().candleLighting() and HDate().havdalah()
+	Fix spelling of alot_hashachar zman
+	Add Month().molad()
+	Change names of internal methods to be shorter
+	Don't include entire README in package.json (NPM will do it)
+	Change Hebcal().holidays to an object instead of array
+	Speed optimization for HDate().holidays()
+	Remove function names (most debuggers can figure it out)
+	Fix bug with candlelighting being one day off
+	Don't automatically move day after sunset (was causing too many issues)
+
+version 2.1.2 (2014-04-04 [5 Nisan 5774])
+	Fix sourcemap links
+	Fix GitHub link in package.json
+
+version 2.1.1 (2014-04-04 [5 Nisan 5774])
+	Change default Adar to Adar Sheini
+	Add string support to new HDate()
+	Fix Yom Ha'atzmaut not showing up until 1951
+	Simplify cities
+	Change names of Adar I and Adar II to Adar 1/2
+	Fix HDate().getGregMonthObject()
+	Link sourcemaps to GitHub
+
+version 2.1 (2014-03-16 [Purim 5774])
+	Add Hebcal.GregYear and Hebcal.GregMonth constructors
+	Fix issue with passing a string day to new HDate(day, month[, year])
+	Fix broken Adar 1/2 to new HDate(string)
+	Default unspecified Adar to be 1, not 2
+	Change behavior of Hebcal.prototype.map to map over individual days
+	Add hallel and tachanun to HDate()s
+	Add Hebcal.events property
+	Setting Hebcal.defaultLocation or Hebcal.defaultCity calls an event
+	Add Hebcal().getDay() method
+	Fix issue with new Hebcal(-1)
+	Make city names case-insensitive
+	Add Ashkenazis sedra names
+	Fix issue with Shabbat Mevarchim in Elul
+	Add Shabbat Mevarchim and Rosh Chodesh to holidays
+	Add HDate().onOrBefore()
+	Add Hebcal().days() and Hebcal().filter()
+	Remove some internal methods from the export
+	Have HDate().getMonthObject(), getYearObject(), getGregMonthObject(), getGregYearObject() always return a value, even if unaffiliated
+	Move client files to new folder
+	Change cities to use lat/long decimals
+	Cache results of HDate().getSedra()
+	Add HDate().getParsha() alias of getSedra()
+	Add Hebcal.parshiot and Hebcal.LANGUAGE
+	Add Hebcal().findParsha()
+	Export Hebcal.map and Hebcal.filter
+	Change default havdalah offset to 42
+	Fix bug with HDate(29 Adar2).next() going to the next year
+	Add command line interface
+	Add a few unit tests
+
+version 2.0 (2014-02-18 [19 Adar 1 5774])
+	Completely rewrote original JavaScript code

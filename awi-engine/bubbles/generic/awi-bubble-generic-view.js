@@ -30,53 +30,62 @@ class BubbleGenericView extends awibubble.Bubble
 		this.token = 'view';
 		this.classname = 'generic';
 		this.properties.action = 'display the content of a file';
-		this.properties.inputs = [ { userInput: 'the name of the file to display', type: 'string' } ];
-		this.properties.outputs = [ { viewedPath: 'the last viewed file', type: 'path' } ];
-		this.properties.brackets = false;
-		this.properties.tags = [ 'programming', 'assets' ];
+		this.properties.inputs = [
+			{ file: 'the file to view', type: 'string' },
+			{ date: 'the date when the file was created', type: 'string', optional: true },
+			{ time: 'the time when the file was created', type: 'string', optional: true },
+			{ input: 'description of the content to search for', type: 'string', optional: true },
+			];
+		this.properties.outputs = [ { files: 'the last list of files', type: 'file.array' },
+									{ fileViewed: 'the last file viewed', type: 'file' } ];
+		this.properties.parser = {
+			verb: [ 'view', 'display', 'show' ],
+			file: [], date: [], time: [], input: [] };
+		this.properties.select = [ [ 'verb' ] ];
 	}
 	async play( line, parameters, control )
 	{
-		super.play( line, parameters, control );
-		if ( /^\d+$/.test( parameters.userInput ) )
+		var self = this;
+		async function playIt( file, files )
 		{
-			var files = this.branch.getLastData( this, 'fileList' );
+			var play = await self.awi.system.playFile( file, 'view', control );
+			if ( play.success )
+			{
+				if ( typeof files != 'undefined' )
+					return { success: true, data: { files: files, fileViewed: file } };
+				return { success: true, data: { fileViewed: file } };
+			}
+		}
+
+		await super.play( line, parameters, control );
+		if ( /^\d+$/.test( line ) )
+		{
+			var files = this.branch.getLastData( this, 'files' );
 			if ( files && files.length > 0 )
 			{
-				var number = parseInt( parameters.userInput ) - 1;
+				var number = parseInt( line ) - 1;
 				if ( number >= 0 && number < files.length )
-				{
-					var type = this.awi.system.getFileType( files[ number ].path );
-					return await this.awi.system.playFile( files[ number ].path, type, 'view', { } );
-				}
+					return await playIt( files[ number ] );
 				return { success: false, error: 'awi:not-found:iwa' };
 			}
 		}
-		var path = this.awi.utilities.normalize( parameters.userInput )
-		var answer = await this.awi.system.exists( path );
-		if ( answer.success )
-			return await this.awi.system.playFile( files[ 0 ].path, type, 'view', { } );
-
-		var type = this.awi.system.getFileType( parameters.userInput );
-		var paths = this.awi.system.getPaths( type );
-		var answer = await this.awi.system.findFile( paths, parameters.userInput, { } );
-		if ( !answer.success || answer.data.length == 0 )
+		var answer = await this.awi.system.findFiles( line, parameters, control );
+		if ( !answer.success )
 			return { success: false, error: 'awi:not-found:iwa' };
 
-		var files = answer.data;
-		if ( files.length == 1 )
-			return await this.awi.system.playFile( files[ 0 ].path, type, 'view', { } );
+		if ( answer.success === '1' )
+			return await playIt( answer.data[ 0 ], answer.data );
 
-		this.awi.editor.print( control.editor, [ 'You can view these files: ' ], { user: 'information' } );
 		var result = [];
-		for ( var f = 0; f < files.length; f++ )
-			result.push( ( f + 1 ) + '. ' + files[ f ].path );
+		this.awi.editor.print( control.editor, [ 'You can view these files: ' ], { user: 'information' } );
+		for ( var f = 0; f < answer.data.length; f++ )
+			result.push( ( f + 1 ) + '. ' + answer.data[ f ].path );
 		this.awi.editor.print( control.editor, result, { user: 'information' } );
 		var param = await this.awi.prompt.getParameters( [
-			{ choice: 'Please enter a number between 1 and ' + files.length, type: 'number', interval: [ 1, files.length ], optional: false, default: 0 },
+			{ choice: 'Please enter a number between 1 and ' + answer.data.length, type: 'number', interval: [ 1, answer.data.length ], optional: false, default: 0 },
 			], control );
 		if ( param.success )
-			return await this.awi.system.playFile( files[ param.data.choice - 1 ].path, type, 'view', { } );
+			return await playIt( answer.data[ param.data.choice - 1 ], answer.data );
 		return answer;
 	}
 	async playback( line, parameters, control )

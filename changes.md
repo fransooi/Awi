@@ -1,3 +1,9 @@
+20230614 More debugging
+20230614 New TIME utilities connector
+20230614 New PARSER utilities connector
+20230614 Reformatting of parser info in all bubbles
+20230614 NEW! Initial command parser implementation, now understand complex commands.
+
 20230608 New server command "understand", parsing an audio file
 20230608 Server side complete and working
 

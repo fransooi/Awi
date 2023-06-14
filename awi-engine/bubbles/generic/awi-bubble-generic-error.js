@@ -30,10 +30,6 @@ class BubbleGenericError extends awibubble.Bubble
 		this.token = 'error';
 		this.classname = 'generic';
 		this.properties.action = 'handle errors';
-		this.properties.inputs = [ ];
-		this.properties.outputs = [ ];
-		this.properties.brackets = false;
-		this.properties.tags = [ 'generic' ];
 	}
 	async play( line, parameters, control )
 	{

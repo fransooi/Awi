@@ -219,41 +219,9 @@ class Branch extends awibubble.Bubble
 		}
 		line = line.substring( start ).trim();
 
-		var classname;
 		if ( !command )
 		{
-			for ( classname in this.awi.bubbles )
-			{
-				var token;
-				var space = -1, column, start;
-				var count = 2;
-				do
-				{
-					start = space + 1;
-					space = line.indexOf( ' ', start );
-					column = line.indexOf( ':', start );
-					if ( space >= 0 && column >= 0 )
-						space = Math.min( space, column );
-					else if ( space < 0 && column >= 0 )
-						space = column;
-					else if ( space < 0 )
-						space = line.length;
-					token = line.substring( start, space ).toLowerCase();
-				} while ( !this.awi.newBubbles[ classname ][ token ] && space < line.length && count-- > 0 )
-
-				if ( this.awi.bubbles[ classname ][ token ] )
-				{
-					command =
-					{
-						token: token,
-						classname: classname,
-						parameters: parameters,
-						options: {}
-					};
-					line = line.substring( space ).trim();
-					break;
-				}
-			}
+			command = this.awi.parser.extractCommandFromLine( line, control );
 		}
 		if ( !command )
 		{
@@ -304,8 +272,8 @@ class Branch extends awibubble.Bubble
 			for ( var p = 0; p < bubble.properties.outputs.length; p++ )
 			{
 				var output = this.awi.utilities.getBubbleParams( bubble.properties.outputs[ p ] );
-				if ( output.name == token )
-					return bubble.data;
+				if ( output.name == token && typeof bubble.data[ token ] != 'undefined' )
+					return bubble.data[ token ];
 			}
 			bubble = this.getBubble( bubble.parent );
 		}

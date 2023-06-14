@@ -36,6 +36,7 @@ class Connector
 			data:
 			{
 				name: this.name,
+				token: this.token,
 				classname: this.classname,
 				prompt: this.name + ' connector version ' + this.version, version: this.version
 			}

@@ -32,6 +32,7 @@ class ConnectorEditorCommandline extends awiconnector.Connector
 		this.classname = 'editor';
 		this.version = '0.2';
 		this.connected = false;
+		this.noInput = 0;
 		this.editors = {};
 	}
 	async connect( options )
@@ -39,6 +40,7 @@ class ConnectorEditorCommandline extends awiconnector.Connector
 		super.connect( options );
 		this.default = this.addEditor();
 		this.connected = true;
+		this.connectAnswer.data.token = this.classname;
 		this.connectAnswer.success = true;
 		return this.connectAnswer;
 	}
@@ -62,12 +64,16 @@ class ConnectorEditorCommandline extends awiconnector.Connector
 		var self = this;
 		rline.on( 'line', function( input )
 		{
-			if ( editor.inputEnabled )
+			if ( self.noInput == 0 )
 			{
 				if ( editor.reroute )
 					editor.reroute( input, {}, { editor: editor } );
 				else
 					self.awi.prompt.prompt( input, {}, { editor: editor } );
+			}
+			else
+			{
+				self.noInput--;
 			}
 		} );
 		return editor;
@@ -103,6 +109,8 @@ class ConnectorEditorCommandline extends awiconnector.Connector
 	}
 	close( editor )
 	{
+		if ( editor.handleNoInput )
+			clearInterval( editor.handleNoInput );
 	}
 	wait( editor, onOff, options = {} )
 	{
@@ -120,13 +128,15 @@ class ConnectorEditorCommandline extends awiconnector.Connector
 		if ( !prompt )
 			return;
 
+		var self = this;
+		var justify = this.awi.getConfig( 'user' ).justify;
 		if ( typeof text == 'string' )
 			text = text.split( '\n' );
-		var justify = this.awi.getConfig( 'user' ).justify;
 		function printLinesDown( lines )
 		{
 			for ( var l = 0; l < lines.length; l++ )
 			{
+				self.noInput++;
 				editor.readline.write( prompt + lines[ l ] + '\n' );
 			}
 		}
@@ -134,9 +144,12 @@ class ConnectorEditorCommandline extends awiconnector.Connector
 		{
 			var line = this.interpretLine( text[ t ] );
 			if ( !options.noJustify )
+			{
 				printLinesDown( this.awi.utilities.justifyText( line, justify ) );
+			}
 			else
 			{
+				this.noInput++;
 				editor.readline.write( prompt + line + '\n' );
 			}
 		}

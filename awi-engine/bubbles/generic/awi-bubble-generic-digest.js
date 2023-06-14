@@ -31,15 +31,16 @@ class BubbleGenericDigest extends awibubble.Bubble
 		this.classname = 'generic';
 		this.properties.action = 'read the files in the input buffer and memorize them';
 		this.properties.inputs = [
-			{ userInput: 'the topic of data to process, example "Friend Name"', type: 'string', optional: true, default: '' },
-			{ senderName: 'Your name, as stated in the conversation...', type: 'string' },
+			{ noun: 'the topic of data to process, example "Friend Name"', type: 'string', optional: true, default: '' },
 		];
 		this.properties.outputs = [
 			{ receiverName: 'the name of the receiver', type: 'string'  },
 			{ souvenirs: 'list of souvenirs associated to the receiver', type: 'array.string.souvenir' }
 		]
-		this.properties.brackets = false;
-		this.properties.tags = [ 'generic', 'memory', 'souvenirs' ];
+		this.properties.parser = {
+			noun: [ 'audio', 'sound', 'video', 'document', 'messenger', 'image', 'photo' ],
+			verb: [ 'digest' ] };
+		this.properties.select = [ [ 'verb' ] ];
 	}
 	async messenger( path, parameters, control )
 	{
@@ -264,14 +265,15 @@ class BubbleGenericDigest extends awibubble.Bubble
 				valid: [],
 				invalid: []
 			};
-			var type = parameters.userInput;
+			var type = parameters.noun;
 			if ( type )
 			{
 				var path = this.awi.utilities.normalize( this.awi.config.getDataPath() + '/todigest/' + type );
 				var exist = await this.awi.system.exists( path );
 				if ( !exist.success )
 				{
-					path = this.awi.utilities.normalize( this.awi.config.getDataPath() + '/todigest/' + type + 's' );
+					type += 's';
+					path = this.awi.utilities.normalize( this.awi.config.getDataPath() + '/todigest/' + type );
 					exist = await this.awi.system.exists( path );
 				}
 				if ( !exist.success )

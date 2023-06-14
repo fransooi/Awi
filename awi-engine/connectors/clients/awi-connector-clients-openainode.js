@@ -53,6 +53,7 @@ class ConnectorClientOpenAiNode extends awiconnector.Connector
 				this.openai = new OpenAIApi( this.configuration );
 			}
 		}
+		this.connectAnswer.data.token = this.classname;
 		this.connectAnswer.success = this.openai ? true : false;
 		this.connectAnswer.nonFatal = true;
 		return this.connectAnswer;

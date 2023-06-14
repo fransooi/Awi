@@ -30,10 +30,6 @@ class BubbleGenericWelcome extends awibubble.Bubble
 		this.token = 'welcome';
 		this.classname = 'generic';
 		this.properties.action = "displays user's welcome message and checks for initial parameters";
-		this.properties.inputs = [ ];
-		this.properties.outputs = [ ];
-		this.properties.brackets = false;
-		this.properties.tags = [ 'generic' ];
 	}
 	async play( line, parameters, control )
 	{
@@ -42,9 +38,9 @@ class BubbleGenericWelcome extends awibubble.Bubble
 		if ( config.firstName == '' )
 		{
 			var param = await this.awi.prompt.getParameters( [
-				{ firstname: 'Please enter your first name: ', type: 'string', optional: false, default: '' },
-				{ lastname: 'Please enter your last name: ', type: 'string', optional: false, default: '' },
-				{ aikey: 'Please enter your open-ai key: ', type: 'string', optional: false, default: '' },
+				{ firstname: 'your first name: ', type: 'string', optional: false, default: '' },
+				{ lastname: 'your last name: ', type: 'string', optional: false, default: '' },
+				{ aikey: 'your open-ai key: ', type: 'string', optional: false, default: '' },
 				], control );
 			if ( param.success )
 			{
@@ -59,8 +55,6 @@ class BubbleGenericWelcome extends awibubble.Bubble
 				{
 					this.awi.editor.print( control.editor, 'User configuration "' + config.firstName + '" successfully created in ' + this.awi.config.getConfigurationPath() );
 					this.awi.editor.print( control.editor, 'Please now type "' + config.firstName + '" to login...' );
-					var prompt = this.awi.config.getPrompt( 'question' );
-					this.awi.editor.waitForInput( control.editor );
 					return { success: true, data: {} };
 				}
 				this.awi.editor.print( control.editor, 'Sorry I need these information to run.' );

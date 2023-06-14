@@ -43,27 +43,18 @@ class ConnectorSystemNode extends awiconnector.Connector
 		this.getAssociation = promisify( regedit.list );
 		this.assetsTypes =
 		{
-			image: [ '.png', '.jpg', '.jpeg' ],
-			sound: [ '.wav', '.mp3', '.ogg' ],
-			video: [ '.mp4' ],
-			music: [ '.mod' ],
-			json: [ '.json' ],
-			text: [ '.txt', '*.asc' ],
-			document: [ '.docx', '*.doc', '*.rtf' ],
+			image: { names: [ 'image', 'photo', 'drawing', 'painting', 'sketch' ], filters: [ '*.png', '*.jpg', '*.jpeg', '*.gif', '*.psd', '*.psp', '*.webm' ], paths: [] },
+			sound: { names: [ 'sound', 'audio', 'sample', 'wave' ], filters: [ '*.wav', '*.mp3', '*.ogg' ], paths: [] },
+			video: { names: [ 'video', 'clip', 'film', 'movie' ], filters: [ '*.mp4', '*.ogg', '*.avi' ], paths: [] },
+			music: { names: [ 'music', 'midi', 'module', 'tracker' ], filters: [ '*.mp3', '*.ogg', '*.flac', '*.mod' ], paths: [] },
+			json: { names: [ 'json' ], filters: [ '*.json' ], paths: [] },
+			document: { names: [ 'document', 'text', 'letter' ], filters: [ '*.docx', '*.doc', '*.rtf', '*.txt', '*.asc' ], paths: [] },
+			presentation: { names: [ 'presentation', 'slides' ], filters: [ '*.pptx', '*.ppt' ], paths: [] },
+			source: { names: [ 'source' ], filters: [ '*.js', '*.ts', '*.py', '*.c', '*.cpp', '*.h', '*.cs' ], paths: [] },
+			application: { names: [ 'application', 'executable', 'program', 'app' ], filters: [ '*.exe' ], paths: [] },
+			aozaccessory: { names: [ 'aozaccessory', 'accessory' ], filters: [ '*.aozacc' ], paths: [] },
+			file: { names: [ 'file' ], filters: [ '*.*' ], paths: [] },
 		}
-		this.sourceDirectories =
-		{
-			win32:
-			{
-				assets: [ '*Desktop', '*Documents', '*Pictures', '*Music', '*Downloads', '*Videos' ],
-			}
-		};
-/*
-		try 
-		{
-			this.tempDirectoryPath = fs.mkdtempSync( ppath.join( os.tmpdir(), 'awi' ) );
-		} catch { }
-*/
 	}
 	quit()
 	{
@@ -75,6 +66,7 @@ class ConnectorSystemNode extends awiconnector.Connector
 	{
 		super.connect( options );
 		this.connectAnswer.success = true;
+		this.connectAnswer.data.token = this.classname;
 		return this.connectAnswer;
 	}
 	async getDirectory( path, options )
@@ -162,74 +154,101 @@ class ConnectorSystemNode extends awiconnector.Connector
 			return { success: true, data: tree };
 		return { success: false, error: 'awi:directory-not-found:iwa' };
 	}
-	async findFile( directories, filename, options )
+	async getApplications( file )
 	{
-		var filters;
+		var softwares = fetchinstalledsoftware.getAllInstalledSoftwareSync();
+		for ( var s = 0; s < softwares.length; s++ )
+		{
+			var software = softwares[ s ];
+			if ( typeof software.DisplayIcon != 'undefined' )
+			{
+				var path = this.awi.utilities.normalize( software.DisplayIcon );
+				if ( path.toLowerCase().indexOf( filename.toLowerCase() ) >= 0 )
+				{
+					var ext = this.awi.utilities.extname( path ).substring( 1 ).toLowerCase();
+					if ( this.getFileType( ext, 'executable' ).success )
+					{
+						var file = await this.awi.utilities.getFileInfo( path );
+						if ( file )
+							found.push( file );
+					}
+				}
+			}
+		}
+	}
+	async askForFilepaths( file, parameters, control )
+	{
+		var paths = await this.awi.config.getDefaultPaths( file );
+		var param = await this.awi.prompt.getParameters( [
+			{ choice: 'the different paths to the folder containing ' + file.names[ 0 ] + 's.', type: 'array.string', default: [ paths[ 0 ] ] },
+			], control );
+		if ( param.success )
+		{
+			file.paths = param.data.choice;
+			this.awi.config.getConfig( 'user' ).paths[ this.awi.config.platform ][ file.names[ 0 ] ] = param.data.choice;
+		}
+	}
+	async findFiles( line, parameters, control )
+	{
 		var found = [];
-		if ( directories == 'executable' )
+		var file = parameters.file;
+		switch ( file.names[ 0 ] )
 		{
-			var softwares = fetchinstalledsoftware.getAllInstalledSoftwareSync();
-			for ( var s = 0; s < softwares.length; s++ )
-			{
-				var software = softwares[ s ];
-				/*
-				for ( var p in software )
+			case 'application':
+				found = await this.getApplications( line, parameters, control );
+				break;
+			case 'aozaccessory':
+				found = await this.connectors.languages.aozbasic.getAccessories( line, parameters, control );
+				break;
+			default:
+				if ( file.paths.length == 0 )
+					await this.askForFilepaths( file, parameters, control );
+				if ( file.paths.length )
 				{
-					if ( software[ p ].toLowerCase().indexOf( filename.toLowerCase() ) >= 0 )
+					for ( var p = 0; p < file.paths.length; p++ )
 					{
-						console.log( software[ p ] );
-						break;
+						var answer = await this.awi.system.getDirectory( file.paths[ p ], { onlyFiles: false, recursive: true, filters: file.filters } );
+						if ( answer.data )
+							found.push( ...this.awi.utilities.getFileArrayFromTree( answer.data ) );
 					}
 				}
-				*/
-				if ( typeof software.DisplayIcon != 'undefined' )
+				break;
+		}
+		if ( typeof parameters.date != 'undefined' )
+		{
+			var newFound = [];
+			for ( var f = 0; f < found.length; f++ )
+			{
+				var file = found[ f ];
+				for ( var d = 0; d < parameters.date.length; d++ )
 				{
-					var path = this.awi.utilities.normalize( software.DisplayIcon );
-					if ( path.toLowerCase().indexOf( filename.toLowerCase() ) >= 0 )
-					{
-						var ext = this.awi.utilities.extname( path ).substring( 1 ).toLowerCase();
-						if ( this.getFileType( ext, 'executable' ).success )
-						{
-							var file = await this.awi.utilities.getFileInfo( path );
-							if ( file )
-								found.push( file );
-						}
-					}
+					if ( this.awi.time.isStatsWithinDate( file.stats, parameters.date[ d ] ) )
+						newFound.push( file );
 				}
 			}
-			return { success: found.length > 0, data: found };
+			found = newFound;
 		}
-		if ( typeof options.type != 'undefined' )
+		if ( typeof parameters.time != 'undefined' )
 		{
-			filters = this.getFileFilters( options.type );
-			if ( !filters.success )
-				return filters;
-			filters = filters.data;
-		}
-		else
-		{
-			if ( directories[ 0 ].toLowerCase() == filename )
+			var newFound = [];
+			for ( var f = 0; f < found.length; f++ )
 			{
-				var info = this.awi.utilities.parse( filename );
-				var name = info.name ? info.name : '*';
-				var ext = info.ext ? info.ext : '*';
-				filters = [ name + ext ];
-				directories[ 0 ] = info.dir;
+				var file = found[ f ];
+				for ( var d = 0; d < parameters.time.length; d++ )
+				{
+					if ( this.awi.time.isStatsWithinDate( file.stats, parameters.time ) )
+						newFound.push( file );
+				}
 			}
-			else
-			{
-				filters = [ filename ];
-			}
+			found = newFound;
 		}
-		for ( var d = 0; d < directories.length; d++ )
-		{
-			var answer = await this.awi.system.getDirectory( directories[ d ], { onlyFiles: false, recursive: true, filters: filters } );
-			if ( answer.data )
-			{
-				var files = this.awi.utilities.getFileArrayFromTree( answer.data );
-				found.push( ...files );
-			}
-		}
+		for ( var f = 0; f < found.length; f++ )
+			found[ f ].file = file;
+		file.list = found;
+		if ( found.length == 0 )
+			return { success: false, error: 'awi:file-not-found:iwa' };
+		if ( found.length == 1 )
+			return { success: '1', data: found };
 		return { success: true, data: found };
 	}
 	async importFile( bubble, file, options = {} )
@@ -281,83 +300,7 @@ class ConnectorSystemNode extends awiconnector.Connector
 		this.print( bubble, [ result ] );
 		return true;
 	}
-	async playFile( path, type, action, options )
-	{
-		var stdOut = '';
-		var stdErr = '';
-		var result;
-		var info = this.awi.utilities.parse( path );
-		var vars =
-		{
-			root: info.root,
-			dir: info.dir,
-			base: info.base,
-			ext: info.ext,
-			name: info.name,
-			file: info.dir + '/' + info.name + info.ext,
-		}
-		var paths = this.awi.config.getCurrentSystem().paths;
-		var pathInfo = paths[ type ];
-		if ( pathInfo )
-		{
-			var actionInfo = pathInfo[ action ];
-			if ( actionInfo )
-			{
-				switch ( actionInfo.type )
-				{
-					case 'exec':
-						var result = false;
-						var cwd = this.getPath( actionInfo.cwd, vars );
-						var command = this.getPath( actionInfo.command, vars );
-						var process = exec( command, { cwd: cwd },
-							function( error, stdo, stde )
-							{
-								if ( !error )
-								{
-									result = true;
-									if ( stde )
-										stdErr += stde;
-									if ( stdo )
-										stdOut += stdo;
-								}
-								else
-									result = false;
-							} );
-						if ( process )
-							return { success: true, data: path };
-						break;
-					case 'startbat':
-						var result = false;
-						var cwd = this.getPath( actionInfo.cwd, vars );
-						var command = this.getPath( actionInfo.command, vars );
-						command = ppath.normalize( this.awi.config.getDataPath() + '/start.bat ' + command );
-						console.log( 'command: ' + command );
-						console.log( 'cwd: ' + cwd );
-						var process = exec( command, { cwd: cwd },
-							function( error, stdo, stde )
-							{
-								if ( !error )
-								{
-									result = true;
-									if ( stde )
-										stdErr += stde;
-									if ( stdo )
-										stdOut += stdo;
-								}
-								else
-									result = false;
-							} );
-						if ( process )
-							return { success: true, data: path };
-						break;
-						default:
-						break;
-				}
-			}
-		}
-		return { success: false, error: 'awi:file-cannot-be-played:iwa' };
-	}
-	getPath( path, vars = {} )
+	getVarsPath( path, vars = {} )
 	{
 		var start = path.indexOf( '{' );
 		while( start >= 0 )
@@ -373,7 +316,7 @@ class ConnectorSystemNode extends awiconnector.Connector
 				{
 					default:
 						replace = '';
-						bnreak;
+						break;
 				}
 			}
 			path = path.substring( 0, start ) + replace + path.substring( end + 1 );
@@ -381,22 +324,85 @@ class ConnectorSystemNode extends awiconnector.Connector
 		}
 		return ppath.normalize( path );
 	}
-	getPaths( type, path )
+	async playFile( file, action, control )
 	{
-		if ( type == 'any' )
-			return [ path ];
-
-		var directories = [];
-		var paths = this.awi.config.getCurrentSystem().paths;
-		if ( !paths[ type ] )
-			type = 'any';
-		var typeInfo = paths[ type ];
-		for ( var f = 0; f < typeInfo.libraries.length; f++ )
+		var stdOut = '';
+		var stdErr = '';
+		var info = this.awi.utilities.parse( file.path );
+		var vars =
 		{
-			var path = this.getPath( typeInfo.libraries[ f ] );
-			directories.push( path );
+			root: info.root,
+			dir: info.dir,
+			base: info.base,
+			ext: info.ext,
+			name: info.name,
+			file: info.dir + '/' + info.name + info.ext,
 		}
-		return directories;
+		var runInfo = this.awi.config.getSystem().commands[ this.awi.config.platform ];
+		var actionInfo = runInfo[ file.file.names[ 0 ] ];
+		if ( actionInfo )
+		{
+			actionInfo = actionInfo[ action ];
+			switch ( actionInfo.type )
+			{
+				case 'exec':
+					var result = false;
+					var cwd = this.getVarsPath( actionInfo.cwd, vars );
+					var command = this.getVarsPath( actionInfo.command, vars );
+					var process = exec( command, { cwd: cwd },
+						function( error, stdo, stde )
+						{
+							if ( !error )
+							{
+								result = true;
+								if ( stde )
+									stdErr += stde;
+								if ( stdo )
+									stdOut += stdo;
+							}
+							else
+								result = false;
+						} );
+					if ( process )
+						return { success: true, data: {} };
+					break;
+
+				case 'startbat':
+					var result = false;
+					var cwd = this.getVarsPath( actionInfo.cwd, vars );
+					var command = this.getVarsPath( actionInfo.command, vars );
+					command = ppath.normalize( this.awi.config.getDataPath() + '/start.bat ' + command );
+					console.log( 'command: ' + command );
+					console.log( 'cwd: ' + cwd );
+					var process = exec( command, { cwd: cwd },
+						function( error, stdo, stde )
+						{
+							if ( !error )
+							{
+								result = true;
+								if ( stde )
+									stdErr += stde;
+								if ( stdo )
+									stdOut += stdo;
+							}
+							else
+								result = false;
+						} );
+					if ( process )
+						return { success: true, data: path };
+					break;
+
+				default:
+					break;
+			}
+		}
+		return { success: false, error: 'awi:file-cannot-be-played:iwa' };
+	}
+	async getPaths( file )
+	{
+		if ( this.awi.config.getConfig( 'user' ).paths[ this.awi.config.platform ] )
+			return this.awi.config.getConfig( 'user' ).paths[ this.awi.config.platform ][ file.names[ 0 ] ];
+		return [];
 	}
 	getFileType( path )
 	{
@@ -408,7 +414,7 @@ class ConnectorSystemNode extends awiconnector.Connector
 		if ( !ext )
 			return 'any';
 
-		var paths = this.awi.config.getCurrentSystem().paths;
+		var paths = this.awi.config.system.paths;
 		for ( var t in paths )
 		{
 			var typeInfo = paths[ t ];
@@ -425,7 +431,7 @@ class ConnectorSystemNode extends awiconnector.Connector
 	}
 	getFileFilters( type )
 	{
-		var paths = this.awi.config.getCurrentSystem().paths;
+		var paths = this.awi.config.system.paths;
 		if ( paths[ type ] )
 			return paths[ type ].filters;
 		return paths[ 'any' ].extensions;
@@ -597,6 +603,30 @@ class ConnectorSystemNode extends awiconnector.Connector
 		text = he.decode( text );
 		text = he.unescape( text );
 		return text;
+	}
+	async getSystemInformation( type )
+	{
+		switch ( type )
+		{
+			case 'platform':
+				return os.platform();
+			case 'userDir':
+				return this.awi.utilities.normalize( os.homedir() );
+			case 'userName':
+				return os.userInfo().username;
+			case 'drives':
+				var list = [];
+				if ( os.platform == 'win32' )
+				{
+					for ( var l = 0; l < 26; l++ )
+					{
+						var answer = await this.exists( String.fromCharCode( 65 + l ) + ':' );
+						if ( answer.success )
+							list.push( String.fromCharCode( 65 + l ) );
+					}
+				}
+				return list;
+		}
 	}
 }
 module.exports.Connector = ConnectorSystemNode;

@@ -1,13 +1,33 @@
+/** --------------------------------------------------------------------------
+*
+*            / \
+*          / _ \              (°°)       Intelligent
+*        / ___ \ [ \ [ \ [  ][   ]       Programmable
+*     _/ /   \ \_\ \/\ \/ /  |  | \      Personal Assistant
+* (_)|____| |____|\__/\__/ [_| |_] \     link:
+*
+* This file is open-source under the conditions contained in the
+* license file located at the root of this project.
+* Please support the project: https://patreon.com/francoislionet
+*
+* ----------------------------------------------------------------------------
+* @file awi-connector-utilities-utilities.js
+* @author FL (Francois Lionet)
+* @date first pushed on 10/11/2019
+* @version 0.3
+*
+* @short Various utilities.
+*
+*/
 var awiconnector = require( '../awi-connector' );
-var awiawi = require( '../../awi' );
 
-class ConnectorUtilitieAwi extends awiconnector.Connector
+class ConnectorUtilityUtilities extends awiconnector.Connector
 {
 	constructor( awi, options = {} )
 	{
 		super( awi, options );
 		this.name = 'Awi utilities';
-		this.token = 'awi';
+		this.token = 'utilities';
 		this.classname = 'utilities';
 		this.version = '0.2.1';
 		this.sep = '/';
@@ -21,12 +41,9 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 	}
 	async completeConnect()
 	{
-		var answer = await this.loadJavascript( this.awi.config.getEnginePath() + '/data/libs/compromise.js' );
+		var answer = await this.loadJavascript( this.awi.config.getEnginePath() + '/data/libs/sha1.js', { eval: true } );
 		if ( answer.success )
-			this.compromise = answer.data;
-		answer = await this.loadJavascript( this.awi.config.getEnginePath() + '/data/libs/sha1.js', { eval: true } );
-		if ( answer.success )
-			this.sha1 = answer.data;
+			this.sha1 = answer.data.result;
 	}
 	capitalize( text )
 	{
@@ -235,7 +252,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		{
 			lookup[ chars.charCodeAt( i ) ] = i;
 		}
-	
+
 		var bufferLength = str.length * 0.75, len = str.length, i, p = 0, encoded1, encoded2, encoded3, encoded4;
 		if ( str[ str.length - 1 ] === "=")
 		{
@@ -245,17 +262,17 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 				bufferLength--;
 			}
 		}
-	
+
 		var arraybuffer = new ArrayBuffer( bufferLength ),
 		bytes = new Uint8Array( arraybuffer );
-	
+
 		for ( i = 0; i < len; i += 4 )
 		{
 			encoded1 = lookup[str.charCodeAt(i)];
 			encoded2 = lookup[str.charCodeAt(i+1)];
 			encoded3 = lookup[str.charCodeAt(i+2)];
 			encoded4 = lookup[str.charCodeAt(i+3)];
-	
+
 			bytes[p++] = (encoded1 << 2) | (encoded2 >> 4);
 			bytes[p++] = ((encoded2 & 15) << 4) | (encoded3 >> 2);
 			bytes[p++] = ((encoded3 & 3) << 6) | (encoded4 & 63);
@@ -266,7 +283,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 	{
 		var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 		var bytes = new Uint8Array( arrayBuffer ), i, len = bytes.length, base64 = "";
-	
+
 		for (i = 0; i < len; i+=3)
 		{
 			base64 += chars[bytes[i] >> 2];
@@ -274,7 +291,7 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			base64 += chars[((bytes[i + 1] & 15) << 2) | (bytes[i + 2] >> 6)];
 			base64 += chars[bytes[i + 2] & 63];
 		}
-	
+
 		if ((len % 3) === 2)
 		{
 			base64 = base64.substring(0, base64.length - 1) + "=";
@@ -777,17 +794,6 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			line = line.substring( 0, start ) + line.substring( end + 1 );
 			start = line.indexOf( '<' );
 		}
-		/*
-		var regex = [ /([a-zA-Z]{3})\s(\d{1,2}),\s(\d{4})\s(\d{1,2}):(\d{2}):(\d{2})(am|pm|AM|PM)?/ ];
-		var found = this.matchRegex( line, regex );
-		while ( found )
-		{
-			var start = line.indexOf( found[ 0 ] );
-			var end = start + found[ 0 ].length;
-			line = line.substring( 0, start ) + line.substring( end );
-			found = this.matchRegex( line, regex );
-		}
-		*/
 		return line.trim();
 	}
 	getFinalHtmlData( structure )
@@ -1058,203 +1064,14 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		)
 		return index;
 	}
-	getInterval( interval )
+	isFilter( name )
 	{
-		var start = new Date();
-		var end = new Date();
-		if ( interval == 'yesterday' )
+		for ( var c = 0; c < name.length; c++ )
 		{
-			start.setDay( start.getDay() - 1 );
-			end.setDay( end.getDay() - 1 );
-			start.setHours( 0, 0, 0, 0 );
-			end.setHours( 23, 59, 59, 999 );
+			if ( info.name.charAt( c ) == '*' || info.name.charAt( c ) == '?' )
+				return true;
 		}
-		if ( interval.indexOf( 'last' ) == 0 )
-		{
-			var words = interval.split( ' ' );
-			var day = words.find( function( element ) { return element == 'day'; } );
-			var month = words.find( function( element ) { return element == 'month'; } );
-			var year = words.find( function( element ) { return element == 'year'; } );
-			if ( day )
-			{
-				start.setDay( start.getDay() - 1 );
-				end.setDay( end.getDay() - 1 );
-				start.setHours( 0, 0, 0, 0 );
-				end.setHours( 23, 59, 59, 999 );
-			}
-			else if ( month )
-			{
-				var m = start.getMonth() - 1;
-				if ( m > 0 )
-				{
-					start.setMonth( m, 1 );
-					end.setMonth( m, 1 );
-				}
-				else
-				{
-					start.setFullYear( start.getYear() - 1, 0, 1 );
-					end.setFullYear( start.getYear() - 1, 0, 1 );
-				}
-				start.setHours( 0, 0, 0, 0 );
-				end.setHours( 23, 59, 59, 999 );
-			}
-			else if ( year )
-			{
-				start.setFullYear( start.getYear() - 1, 0, 1 );
-				end.setFullYear( end.getYear() - 1, 0, 1 );
-				start.setHours( 0, 0, 0, 0 );
-				end.setHours( 23, 59, 59, 999 );
-			}
-		}
-		if ( interval.indexOf( 'ago' ) >= 0 )
-		{
-			var day = words.find( function( element ) { return element == 'day' || element == 'days'; } );
-			var month = words.find( function( element ) { return element == 'month' || element == 'months'; } );
-			var year = words.find( function( element ) { return element == 'month' || element == 'months'; } );
-			var number = words.find(
-				function( element )
-				{
-					return self.getNumericValue( element ) >= 0;
-				} );
-			if ( number )
-				number = this.getNumericValue( number );
-			if ( day )
-			{
-				var year = start.getYear();
-				var month = start.getMonth();
-				for ( var n = 0; n < number; n++ )
-				{
-					start.setDay( start.getDay() - 1 );
-					end.setDay( end.getDay() - 1 );
-				}
-				start.setHours( 0, 0, 0, 0 );
-				end.setHours( 23, 59, 59, 999 );
-			}
-			else if ( month )
-			{
-				for ( var n = 0; n < number; n++ )
-				{
-					var m = start.getMonth() - 1;
-					if ( m > 0 )
-					{
-						start.setMonth( m, 1 );
-						end.setMonth( m, 1 );
-					}
-					else
-					{
-						start.setFullYear( start.getYear() - 1, 0, 1 );
-						end.setFullYear( end.getYear() - 1, 0, 1 );
-					}
-				}
-				start.setHours( 0, 0, 0, 0 );
-				end.setHours( 23, 59, 59, 999 );
-			}
-			else if ( year )
-			{
-				start.setFullYear( start.getYear() - 1, 0, 1 );
-				end.setFullYear( end.getYear() - 1, 0, 1 );
-				start.setHours( 0, 0, 0, 0 );
-				end.setHours( 23, 59, 59, 999 );
-			}
-		}
-		return { start: start, end: end }
-	}
-	isStatsWithinInterval( stats, interval )
-	{
-		if ( interval == 'any' )
-			return true;
-		interval = this.getInterval( interval );
-		if ( stats.mtime >= interval.start.time && stats.mtime < interval.end.time )
-			return true;
 		return false;
-	}
-	getTimestampFromStats( stats )
-	{
-		var date = new Date( stats.birthtimeMs );
-		return this.getTimestampFromDate( date );
-	}
-	getTimestampFromDate( date )
-	{
-		/*
-		var timeInfo =
-		{
-			year: this.fillString( '' + date.getYear(), '0', 2, 'start' ),
-			month: this.fillString( '' + date.getMonth(), '0', 2, 'start' ),
-			day: this.fillString( '' + date.getDay(), '0', 2, 'start' ),
-			hours: this.fillString( '' + date.getHours(), '0', 2, 'start' ),
-			minutes: this.fillString( '' + date.getMinutes(), '0', 2, 'start' ),
-			seconds: this.fillString( '' + date.getSeconds(), '0', 2, 'start' ),
-			milliseconds: this.fillString( '' + date.getMilliseconds(), '0', 3, 'start' ),
-		};
-		var timeString = this.format( '{year}-{month}-{day}.{hours}:{minutes}:{seconds},{milliseconds}', timeInfo );*/
-		return { time: date.getTime(), text: date.toUTCString() };
-	};
-	getTimestamp( matches, monthReplacement = 1 )
-	{
-		var [ _, month, day, year, hours, minutes, seconds, ampm ] = matches;
-
-		// Convert month to number
-		var monthList =
-		[
-			"JanuFebrMarsApriMay JuneJulyAuguSeptOctoNoveDece",
-			"JanvFevrMarsAvriMai JuinJuilAoutSeptOctoNoveDece",
-			"JanvFévrMarsAvriMai JuinJuilAoûtSeptOctoNoveDéce",
-		]
-		var nMonth;
-		month = month.substring( 0, 4 ).toLowerCase();
-		for ( var n = 0; n < monthList.length; n++ )
-		{
-			var nMonth = monthList[ n ].toLowerCase().indexOf( month );
-			if ( nMonth >= 0 )
-			{
-				nMonth = Math.floor( nMonth / 4 );
-				nMonth++;
-				break;
-			}
-		}
-		if ( nMonth < 1 )
-			nMonth = monthReplacement;
-		month = nMonth;
-		var isPM = ( ampm === 'pm' || ampm === 'PM' );
-		var newHours = ( isPM && hours !== '12' ) ? parseInt( hours ) + 12 : parseInt( hours );
-		/*
-		var timeInfo =
-		{
-			day: typeof day == 'undefined' ? 'DD' : this.fillString( day, '0', 2, 'start' ),
-			month: typeof month == 'undefined' ? 'MM' : this.fillString( '' + month, '0', 2, 'start' ),
-			year:  typeof year == 'undefined' ? 'YYYY' : this.fillString( year, '??', 4, 'start' ),
-			hours:  typeof hours == 'undefined' ? 'HH' : this.fillString( hours, '0', 2, 'start' ),
-			minutes:  typeof minutes == 'undefined' ? 'MM' : this.fillString( minutes, '0', 2, 'start' ),
-			seconds: typeof seconds == 'undefined' ? 'SS' : this.fillString( seconds, '0', 2, 'start' ),
-		};
-		var timeString = this.format( '{year}-{month}-{day}.{hours}:{minutes}:{seconds}', timeInfo );*/
-		var date = new Date( parseInt( year ), month - 1, parseInt( day ), newHours, parseInt( minutes ), parseInt( seconds ) )
-		return { time: date.getTime(), text: date.toUTCString() };
-	}
-	getMediaTimestamp( matches )
-	{
-		var [ _, hours, minutes, seconds, milliseconds ] = matches;
-		hours = this.checkUndefined( hours, '00' );
-		minutes = this.checkUndefined( minutes, '00' );
-		seconds = this.checkUndefined( seconds, '00' );
-		milliseconds = this.checkUndefined( milliseconds, '000' );
-
-		var date = new Date();
-		date.setFullYear( 2000, 1 );
-		date.setHours( parseInt( hours ) );
-		date.setMinutes( parseInt( minutes ) );
-		date.setSeconds( parseInt( seconds ) );
-		date.setMilliseconds( parseInt( milliseconds ) );
-		var timestamp = this.getTimestampFromDate( date );
-		var timeInfo =
-		{
-			hours:  this.fillString( '' + date.getHours(), '0', 2, 'start' ),
-			minutes:  this.fillString( '' + date.getMinutes(), '0', 2, 'start' ),
-			seconds: this.fillString( '' + date.getSeconds(), '0', 2, 'start' ),
-			milliseconds: this.fillString( '' + date.getMilliseconds(), '0', 3, 'start' ),
-		};
-		timestamp.text = this.format( '{hours}:{minutes}:{seconds}.{milliseconds}', timeInfo );
-		return timestamp;
 	}
 	normalize( path )
 	{
@@ -1342,8 +1159,9 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 			}
 			if ( result.name == '' && result.ext == '' )
 			{
-				result.dir += '/' + result.base;
-				result.base = '';
+				result.name = result.base;
+				//result.dir += '/' + result.base;
+				//result.base = '';
 			}
 		}
 		return result;
@@ -1815,22 +1633,89 @@ class ConnectorUtilitieAwi extends awiconnector.Connector
 		var answer = await this.awi.system.readFile( path, { encoding: 'utf8' } );
 		if ( answer.success )
 		{
+			var source = answer.data;
+			answer.data = {};
 			try
 			{
 				if ( !options.eval )
 				{
-					var f = Function( answer.data + '' );
-					answer.data = f();
+					var f = Function( source + '' );
+					f.window = {};
+					answer.data.result = f();
 				}
 				else
 				{
-					answer.data = eval( answer.data + '' );
+					var window = {};
+					eval( source + '' );
 				}
+				answer.data.window = window;
 			} catch( e ) {
 				answer.success = false;
 			}
 		}
 		return answer;
 	}
+	removePunctuation( text )
+	{
+		var result = '';
+		for ( var p = 0; p < text.length; p++ )
+		{
+			var c = text.charAt( p );
+			if ( ( c >= 'a' && c <= 'z') || ( c >= 'A' && c <= 'Z' ) || c == ' ' || c == '_' )
+				result += c;
+		}
+		return result;
+	}
+	isExpression( text )
+	{
+		var result = false;
+		var c = text.charAt( 0 );
+		if ( c == '(')
+		{
+			var count = 1;
+			for ( var p = 0; p < text.length; p++ )
+			{
+				var c = text.charAt( p );
+				if ( c == '(' )
+					count++;
+				else if ( c == ')' )
+				{
+					count--;
+					if ( count == 0 )
+						break;
+				}
+			}
+			if ( count == 0 && p + 1 >= text.length )
+				return true;
+		}
+		for ( var p = 0; p < text.length; p++ )
+		{
+			var c = text.charAt( p );
+			if ( c == '+' || c == '-' || c == '*' || c == '/' || c == '(' || c == ')' )
+				result = true;
+		}
+		return result;
+	}
+	isPath( text )
+	{
+		var result = false;
+		for ( var p = 0; p < text.length; p++ )
+		{
+			var c = text.charAt( p );
+			if ( c == '/' || c == '\\' || c == '*' || c == '.' || c == '?' )
+				result = true;
+		}
+		if ( result )
+		{
+			try
+			{
+				this.parse( text );
+			} catch ( e )
+			{
+				return false;
+			}
+		}
+		return result;
+	}
 }
-module.exports.Connector = ConnectorUtilitieAwi
+module.exports.Connector = ConnectorUtilityUtilities

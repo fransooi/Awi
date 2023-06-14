@@ -38,10 +38,10 @@ class Bubble
 			action: '',
 			inputs: [],
 			outputs: [],
-			brackets: false,
-			tags: [],
 			editables: [],
-			exits: { success: '' }
+			exits: { success: '' },
+			parser: {},
+			select: []
 		}
 		if ( typeof options.exits != 'undefined' )
 		{
@@ -85,7 +85,8 @@ class Bubble
 
 		var todo = [];
 		var lineDatas = this.awi.utilities.extractLineParameters( line, this.properties.inputs );
-		parameters.userInput = lineDatas.command;
+		parameters.line = line;
+		parameters.lineCommand = lineDatas.command;
 		for ( var p = 0; p < this.properties.inputs.length; p++ )
 		{
 			var parameter = this.awi.utilities.getBubbleParams( this.properties.inputs[ p ] );

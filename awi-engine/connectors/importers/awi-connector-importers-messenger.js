@@ -146,11 +146,11 @@ class ConnectorImporterMessenger extends awiconnector.Connector
 				{
 					var line = data[ d ][ dd ];
 
-					const regex = /([a-zA-Z\u00E9\u00E8\u00EA\u00EB\u00E0\u00E2\u00E4\u00F4\u00F6\u00FB\u00FC\u00E7]{3})\s(\d{1,2}),\s(\d{4})\s(\d{1,2}):(\d{2}):(\d{2})(am|pm|AM|PM)?/;
+					const regex = this.awi.time.getDateRegex();
 					var found = this.awi.utilities.matchRegex( line, regex );
 					if ( found )
 					{
-						date = this.awi.utilities.getTimestamp( found );
+						date = this.awi.time.getDatestampFromMatches( found );
 						continue;
 					}
 					if ( line == receiverName || line == senderName )

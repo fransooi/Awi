@@ -52,6 +52,7 @@ class ConnectorSystemAozRuntime extends awiconnector.Connector
 		super.connect( options );
 		this.connected = true;
 		this.connectAnswer.success = true;
+		this.connectAnswer.data.token = this.classname;
 		return this.connectAnswer;
 	}
 	async waitForCommandEnd()

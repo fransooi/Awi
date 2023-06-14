@@ -30,33 +30,29 @@ class BubbleGenericList extends awibubble.Bubble
 		this.token = 'list';
 		this.classname = 'generic';
 		this.properties.action = 'list files in the registered user directories or any directory';
-		this.properties.inputs = [ { userInput: 'the name of the file to find, wildcards allowed', type: 'string' } ];
-		this.properties.outputs = [ { fileList: 'the list of file information', type: 'path.array' } ];
-		this.properties.brackets = false;
-		this.properties.tags = [ 'system', 'file' ];
+		this.properties.inputs = [
+			{ file: 'the file(s) to find', type: 'string' },
+			{ date: 'the date when the file was created', type: 'string', optional: true },
+			{ time: 'the time when the file was created', type: 'string', optional: true },
+			{ input: 'description of the content to search for', type: 'string', optional: true },
+			];
+		this.properties.outputs = [ { files: 'the last list of files', type: 'file.array' } ];
+		this.properties.parser = { verb: [ 'list' ], file: [],	date: [], time: [], input: []	};
+		this.properties.select = [ [ 'verb' ] ];
 	}
 	async play( line, parameters, control )
 	{
 		await super.play( line, parameters, control );
-		if ( parameters.userInput )
-		{
-			var type = this.awi.system.getFileType( parameters.userInput );
-			var paths = this.awi.system.getPaths( type, parameters.userInput );
-			var answer = await this.awi.system.findFile( paths, parameters.userInput, { } );
-			if ( !answer.success || answer.data.length == 0 )
-				return { success: false, error: 'awi:not-found:iwa' };
-			var files = answer.data;
-			var result = [];
-			if ( files.length > 0 )
-			{
-				this.awi.editor.print( control.editor, [ 'I have found the following files:' ], { noJustify: true, user: 'information' } );
-				for ( var l = 0; l < files.length; l++ )
-					result.push( ( l + 1 ) + '. ' + files[ l ].path );
-				this.awi.editor.print( control.editor, result, { noJustify: true, user: 'information' } );
-				return { success: true, data: files };
-			}
-		}
-		return { success: false, error: 'awi:no-files-found:iwa' };
+		var answer = await this.awi.system.findFiles( line, parameters, control );
+		if ( !answer.success )
+			return { success: false, error: 'awi:not-found:iwa' };
+
+		var files = answer.data;
+		var result = [];
+		for ( var f = 0; f < answer.data.length; f++ )
+			result.push( ( f + 1 ) + '. ' + answer.data[ f ].path );
+		this.awi.editor.print( control.editor, result, { user: 'information' } );
+		return { success: true, data: { files: files } };
 	}
 	async playback( line, parameters, control )
 	{

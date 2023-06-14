@@ -32,8 +32,8 @@ class BubbleGenericQuit extends awibubble.Bubble
 		this.properties.action = 'save conversations and memories and quits Awi';
 		this.properties.inputs = [ ];
 		this.properties.outputs = [ ];
-		this.properties.brackets = false;
-		this.properties.tags = [ 'system', 'config' ];
+		this.properties.parser = { verb: [ 'quit', 'leave', 'exit' ] };
+		this.properties.select = [ [ 'verb' ] ];
 	}
 	async play( line, parameters, control )
 	{

@@ -139,7 +139,7 @@ It returns `
 			direct: { souvenirs: [], content: [] },
 			indirect: { souvenirs: [], content: [] }
 		};
-		if ( parameters.from == 'any' )
+		if ( parameters.what == 'any' )
 		{
 			for ( var k in this.memories )
 			{
@@ -153,15 +153,23 @@ It returns `
 				}
 			}
 		}
-		else if ( typeof this.memories[ parameters.from ] != 'undefined' )
+		else
 		{
-			var answer = await this.memories[ parameters.from ].findSouvenirs( line, parameters, control );
-			if ( answer.success == 'found' )
+			for ( var w = 0; w < parameters.what.length; w++ )
 			{
-				result.direct.souvenirs.push( ...answer.data.direct.souvenirs );
-				result.direct.content.push( ...answer.data.direct.content );
-				result.indirect.souvenirs.push( ...answer.data.indirect.souvenirs );
-				result.indirect.content.push( ...answer.data.indirect.content );
+				var memory = this.memories[ parameters.what[ w ] ];
+				memory = ( typeof memory == 'undefined' ? this.memories[ parameters.what[ w ] + 's' ] : this.memories[ parameters.what[ w ] ] );
+				if ( memory )
+				{
+					var answer = await memory.findSouvenirs( line, parameters, control );
+					if ( answer.success == 'found' )
+					{
+						result.direct.souvenirs.push( ...answer.data.direct.souvenirs );
+						result.direct.content.push( ...answer.data.direct.content );
+						result.indirect.souvenirs.push( ...answer.data.indirect.souvenirs );
+						result.indirect.content.push( ...answer.data.indirect.content );
+					}
+				}
 			}
 		}
 		if ( result.direct.souvenirs.length + result.indirect.souvenirs.length > 0 )

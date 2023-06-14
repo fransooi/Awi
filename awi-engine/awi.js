@@ -130,9 +130,9 @@ class Awi
 						answers[ answer.data.classname ] = [ { success: answer.success, data: answer.data } ];
 						this[ answer.data.classname ] = this.connectors[ classname ][ name ];
 						this.connectors[ classname ].current = this.connectors[ classname ][ name ];
-						if ( classname == 'utilities' )
+						if ( classname == 'utilities' && name == 'awi'  )
 						{
-							await this.config.loadConfigs();
+							await this.config.init();
 						}
 					}
 				}
@@ -240,11 +240,11 @@ class Awi
 					{
 						var answer = await this.connectors[ classname ][ name ].connect( connector.options );
 						answers[ answer.data.classname ] = [ { success: answer.success, nonFatal: answer.nonFatal, data: answer.data } ];
-						this[ answer.data.classname ] = this.connectors[ classname ][ name ];
+						this[ answer.data.token ] = this.connectors[ classname ][ name ];
 						this.connectors[ classname ].current = this.connectors[ classname ][ name ];
-						if ( classname == 'utilities' )
+						if ( classname == 'utilities' && name == 'utilities' )
 						{
-							await this.config.loadConfigs();
+							await this.config.init();
 						}
 					}
 				}

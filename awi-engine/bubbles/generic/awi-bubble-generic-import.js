@@ -30,10 +30,17 @@ class BubbleGenericImport extends awibubble.Bubble
 		this.token = 'import';
 		this.classname = 'generic';
 		this.properties.action = 'import assets in the designated folder of the application';
-		this.properties.inputs = [ { userInput: 'the name or number of the asset to import', type: 'string' } ];
+		this.properties.inputs = [ { file: 'the name or number of the asset to import', type: 'string' } ];
 		this.properties.outputs = [ { importedPath: 'the path to the asset', type: 'path' } ];
-		this.properties.brackets = false;
-		this.properties.tags = [ 'programming', 'assets' ];
+		this.properties.inputs = [
+			{ file: 'the file to import', type: 'string' },
+			{ date: 'the date when the file was created', type: 'string', optional: true },
+			{ time: 'the time when the file was created', type: 'string', optional: true },
+			{ input: 'description of the content to search for', type: 'string', optional: true },
+			];
+		this.properties.parser = {
+			verb: [ this.name ], file: [], date: [], time: [], input: [] };
+		this.properties.select = [ [ 'verb' ] ];
 	}
 	async play( line, parameters, control )
 	{

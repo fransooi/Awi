@@ -30,10 +30,6 @@ class BubbleGenericRoot extends awibubble.Bubble
 		this.token = 'root';
 		this.classname = 'generic';
 		this.properties.action = 'root of a branch of bubbles';
-		this.properties.inputs = [ ];
-		this.properties.outputs = [ ];
-		this.properties.brackets = false;
-		this.properties.tags = [ 'generic' ];
 	}
 	async play( line, parameters, control )
 	{

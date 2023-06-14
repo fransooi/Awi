@@ -20,7 +20,6 @@
 *
 */
 var awibubble = require( '../awi-bubble' )
-var awimessages = require( '../../awi-messages' )
 
 class BubbleGenericWrite extends awibubble.Bubble
 {
@@ -31,11 +30,16 @@ class BubbleGenericWrite extends awibubble.Bubble
 		this.token = 'write';
 		this.classname = 'generic';
 		this.properties.action = 'write a text, code, resume, synthesis';
-		this.properties.inputs = [ ];
-		this.properties.editables =	[ ];
-		this.properties.outputs = [ ];
-		this.properties.brackets = false;
-		this.properties.tags = [ 'editor', 'aoz', 'code' ];
+		this.properties.inputs = [
+			{ noun: 'what to write', type: 'string' },
+			{ person: 'the person to write to', type: 'string', optional: true },
+			];
+		this.properties.outputs = [];
+		this.properties.parser = {
+			verb: [ 'write' ],
+			noun: [ 'mail', 'document', 'presentation', 'text' ],
+			person: [] };
+		this.properties.select = [ [ 'verb' ] ];
 	}
 	async play( line, parameters, control )
 	{

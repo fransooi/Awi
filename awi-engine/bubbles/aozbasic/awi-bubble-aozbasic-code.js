@@ -60,8 +60,8 @@ Now the code:
 ` 				}
 		];
 		this.properties.outputs = [ { javascriptCode: 'the code of the new function', type: 'string' } ];
-		this.properties.brackets = false;
-		this.properties.tags = [ 'editor', 'aoz', 'code' ];
+		this.properties.parser = { verb: [ 'code', 'program' ], noun: [ 'procedure' ] };
+		this.properties.select = [ [ 'verb', 'noun' ] ];
 	}
 	async play( line, parameters, control )
 	{

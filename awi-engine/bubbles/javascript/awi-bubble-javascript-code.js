@@ -40,8 +40,8 @@ class BubbleJavascriptCode extends awibubble.Bubble
 			{ codeConfirm: 'Do you confirm all the parameters above? (y)es or no?', type: 'yesno.string', default: 'yes', clear: true },
 		];
 		this.properties.outputs = [ { javascriptCode: 'the code of the new function', type: 'array.string.javascript' } ];
-		this.properties.brackets = false;
-		this.properties.tags = [ 'editor', 'aoz', 'code' ];
+		this.properties.parser = { verb: [ 'code', 'program' ], noun: [ 'javascript' ] };
+		this.properties.select = [ [ 'verb', 'noun' ] ];
 	}
 	async play( line, parameters, control )
 	{

@@ -3,10 +3,10 @@
 *            / \
 *          / _ \              (°°)       Intelligent
 *        / ___ \ [ \ [ \ [  ][   ]       Programmable
-*     _/ /   \ \_\ \/\ \/ /  |  | \      Personal 
+*     _/ /   \ \_\ \/\ \/ /  |  | \      Personal
 * (_)|____| |____|\__/\__/ [_| |_] \     Assistant
 *
-* This file is open-source under the conditions contained in the 
+* This file is open-source under the conditions contained in the
 * license file located at the root of this project.
 * Please support the project: https://patreon.com/francoislionet
 *
@@ -16,7 +16,7 @@
 * @date first pushed on 10/11/2019
 * @version 0.3
 *
-* @short Starts Awi as simple command line prompt 
+* @short Starts Awi as simple command line prompt
 *
 */
 var awiawi = require( './awi-engine/awi' );
@@ -35,20 +35,22 @@ async function startAwi( prompt, config )
 }
 
 function getArguments()
-{ 
+{
 	var thispath = __dirname;
 	var answer =
 	{
-		config: 
+		config:
 		{
 			prompt: '',
 			configurations: thispath + '/configs',
 			engine: thispath + '/awi-engine',
 			data: thispath + '/data',
-	connectors: 
+	connectors:
 	[
 		{ name: 'systems.node', options: {}, default: true },
-		{ name: 'utilities.awi', options: {}, default: true },
+		{ name: 'utilities.utilities', options: {}, default: true },
+		{ name: 'utilities.time', options: {}, default: true },
+		{ name: 'utilities.parser', options: {}, default: true },
 		{ name: 'clients.openainode', options: {}, default: true },
 		{ name: 'editors.commandline', options: {}, default: true },
 		{ name: 'languages.javascript', options: {}, default: true },
@@ -57,7 +59,7 @@ function getArguments()
 		},
 		prompt: ''
 	};
-	
+
 	var error = false;
 	var quit = false;
 	for ( var a = 2; ( a < process.argv.length ) && !quit && !error; a++ )

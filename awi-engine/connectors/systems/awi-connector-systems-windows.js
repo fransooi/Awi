@@ -36,7 +36,9 @@ class ConnectorSystemWindows extends awiconnector.Connector
 	}
 	async connect( options )
 	{
-		return super.connect( options );
+		super.connect( options );
+		this.connectAnswer.data.token = this.classname;
+		return this.connectAnswer;
 	}
 	findFile( path, options )
 	{

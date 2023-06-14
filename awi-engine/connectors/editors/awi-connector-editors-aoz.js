@@ -41,6 +41,7 @@ class ConnectorEditorAozRuntime extends awiconnector.Connector
 	{
 		super.connect( options );
 		this.connected = true;
+		this.connectAnswer.data.token = this.classname;
 		this.connectAnswer.success = true;
 		return this.connectAnswer;
 	}

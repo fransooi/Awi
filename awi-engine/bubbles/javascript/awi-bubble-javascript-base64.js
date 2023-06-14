@@ -30,10 +30,18 @@ class BubbleProgrammingBase64 extends awibubble.Bubble
 		this.token = 'base64';
 		this.classname = 'programming';
 		this.properties.action = 'converts an image to Base 64 Ascii code';
-		this.properties.inputs = [ { userInput: 'the path or filter to the image', type: 'string' } ];
+		this.properties.inputs = [
+			{ file: 'the file to edit', type: 'string' },
+			{ date: 'the date when the file was created', type: 'string', optional: true },
+			{ time: 'the time when the file was created', type: 'string', optional: true },
+			{ input: 'description of the content to search for', type: 'string', optional: true },
+			];
 		this.properties.outputs = [ { base64: 'the image converted to base64', type: 'string.base64' } ];
-		this.properties.brackets = true;
-		this.properties.tags = [ 'programming' ];
+		this.properties.parser = {
+			verb: [ 'convert', 'transform' ],
+			adjective: [ 'base64' ],
+			file: [], date: [], time: [], input: [] };
+		this.properties.select = [ [ 'verb', 'adjective' ] ];
 	}
 	async play( line, parameters, control )
 	{

@@ -32,8 +32,6 @@ class BubbleGenericInput extends awibubble.Bubble
 		this.properties.action = 'ask the user for input';
 		this.properties.inputs = [ { inputInfo: 'information on the data to input', type: 'array' } ];
 		this.properties.outputs = [];
-		this.properties.brackets = false;
-		this.properties.tags = [ 'generic', 'user', 'input' ];
 	}
 	/*
 	async getParameters( parameters, data, control = {} )

@@ -59,9 +59,9 @@ class ConnectorImporterAudio extends awiconnector.Connector
 				var arrow = lines[ l + 1 ].indexOf( '-->' );
 				var start = lines[ l + 1 ].substring( 0, arrow ).trim();
 				var end = lines[ l + 1 ].substring( arrow + 3 ).trim();
-				const regex = /^(\d{2}):(\d{2}):(\d{2}),(\d{3})$/;
-				start = this.awi.utilities.getMediaTimestamp( this.awi.utilities.matchRegex( start, regex ) );
-				end = this.awi.utilities.getMediaTimestamp( this.awi.utilities.matchRegex( end, regex ) );
+				const regex = this.awi.time.getMediaRegex();
+				start = this.awi.time.getTimestampFromMatches( this.awi.utilities.matchRegex( start, regex ) );
+				end = this.awi.time.getTimestampFromMatches( this.awi.utilities.matchRegex( end, regex ) );
 				var text = '';
 				for ( var ll = 2; ll + l < lines.length; ll++ )
 				{
@@ -76,7 +76,7 @@ class ConnectorImporterAudio extends awiconnector.Connector
 					receiverName: '',
 					path: path,
 					text: text,
-					date: this.awi.utilities.getTimestampFromStats( stats ),
+					date: this.awi.time.getTimestampFromStats( stats ),
 					start: start,
 					end: end
 				} } );

@@ -30,15 +30,19 @@ class BubbleGenericHex extends awibubble.Bubble
 		this.token = 'hex';
 		this.classname = 'generic';
 		this.properties.action = 'converts an expression to a hexadecimal number';
-		this.properties.inputs = [ { userInput: 'the expression to convert to hexadecimal', type: 'string' } ];
+		this.properties.inputs = [ { evaluation: 'the expression to convert to hexadecimal', type: 'string' } ];
 		this.properties.outputs = [ { hexValue: 'the expression converted to hexadecimal', type: 'number' } ];
-		this.properties.brackets = false;
-		this.properties.tags = [ 'conversions', 'mathematics', 'education', 'programming' ];
+		this.properties.parser = {
+			verb: [ 'convert', 'transform', 'calculate' ],
+			adjective: [ 'hexadecimal', 'hexa' ],
+			questionWord: [ 'what' ],
+			evaluation: [ 'numeric' ] };
+		this.properties.select = [ [ 'verb', 'adjective' ], [ 'questionWord', 'adjective' ] ];
 	}
 	async play( line, parameters, control )
 	{
 		await super.play( line, parameters, control );
-		var answer = await this.awi.language.doEval( parameters.userInput, {} );
+		var answer = await this.awi.language.doEval( '' + parameters.evaluation, {} );
 		if ( answer.success )
 		{
 			var result = '$' + this.awi.utilities.toHex( answer.data, 8 );

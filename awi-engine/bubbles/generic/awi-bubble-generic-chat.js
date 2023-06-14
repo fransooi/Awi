@@ -33,8 +33,6 @@ class BubbleGenericChat extends awibubble.Bubble
 		this.properties.action = 'answers to generic questions';
 		this.properties.inputs = [ { userInput: 'the question', type: 'string' } ];
 		this.properties.outputs = [ { awiAnswer: 'the answer to the question', type: 'string' } ];
-		this.properties.brackets = false;
-		this.properties.tags = [ 'system', 'chat' ];
 		this.empty = false;
 	}
 	async play( line, parameters, control )

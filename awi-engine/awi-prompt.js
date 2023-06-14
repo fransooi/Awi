@@ -40,77 +40,6 @@ class Prompt
 		this.options = { awi: {}, bubble: {} };
 		this.promptThis = this;
 		this.questionCount = 1;
-
-		this.types =
-		{
-			png: { importTo: [ '/resources/1.images', '/resources/images', '/resources/1.Images', '/resources/Images' ], displayName: 'images' },
-			jpg: { importTo: [ '/resources/1.images', '/resources/images', '/resources/1.Images', '/resources/Images' ], displayName: 'images' },
-			jpeg: { importTo: [ '/resources/1.images', '/resources/images', '/resources/1.Images', '/resources/Images' ], displayName: 'images' },
-			mp3: { importTo: [ '/resources/5.samples', '/resources/5.sounds', '/resources/5.Samples', '/resources/5.Sounds', '/resources/Sounds', '/resources/Samples' ], displayName: 'sounds' },
-			wav: { importTo: [ '/resources/5.samples', '/resources/5.sounds', '/resources/5.Samples', '/resources/5.Sounds', '/resources/Sounds', '/resources/Samples' ], displayName: 'sounds' },
-			mp4: { importTo: [ '/resources/assets', '/resources/Assets' ], displayName: 'assets' },
-			_assets_: { importTo: [ '/resources/assets' ], displayName: 'assets' }
-		}
-		this.animations =
-		{
-			awi:
-			{
-				type: 'oneline',
-				anims:
-				{
-					thinking:
-					{
-						speed: 5,
-						loop: -1,
-						definition: [ '(...)' ]
-					},
-					neutral:
-					{
-						speed: 3,
-						loop: -1,
-						definition: [ '(°°)' ]
-					},
-					success:
-					{
-						speed: 3,
-						loop: -1,
-						definition: [ '(**)' ]
-					},
-					error:
-					{
-						speed: 3,
-						loop: -1,
-						definition: [ '(!!)' ]
-					},
-					question:
-					{
-						speed: 3,
-						loop: -1,
-						definition: [ '(??)' ]
-					},
-					waiting:
-					{
-						speed: 4,
-						loop: -1,
-						wink: 0,
-						cling: 5,
-						definition: [ '(.)', '(..)', '(...)', '(..)' ]
-					},
-					winkLeft:
-					{
-						speed: 1,
-						loop: 1,
-						definition: [ '(-°)' ]
-					},
-					winkRight:
-					{
-						speed: 1,
-						loop: 1,
-						definition: [ '(°-)' ]
-					},
-				}
-			}
-		}
 		this.branch = new awibranch.Branch( this.awi, { parent: 'prompt' } )
 	}
 	async play( line, data, control )
@@ -169,7 +98,7 @@ class Prompt
 						if ( answer.success )
 						{
 							logged = true;
-							line = '';	//'Please say hello to ' + userName + ' with a short joke about programming...';
+							line = '';
 							this.awi.editor.print( control.editor, 'User changed to ' + userName + '\n', { user: 'information' } );
 						}
 						else
@@ -204,10 +133,13 @@ class Prompt
 		}
 
 		// A normal bubble...
-		line = this.branch.addBubbleFromLine( line, {} );
+		var command = await this.awi.parser.extractCommandFromLine( line, control );
+		var parameters = command.parameters;
+		command.parameters = {};
+		this.branch.addBubbleFromCommand( command, parameters, control );
 		control.start = 'current';
 		control.questionCount = this.questionCount++;
-		var answer = await this.branch.play( line, data, control );
+		var answer = await this.branch.play( command.line, parameters, control );
 		control.questionCount = undefined;
 		control.editor.self.waitForInput( control.editor, { force: true } );
 		return answer;

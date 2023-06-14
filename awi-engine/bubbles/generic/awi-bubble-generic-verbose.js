@@ -32,7 +32,11 @@ class BubbleGenericVerbose extends awibubble.Bubble
 		this.properties.action = 'sets the level of verbosity of awi';
 		this.properties.inputs = [ { userInput: 'the level of verbosity, from 1 to 3', type: 'number', interval: { start: 1, end: 3 }, optional: false } ];
 		this.properties.outputs = [];
-		this.properties.tags = [ 'system', '', '', '' ];
+		this.properties.parser = {
+			verb: [ 'verbose' ],
+			value: []
+		}
+		this.properties.select = [ [ 'verb' ] ];
 	}
 	async play( line, parameters, control )
 	{

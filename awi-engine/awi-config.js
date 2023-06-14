@@ -42,7 +42,12 @@ class Config
 			this.getDataPath = config.data;
 		this.user = '';
 		this.configs = {};
-		this.systemName = 'win32';
+		this.platform = 'win32';
+	}
+	async init()
+	{
+		await this.loadConfigs();
+		this.platform = await this.awi.system.getSystemInformation( 'platform' );
 	}
 	isUserLogged()
 	{
@@ -217,68 +222,64 @@ class Config
 							verbose2: '. ',
 							verbose3: '. ',
 						},
-						configs:
+						commands:
 						{
 							win32:
 							{
-								paths:
-								{
-									image: {
-										libraries: [ 'D:/Pictures' ],
-										view: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
-										edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
-										run: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
-										filters: [ '*.png', '*.jpg', '*.jpeg', '*.gif', '*.psd' ]
-									},
-									video: {
-										libraries: [ 'D:/Videos' ],
-										view: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
-										edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
-										run: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
-										filters: [ '*.mp4', '*.avi', '*.mpeg', '*.ogg' ]
-									},
-									audio: {
-										libraries: [ 'D:/Music' ],
-										view: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
-										edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
-										run: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
-										filters: [ '*.mp3', '*.wav', '*.ogg' ]
-									},
-									document: {
-										libraries: [ 'D:/Documents' ],
-										view: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
-										edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
-										run: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
-										filters: [ '*.txt', '*.pdf', '*.docx', '*.doc', '*.xls', '*.xsls', '*.ppt', '*.odf' ]
-									},
-									source: {
-										libraries: [ 'C:/Awi', 'C:/AOZ_Studio' ],
-										view: { command: 'code "{file}"', cwd: '', type: 'exec' },
-										edit: { command: 'code "{file}"', cwd: '', type: 'exec' },
-										run: { command: 'code "{file}"', cwd: '', type: 'exec' },
-										filters: [ '*.js', '*.c', '*.cpp', '*.h', '*.hh', '*.py' ]
-									},
-									html: {
-										libraries: [],
-										view: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
-										edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
-										run: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
-										filters: [ '*.html' ]
-									},
-									executable: {
-										libraries: [ 'C:/Program Files', 'C:/Program Files (x86)'],
-										view: { command: 'start {file}', cwd: '"{dir}"', type: 'exec' },
-										edit: { command: 'start {file}', cwd: '"{dir}"', type: 'exec' },
-										run: { command: 'start {file}', cwd: '"{dir}"', type: 'exec' },
-										filters: [ '*.exe' ]
-									},
-									any: {
-										libraries: [],
-										view: { command: 'explorer {file}', cwd: '', type: 'exec' },
-										edit: { command: 'explorer {file}', cwd: '', type: 'exec' },
-										run: { command: 'explorer {file}', cwd: '', type: 'exec' },
-										filters: [ '*.*' ]
-									}
+								image: {
+									view: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+									edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+									run: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+								},
+								video: {
+									view: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+									edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+									run: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+								},
+								sound: {
+									view: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+									edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+									run: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+								},
+								document: {
+									view: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+									edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+									run: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+								},
+								presentation: {
+									view: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+									edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+									run: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+								},
+								source: {
+									view: { command: 'code "{file}"', cwd: '', type: 'exec' },
+									edit: { command: 'code "{file}"', cwd: '', type: 'exec' },
+									run: { command: 'code "{file}"', cwd: '', type: 'exec' },
+								},
+								json: {
+									view: { command: 'code "{file}"', cwd: '', type: 'exec' },
+									edit: { command: 'code "{file}"', cwd: '', type: 'exec' },
+									run: { command: 'code "{file}"', cwd: '', type: 'exec' },
+								},
+								html: {
+									view: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+									edit: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+									run: { command: 'explorer "{file}"', cwd: '', type: 'exec' },
+								},
+								application: {
+									view: { command: 'start {file}', cwd: '"{dir}"', type: 'exec' },
+									edit: { command: 'start {file}', cwd: '"{dir}"', type: 'exec' },
+									run: { command: 'start {file}', cwd: '"{dir}"', type: 'exec' },
+								},
+								aozaccessory: {
+									view: { command: 'aoz {file}', cwd: '"{dir}"', type: 'exec' },
+									edit: { command: 'aoz {file}', cwd: '"{dir}"', type: 'exec' },
+									run: { command: 'aoz {file}', cwd: '"{dir}"', type: 'exec' },
+								},
+								file: {
+									view: { command: 'explorer {file}', cwd: '', type: 'exec' },
+									edit: { command: 'explorer {file}', cwd: '', type: 'exec' },
+									run: { command: 'explorer {file}', cwd: '', type: 'exec' },
 								}
 							},
 							macOS: {},
@@ -325,7 +326,29 @@ class Config
 							'Please take note: you are talking to {firstName}.',
 							'\nNot more than 50 words in any response.'
 						],
+						paths: {
+							win32: [],
+							macOS: [],
+							linux: [],
+							android: [],
+							iPhone: []
+						}
 					};
+					for ( var p in this.configs[ type ].paths )
+					{
+						this.configs[ type ].paths[ p ] = {
+							image: [],
+							sound: [],
+							video: [],
+							music: [],
+							json: [],
+							document: [],
+							presentation: [],
+							source: [],
+							application: [],
+							aozaccessory: [],
+							file: [] };
+					}
 					break;
 				case 'personality':
 					this.configs[ type ] =
@@ -376,6 +399,45 @@ class Config
 		if ( callback )
 			callback( this.configs[ type ] )
 		return this.configs[ type ];
+	}
+	async getDefaultPaths()
+	{
+		var paths = {
+			win32: {},
+			darwin: {},
+			linux: {},
+			android: {},
+			iOS: {}	};
+		var userDir = await this.awi.system.getSystemInformation( 'userDir' );
+		var drives = await this.awi.system.getSystemInformation( 'drives' );
+		for ( var d = 0; d < drives.length; d++ )
+			drives[ d ] = drives[ d ] + ':/';
+		var platform = await this.awi.system.getSystemInformation( 'platform' );
+		switch ( platform )
+		{
+			case 'win32':
+				paths.win32.image = [ userDir + '/Pictures' ];
+				paths.win32.sound = [];
+				paths.win32.video = [ userDir + '/Videos' ];
+				paths.win32.music = [ userDir + '/Music' ];
+				paths.win32.document = [ userDir + '/Documents' ];
+				paths.win32.presentation = [ userDir + '/Documents' ];
+				paths.win32.json = [];
+				paths.win32.source = [];
+				paths.win32.application = [ 'C:/Program Files', 'C:/Program Files (x86)' ];
+				paths.win32.accessory = [ 'C:/AOZ_Studio/AOZ_Studio/aoz/app/aozacc' ];
+				paths.win32.file = drives;
+				break;
+			case 'darwin':
+				break;
+			case 'linux':
+				break;
+			case 'android':
+				break;
+			case 'iOS':
+				break;
+		}
+		return paths;
 	}
 	getPrompt( type )
 	{
@@ -485,9 +547,9 @@ class Config
 			return 'ws://localhost:8765';
 		return this.configs[ 'system' ].serverUrl;
 	}
-	getCurrentSystem()
+	getSystem()
 	{
-		return this.configs.system.configs[ this.systemName ];
+		return this.configs[ 'system' ];
 	}
 	getDebug()
 	{

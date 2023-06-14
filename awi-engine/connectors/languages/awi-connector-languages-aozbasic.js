@@ -72,6 +72,7 @@ class ConnectorLangageAozBasic extends awiconnector.Connector
 			this.connected = true;
 			this.connectAnswer.success = true;
 		} while( false )
+		this.connectAnswer.data.token = this.classname;
 		return this.connectAnswer;
 	}
 	async getImportPaths()

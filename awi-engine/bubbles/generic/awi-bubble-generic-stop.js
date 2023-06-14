@@ -30,15 +30,18 @@ class BubbleGenericStop extends awibubble.Bubble
 		this.token = 'stop';
 		this.classname = 'generic';
 		this.properties.action = 'stop a media playing';
-		this.properties.inputs = [ { userInput: 'the name of the item to stop', type: 'string' } ];
+		this.properties.inputs = [ { noun: 'the name of the item to stop', type: 'string' } ];
 		this.properties.outputs = [ { stopAction: 'the name of the item that was stopped', type: 'string' } ];
-		this.properties.brackets = false;
-		this.properties.tags = [ 'editor', 'media' ];
+		this.properties.parser = {
+			verb: [ 'stop', 'halt' ],
+			noun: [ 'mimetypes' ]
+		}
+		this.properties.select = [ [ 'verb' ] ];
 	}
 	async play( line, parameters, control )
 	{
 		await super.play( line, parameters, control );
-		return await this.awi.editor.stop( control.editor, parameters.userInput );
+		return await this.awi.editor.stop( control.editor, parameters.noun );
 	}
 	async playback( line, parameters, control )
 	{

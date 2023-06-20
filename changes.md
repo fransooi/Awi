@@ -1,3 +1,7 @@
+20230620 Debugging of memories, system is now stable and works
+20230620 Further debugging of the modifications induced by the parser
+20230620 New! Beginning of Android app under Capactitor: awia
+
 20230614 More debugging
 20230614 New TIME utilities connector
 20230614 New PARSER utilities connector

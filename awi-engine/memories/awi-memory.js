@@ -93,12 +93,9 @@ class Memory extends awibranch.Branch
 					directSouvenirs.push( souvenir );
 				}
 			}
-			else
-			{
-				var answer = await souvenir.findSouvenirs( line, parameters, control );
-				if ( answer.success == 'found' )
-					indirectSouvenirs.push( souvenir );
-			}
+			var answer = await souvenir.findSouvenirs( line, parameters, control );
+			if ( answer.success == 'found' )
+				indirectSouvenirs.push( souvenir );
 			souvenir = this.getBubble( souvenir.properties.exits[ 'success' ] );
 		} while ( souvenir );
 		var directContent = [];

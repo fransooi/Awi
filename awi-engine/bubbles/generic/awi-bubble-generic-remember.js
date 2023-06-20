@@ -28,7 +28,7 @@ class BubbleGenericRemember extends awibubble.Bubble
 		super( awi, options );
 		this.name = 'Remember Action Bubble';
 		this.token = 'remember';
-		this.classname = 'generic';``
+		this.classname = 'generic';
 		this.properties.action = 'recall all memories about a subject';
 		this.properties.inputs = [
 			{ what: 'the subject to remember', type: 'string', optional: true, default: 'any' },
@@ -61,7 +61,7 @@ class BubbleGenericRemember extends awibubble.Bubble
 			else
 				this.awi.editor.print( control.editor, 'No direct souvenir found.', { user: 'information' } );
 
-			if ( parameters.scanLevel > 1 && answer.data.indirect.souvenirs.length > 0 )
+			if ( /*parameters.scanLevel > 1 &&*/ answer.data.indirect.souvenirs.length > 0 )
 				this.awi.editor.print( control.editor, 'Found ' + answer.data.indirect.souvenirs.length + ' indirect souvenir(s).', { user: 'information' } );
 			else
 				this.awi.editor.print( control.editor, 'No indirect souvenir found.', { user: 'information' } );

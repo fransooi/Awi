@@ -98,7 +98,7 @@ class Prompt
 						if ( answer.success )
 						{
 							logged = true;
-							line = '';
+							line = 'Hello Awi... Could you first say hello to the user ' + userName + ' then invent a funny joke about programming chores?';
 							this.awi.editor.print( control.editor, 'User changed to ' + userName + '\n', { user: 'information' } );
 						}
 						else

@@ -40,6 +40,7 @@ class ConnectorImporterAudio extends awiconnector.Connector
 	async import( path, senderName, control = {} )
 	{
 		this.awi.editor.print( control.editor, 'Transcripting audio to text from file ' + path + '.', { user: 'importer1' } )
+		control.response_format = 'srt';
 		var transcription = await this.awi.client.createTranscription( '', path, { response_format: 'srt' } );
 		if ( transcription.success )
 		{

@@ -30,9 +30,11 @@ class BubbleGenericDebug extends awibubble.Bubble
 		this.token = 'debug';
 		this.classname = 'generic';
 		this.properties.action = 'sets the level of debug of awi';
-		this.properties.inputs = [ { evaluation: 'the level of debug, from 1 to 3', type: 'number', interval: { start: 1, end: 3 }, optional: false } ];
-		this.properties.outputs = [];
-		this.properties.parser = { evaluation: [ 'numeric' ] };
+		this.properties.inputs = [ { evaluation: 'the level of debug, from 0 to 3', type: 'number', interval: { start: 0, end: 3 }, optional: false } ];
+		this.properties.outputs = [ { evalValue: 'the last evaluated expression', type: 'number' } ];
+		this.properties.parser = {
+			verb: [ 'debug' ],
+			evaluation: [ 'numeric' ] };
 		this.properties.select = [];
 	}
 	async play( line, parameters, control )

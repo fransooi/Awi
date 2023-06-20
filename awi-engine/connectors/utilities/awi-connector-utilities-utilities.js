@@ -1538,9 +1538,9 @@ class ConnectorUtilityUtilities extends awiconnector.Connector
 		var hash = module.exports.sha1;
 		return hash( object );
 	}
-	compareTwoStrings( first, second, options = {} )
+	compareTwoStrings( first, second, control = {} )
 	{
-		if ( options.caseInsensitive )
+		if ( control.caseInsensitive )
 		{
 			first = first.toLowerCase();
 			second = second.toLowerCase();
@@ -1617,7 +1617,6 @@ class ConnectorUtilityUtilities extends awiconnector.Connector
 			var word1 = words1[ w1 ];
 			for ( var w2 = 0; w2 < words2.length; w2++ )
 			{
-				var word2 = words2[ w2 ];
 				var position = word1.indexOf( words2[ w2 ] );
 				if ( position >= 0 )
 				{
@@ -1699,20 +1698,23 @@ class ConnectorUtilityUtilities extends awiconnector.Connector
 	isPath( text )
 	{
 		var result = false;
-		for ( var p = 0; p < text.length; p++ )
+		if ( typeof text != 'undefined' )
 		{
-			var c = text.charAt( p );
-			if ( c == '/' || c == '\\' || c == '*' || c == '.' || c == '?' )
-				result = true;
-		}
-		if ( result )
-		{
-			try
+			for ( var p = 0; p < text.length; p++ )
 			{
-				this.parse( text );
-			} catch ( e )
+				var c = text.charAt( p );
+				if ( c == '/' || c == '\\' || c == '*' || c == '.' || c == '?' )
+					result = true;
+			}
+			if ( result )
 			{
-				return false;
+				try
+				{
+					this.parse( text );
+				} catch ( e )
+				{
+					return false;
+				}
 			}
 		}
 		return result;

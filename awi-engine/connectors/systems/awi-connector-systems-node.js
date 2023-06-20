@@ -41,7 +41,7 @@ class ConnectorSystemNode extends awiconnector.Connector
 		this.version = '0.2';
 		this.rootPath = '';
 		this.getAssociation = promisify( regedit.list );
-		this.assetsTypes =
+		this.assetTypes =
 		{
 			image: { names: [ 'image', 'photo', 'drawing', 'painting', 'sketch' ], filters: [ '*.png', '*.jpg', '*.jpeg', '*.gif', '*.psd', '*.psp', '*.webm' ], paths: [] },
 			sound: { names: [ 'sound', 'audio', 'sample', 'wave' ], filters: [ '*.wav', '*.mp3', '*.ogg' ], paths: [] },
@@ -68,6 +68,49 @@ class ConnectorSystemNode extends awiconnector.Connector
 		this.connectAnswer.success = true;
 		this.connectAnswer.data.token = this.classname;
 		return this.connectAnswer;
+	}
+	async getAssetType( names )
+	{
+		if ( typeof names == 'undefined' || names.length == 0 )
+			return null;
+
+		if ( typeof names == 'string' )
+		{
+			var found = this.awi.parser.findWordDefinition( this.assetTypes.names, name, 'find' );;
+			if ( found )
+				return this.assetTypes[ name ];
+			for ( var s in this.assetTypes )
+			{
+				found = this.assetTypes[ s ].filters.findIndex(
+					function( element )
+					{
+						var filter = element.substring( element.lastIndexOf( '.' ) );
+						return ( name.indexOf( filter ) >= 0 );
+					} );
+				if ( found >= 0 )
+					result.push( this.assetTypes[ found ] );
+			}
+			return null;
+		}
+		for ( var s in this.assetTypes )
+		{
+			var assetType = this.assetTypes[ s ];
+			for ( var n = 0; n < names.length; n++ )
+			{
+				var found = this.awi.parser.findWordDefinition( assetType.names, names[ n ], 'find' );;
+				if ( found )
+					return assetType;
+				var ext = names[ n ].substring( names[ n ].lastIndexOf( '.' ) );
+				var found = assetType.filters.findIndex(
+					function( element )
+					{
+						var filter = element.substring( element.lastIndexOf( '.' ) );
+						return ( filter.indexOf( ext ) >= 0 );
+					} );
+				return assetType;
+			}
+		}
+		return result;
 	}
 	async getDirectory( path, options )
 	{
@@ -214,7 +257,7 @@ class ConnectorSystemNode extends awiconnector.Connector
 				}
 				break;
 		}
-		if ( typeof parameters.date != 'undefined' )
+		if ( typeof parameters.date != 'undefined' && parameters.date.length )
 		{
 			var newFound = [];
 			for ( var f = 0; f < found.length; f++ )
@@ -228,7 +271,7 @@ class ConnectorSystemNode extends awiconnector.Connector
 			}
 			found = newFound;
 		}
-		if ( typeof parameters.time != 'undefined' )
+		if ( typeof parameters.time != 'undefined' && parameters.time.length )
 		{
 			var newFound = [];
 			for ( var f = 0; f < found.length; f++ )

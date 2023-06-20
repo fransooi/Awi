@@ -277,11 +277,12 @@ class ConnectorUtilitiesParser extends awiconnector.Connector
 		} );
 		function getTags( tags, text )
 		{
+			var text = '';
 			for ( var tag in tags )
 			{
 				if ( tag != 'data' )
 				{
-					var arr;
+					var arr = [];
 					var str = text + ( text == '' ? '' : '.' ) + tag;
 					getTags( tags[ tag ], str );
 					var tagName = '#' + tag.charAt( 0 ).toUpperCase() + tag.substring( 1 );
@@ -297,14 +298,14 @@ class ConnectorUtilitiesParser extends awiconnector.Connector
 					if ( arr.length > 0 )
 					{
 						tagsMap[ tag ] = arr;
-						console.log( str + ': ' + tagsMap[ tag ] );
+						text += str + ': ' + tagsMap[ tag ] + '\n';
 					}
 				}
 			}
 		}
 		function extractDates( names )
 		{
-			var extraDates = self.findWordDefinition( self.awi.time.extraDates, names, toRemove );
+			var extraDates = self.findWordDefinition( self.awi.time.extraDates, names );
 			for ( var e = 0; e < extraDates.length; e++ )
 			{
 				var quit = false;
@@ -332,7 +333,7 @@ class ConnectorUtilitiesParser extends awiconnector.Connector
 		}
 		function extractTimes( names )
 		{
-			var extraTimes = self.findWordDefinition( self.awi.time.extraTimes, names, toRemove );
+			var extraTimes = self.findWordDefinition( self.awi.time.extraTimes, names );
 			for ( var e = 0; e < extraTimes.length; e++ )
 			{
 				var quit = false;
@@ -391,44 +392,32 @@ class ConnectorUtilitiesParser extends awiconnector.Connector
 				}
 				else if ( tag == 'file' )
 				{
-					command.parameters.file = self.awi.utilities.copyObject( self.awi.system.assetsTypes.file );
-					var names = bubble.properties.parser.file;
 					var nouns = tagsMap[ 'noun' ];
-					if ( nouns )
+					command.parameters.file = self.awi.utilities.copyObject( self.awi.system.assetTypes.file );
+					if ( typeof tagsMap[ 'noun' ] != 'undefined' && nouns.length > 0 )
 					{
-						for ( var n = 0; n < nouns.length; n++ )
+						var assetType = await self.awi.system.getAssetType( tagsMap[ 'noun' ] );
+						if ( assetType )
 						{
-							var assetType;
-							if ( names.length == 0 )
-								assetType = self.findWordDefinition( self.awi.system.assetsTypes, nouns[ n ], toRemove );
-							else
-								assetType = self.findWordDefinition( names, nouns[ n ], toRemove );
-
-							if ( assetType )
+							if ( command.parameters.file.filters[ 0 ] == '*.*' )
 							{
-								if ( command.parameters.file.filters[ 0 ] == '*.*' )
-								{
-									command.parameters.file.filters = [];
-									command.parameters.file.names = [];
-								}
-								command.parameters.file.filters.push( ...assetType.filters );
-								command.parameters.file.names.push( ...assetType.names );
+								command.parameters.file.filters = [];
+								command.parameters.file.names = [];
 							}
-							else if ( self.awi.utilities.isPath( nouns[ n ] ) )
-							{
-								command.parameters.file.paths.push( nouns[ n ] );
-								toRemove.push( nouns[ n ] );
-							}
+							command.parameters.file.filters.push( ...assetType.filters );
+							command.parameters.file.names.push( ...assetType.names );
 						}
-						if ( command.parameters.file.paths.length == 0 )
+						else if ( self.awi.utilities.isPath( nouns[ n ][ 0 ] ) )
 						{
-							if ( command.parameters.file.names.length > 0 )
-							{
-								var name =  command.parameters.file.names[ 0 ];
-								var config = self.awi.config.getConfig( 'user' ).paths[ self.awi.config.platform ];
-								command.parameters.file.paths = config[ name ];
-							}
+							command.parameters.file.paths.push( nouns[ n ][ 0 ] );
+							toRemove.push( nouns[ n ] );
 						}
+					}
+					if ( command.parameters.file.names.length > 0 )
+					{
+						var name =  command.parameters.file.names[ 0 ];
+						var config = self.awi.config.getConfig( 'user' ).paths[ self.awi.config.platform ];
+						command.parameters.file.paths = config[ name ];
 					}
 				}
 				else if ( tag == 'date' )
@@ -454,16 +443,11 @@ class ConnectorUtilitiesParser extends awiconnector.Connector
 							toRemove.push( tagsMap[ 'firstName' ][ f ] );
 							if ( tagsMap[ 'lastName' ] && tagsMap[ 'lastName' ].length == tagsMap[ 'firstName' ].length )
 							{
-								person += ' ' + this.awi.utilities.capitalize( tagsMap[ 'lastName' ][ f ] );
+								person += ' ' + self.awi.utilities.capitalize( tagsMap[ 'lastName' ][ f ] );
 								toRemove.push( tagsMap[ 'lastName' ][ f ] );
 							}
 							command.parameters.person.push( person );
 						}
-					}
-					else if ( tagsMap[ 'firstName' ].length > 0 )
-					{
-						for ( var f = 0; f < tagsMap[ 'firstName' ].length; f++ )
-							command.parameters.person.push( self.awi.utilities.capitalize( tagsMap[ 'firstName' ][ f ] ) );
 					}
 				}
 				else if ( tag == 'what' )
@@ -577,7 +561,7 @@ class ConnectorUtilitiesParser extends awiconnector.Connector
 		var terms = rootDoc.terms().out( 'array' );
 		if ( !tagsMap.questionWord )
 		{
-			var list = [ [ 'please' ], [ 'can', 'you' ], [ 'could', 'you' ], [ 'i', 'would', 'like', 'you', 't' ] ];
+			var list = [ [ 'please', 'awi' ], [ 'please', 'now' ], [ 'please' ], [ 'can', 'you' ], [ 'could', 'you' ], [ 'i', 'would', 'like', 'you', 'to' ], [ 'now' ] ];
 			for ( var w = 0; w < terms.length; w++ )
 			{
 				var good = false;
@@ -622,7 +606,7 @@ class ConnectorUtilitiesParser extends awiconnector.Connector
 					for ( var token in this.awi.bubbles[ classname ] )
 					{
 						var bubble = this.awi.bubbles[ classname ][ token ];
-						var verb = this.findWordDefinition( bubble.properties.parser.verb, word );
+						var verb = this.findWordDefinition( bubble.properties.parser.verb, word, 'find' );
 						if ( verb )
 						{
 							await getParameters( bubble, command );
@@ -643,7 +627,7 @@ class ConnectorUtilitiesParser extends awiconnector.Connector
 				for ( var token in this.awi.bubbles[ classname ] )
 				{
 					var bubble = this.awi.bubbles[ classname ][ token ];
-					var questionWord = this.findWordDefinition( bubble.properties.parser.questionWord, word );
+					var questionWord = this.findWordDefinition( bubble.properties.parser.questionWord, word, 'find' );
 					if ( questionWord )
 					{
 						await getParameters( bubble, command );
@@ -725,7 +709,7 @@ class ConnectorUtilitiesParser extends awiconnector.Connector
 				text.push( p + ': ' + command.parameters[ p ] );
 			}
 		}
-		this.awi.editor.print( control.editor, text, { user: 'awi' } );
+		this.awi.editor.print( control.editor, text, { user: 'parser' } );
 		return command;
 	}
 }

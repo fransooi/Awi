@@ -101,8 +101,9 @@ class BubbleGenericChat extends awibubble.Bubble
 			}
 		}
 
-		// Gather previous or relevant conversations
-		var memories = await this.awi.extractContentFromMemories( line, { senderName: this.awi.config.getConfig( 'user' ).fullName }, { caseInsensitive: true } );
+		// Gather previous or relevant conversations { caseInsensitive: true }
+		control.caseInsensitive = true;
+		var memories = await this.awi.extractContentFromMemories( line, { senderName: this.awi.config.getConfig( 'user' ).fullName }, control );
 		//memories.push( ...this.awi.memoryManager.recall( parameters.userInput ) );
 		var conversation = '';
 		var takenote = '';

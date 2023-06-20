@@ -302,7 +302,7 @@ class Config
 						},
 						directConnection: true,
 						localServer: true,
-						aiKey: '',				// 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
+						aiKey: '',
 						isDegree: true,
 						fix: 3,
 						debug: 0,
@@ -317,8 +317,8 @@ class Config
 						},
 						debugPrompts:
 						{
-							debug1: [ 'prompt' ],
-							debug2: [ 'completion' ],
+							debug1: [ 'parser' ],
+							debug2: [ 'parser', 'prompt', , 'completion' ],
 							debug3: [ 'all' ]
 						},
 						takeNote:

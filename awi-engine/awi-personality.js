@@ -348,4 +348,4 @@ It returns `
 		return answer;
 	}
 }
-module.exports.Personality = Personality
+module.exports.Personality = Personality;

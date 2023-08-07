@@ -23,6 +23,7 @@ var awimessages = require( './awi-messages' )
 var awiprompt = require( './awi-prompt' )
 var awipersonality = require( './awi-personality' )
 var awiconfig = require( './awi-config' );
+var awirequires = require( './awi-requires' );
 
 class Awi
 {
@@ -54,62 +55,8 @@ class Awi
 	async connect( options = {} )
 	{
 		var answers = {};
-		if ( options.fromAwi )
-		{
-			this.bubbles = {};
-			this.newBubbles = options.fromAwi.newBubbles;
-			for ( var classname in this.newBubbles )
-			{
-				if ( !this.bubbles[ classname ] )
-					this.bubbles[ classname ] = {};
-				for ( var name in this.newBubbles[ classname ] )
-					this.bubbles[ classname ][ name ] = new this.newBubbles[ classname ][ name ]( this, options.fromAwi.bubbles[ classname ][ name ].options );
-			}
-			this.connectors = {};
-			this.newConnectors = options.fromAwi.newConnectors;
-			for ( var classname in options.fromAwi.connectors )
-			{
-				if ( !this.connectors[ classname ] )
-					this.connectors[ classname ] = {};
-				for ( var name in options.fromAwi.connectors[ classname ] )
-				{
-					var srcConnector = options.fromAwi.connectors[ classname ][ name ];
-					if ( name != 'current' )
-					{
-						var found = options.preserveConnectors.find(
-							function( element )
-							{
-								return element == classname + '-' + name
-							} );
-						if ( !found )
-						{
-							var connector = new this.newConnectors[ classname ][ name ]( this, srcConnector.options );
-							var answer = await connector.connect( srcConnector.options );
-							answers[ connector.classname ] = [ { success: answer.success, nonFatal: answer.nonFatal, data: answer.data } ];
-							this[ connector.classname ] = connector;
-							this.connectors[ classname ][ name ] = connector;
-							this.connectors[ classname ].current = connector;
-							if ( classname == 'utilities' )
-								await this.config.loadConfigs();
-						}
-						else
-						{
-							this[ srcConnector.classname ] = srcConnector;
-							this.connectors[ classname ][ name ] = srcConnector;
-							this.connectors[ classname ].current = srcConnector;
-						}
-					}
-				}
-			}
-			this.newSouvenirs = options.fromAwi.newSouvenirs;
-			this.newMemories = options.fromAwi.newMemories;
-		}
-		else
-		{
 			if ( typeof this.systemConfig.engine != 'string' )
 			{
-				var files = this.systemConfig.engine;
-
 				// Start connectors... System must be first.
 				for ( var c = 0; c < this.systemConfig.connectors.length; c++ )
 				{
@@ -119,18 +66,19 @@ class Awi
 					var name = connector.name.substring( dot + 1 );
 					if ( name.indexOf( '*' ) >= 0 || name.indexOf( '?' ) >= 0 )
 						break;
-					var exports = window.awi[ 'awi-connector-' + classname + '-' + name ];
+				var rname = 'awi-connector-' + classname + '-' + name;
+				var exprts = awirequires[ rname ];
 					this.connectors[ classname ] = ( typeof this.connectors[ classname ] == 'undefined' ? {} : this.connectors[ classname ] );
-					this.connectors[ classname ][ name ] = new exports.Connector( this, {} );
+				this.connectors[ classname ][ name ] = new exprts.Connector( this, {} );
 					this.newConnectors[ classname ] = ( typeof this.newConnectors[ classname ] == 'undefined' ? {} : this.newConnectors[ classname ] );
-					this.newConnectors[ classname ][ name ] = exports.Connector;
+				this.newConnectors[ classname ][ name ] = exprts.Connector;
 					if ( connector.default )
 					{
 						var answer = await this.connectors[ classname ][ name ].connect( connector.options );
 						answers[ answer.data.classname ] = [ { success: answer.success, data: answer.data } ];
 						this[ answer.data.classname ] = this.connectors[ classname ][ name ];
 						this.connectors[ classname ].current = this.connectors[ classname ][ name ];
-						if ( classname == 'utilities' && name == 'awi'  )
+					if ( classname == 'utilities' && name == 'utilities'  )
 						{
 							await this.config.init();
 						}
@@ -149,19 +97,18 @@ class Awi
 						do
 						{
 							var done = false;
-							for ( var f = 0; f < files.length; f++ )
+						for ( var f in awirequires )
 							{
-								if ( files[ f ].indexOf( '-' + classname + '-' ) >= 0 )
+							if ( f.indexOf( '-' + classname + '-' ) >= 0 )
 								{
-									name = files[ f ].substring( files[ f ].lastIndexOf( '-' ) + 1 );
+								name = f.substring( f.lastIndexOf( '-' ) + 1 );
 									if ( !this.connectors[ classname ] || !this.connectors[ classname ][ name ] )
 									{
-										//var exports = window.awi[ classname ];
-										var exports = window.awi[ 'awi-connector-' + classname + '-' + name ];
+									var exprts = awirequires[ name ];
 										this.connectors[ classname ] = ( typeof this.connectors[ classname ] == 'undefined' ? {} : this.connectors[ classname ] );
-										this.connectors[ classname ][ name ] = new exports.Connector( this, {} );
+									this.connectors[ classname ][ name ] = new exprts.Connector( this, {} );
 										this.newConnectors[ classname ] = ( typeof this.newConnectors[ classname ] == 'undefined' ? {} : this.newConnectors[ classname ] );
-										this.newConnectors[ classname ][ name ] = exports.Connector;
+									this.newConnectors[ classname ][ name ] = exprts.Connector;
 										var answer = await this.connectors[ classname ][ name ].connect( connector.options );
 										answers[ answer.data.classname ] = typeof answers[ answer.data.classname ] == 'undefined' ? [] : answers[ answer.data.classname ];
 										answers[ answer.data.classname ].push( { success: answer.success, data: answer.data } );
@@ -173,50 +120,68 @@ class Awi
 					}
 				}
 
-				// Bubbles tree
-				for ( var f = 0; f < files.length; f++ )
-				{
-					if ( files[ f ].indexOf( '-bubble-' ) >= 0 )
+			// Make the list of bubbles to load
+			var classList = [ 'generic', 'audio', 'filesystem', 'user', 'vision', this.connectors.languages.current.token ];
+			var answer = await this.system.getDirectory( this.config.getEnginePath() + '/bubbles', { recursive: true, filters: [ 'awi-bubble-*.js' ] } );
+			var files = this.utilities.getFileArrayFromTree( answer.data );
+			for ( var f in awirequires )
+			{
+				var namepos = f.lastIndexOf( '-' );
+				var classpos = f.lastIndexOf( '-', namepos - 1 );
+				var classname = f.substring( classpos + 1, namepos );
+				var name = f.substring( namepos + 1 );
+				var found = classList.find(
+					function( element )
 					{
-						var namepos = files[ f ].lastIndexOf( '-' );
-						var name = files[ f ].substring( namepos + 1 );
-						var classpos = files[ f ].lastIndexOf( '-', namepos - 1 );
-						var classname = files[ f ].substring( classpos + 1, namepos );
-						var exports = window.awi[ 'awi-bubble-' + classname + '-' + name ];
+						return element == classname;
+					}
+				)
+				if ( found )
+				{
+					var exprts = awirequires[ name ];
+					if ( exprts )
+					{
 						this.bubbles[ classname ] = ( typeof this.bubbles[ classname ] == 'undefined' ? {} : this.bubbles[ classname ] );
-						this.bubbles[ classname ][ name ] = new exports.Bubble( this, { key: this.utilities.getUniqueIdentifier( {}, name, f ), parent: '' } );
+						this.bubbles[ classname ][ name ] = new exprts.Bubble( this, { key: this.utilities.getUniqueIdentifier( {}, name, f ), parent: '' } );
 						this.newBubbles[ classname ] = ( typeof this.newBubbles[ classname ] == 'undefined' ? {} : this.newBubbles[ classname ] );
-						this.newBubbles[ classname ][ name ] = exports.Bubble;
+						this.newBubbles[ classname ][ name ] = exprts.Bubble;
+					}
 					}
 				}
 
 				// Gather souvenirs
-				for ( var f = 0; f < files.length; f++ )
+			for ( var f in awirequires )
 				{
-					if ( files[ f ].indexOf( '-souvenir-' ) >= 0 )
+				if ( f.indexOf( 'awi-souvenir-' ) >= 0	)
+				{
+					var namepos = f.lastIndexOf( '-' );
+					var classpos = f.lastIndexOf( '-', namepos - 1 );
+					var classname = f.substring( classpos + 1, namepos );
+					var name = f.substring( namepos + 1 );
+					var exprts = awirequires[ f ];
+					if ( exprts )
 					{
-						var namepos = files[ f ].lastIndexOf( '-' );
-						var name = files[ f ].substring( namepos + 1 );
-						var classpos = files[ f ].lastIndexOf( '-', namepos - 1 );
-						var classname = files[ f ].substring( classpos + 1, namepos );
-						var exports = window.awi[ 'awi-souvenir-' + classname + '-' + name ];
 						this.newSouvenirs[ classname ] = ( typeof this.newSouvenirs[ classname ] == 'undefined' ? {} : this.newSouvenirs[ classname ] );
-						this.newSouvenirs[ classname ][ name ] = exports.Souvenir;
+						this.newSouvenirs[ classname ][ name ] = exprts.Souvenir;
+					}
 					}
 				}
 
 				// Gather memories
-				for ( var f = 0; f < files.length; f++ )
+			for ( var f in awirequires )
+			{
+				if ( f.indexOf( 'awi-memory-' ) >= 0	)
 				{
-					if ( files[ f ].indexOf( '-memory-' ) >= 0 )
+					var namepos = f.lastIndexOf( '-' );
+					var classpos = f.lastIndexOf( '-', namepos - 1 );
+					var classname = f.substring( classpos + 1, namepos );
+					var name = f.substring( namepos + 1 );
+					var exprts = awirequires[ f ];
+					if ( exprts )
 					{
-						var namepos = files[ f ].lastIndexOf( '-' );
-						var name = files[ f ].substring( namepos + 1 );
-						var classpos = files[ f ].lastIndexOf( '-', namepos - 1 );
-						var classname = files[ f ].substring( classpos + 1, namepos );
-						var exports = window.awi[ 'awi-memory-' + classname + '-' + name ];
 						this.newMemories[ classname ] = ( typeof this.newMemories[ classname ] == 'undefined' ? {} : this.newMemories[ classname ] );
-						this.newMemories[ classname ][ name ] = exports.Memory;
+						this.newMemories[ classname ][ name ] = exprts.Memory;
+					}
 					}
 				}
 			}
@@ -341,7 +306,6 @@ class Awi
 				}
 			}
 
-		}
 		// Create messages
 		this.messages = new awimessages.Messages( this, {} );
 		await this.messages.loadMessages();

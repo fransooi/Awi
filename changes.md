@@ -1,3 +1,7 @@
+20230807 Going closed source
+20230807 Work in progress phone application
+20230807 Post of previous versions on GIT
+
 20230620 Debugging of memories, system is now stable and works
 20230620 Further debugging of the modifications induced by the parser
 20230620 New! Beginning of Android app under Capactitor: awia

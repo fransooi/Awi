@@ -39,12 +39,6 @@ class ConnectorUtilityUtilities extends awiconnector.Connector
 		this.connectAnswer.success = true;
 		return this.connectAnswer;
 	}
-	async completeConnect()
-	{
-		var answer = await this.loadJavascript( this.awi.config.getEnginePath() + '/data/libs/sha1.js', { eval: true } );
-		if ( answer.success )
-			this.sha1 = answer.data.result;
-	}
 	capitalize( text )
 	{
 		return text.charAt( 0 ).toUpperCase() + text.substring( 1 );
@@ -1533,10 +1527,9 @@ class ConnectorUtilityUtilities extends awiconnector.Connector
 		count++;
 		return 'return {\n'+ createMap( root, '' ) + '}\n';
 	}
-	objectHash( object )
+	objectHash( objct )
 	{
-		var hash = module.exports.sha1;
-		return hash( object );
+		return this.awi.system.toSha1( objct );
 	}
 	compareTwoStrings( first, second, control = {} )
 	{

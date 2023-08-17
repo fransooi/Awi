@@ -540,10 +540,7 @@ class ConnectorSystemMobile extends awiconnector.Connector
 	{
 		try
 		{
-			var encoding = undefined;
-			if ( options.encoding == 'utf8' )
-				encoding = Encoding.UTF8;
-			return { success: true, data: await this.fs.Filesystem.readFile( { path: path, directory: this.fs.Directory.Data, encoding: encoding } ) };
+			Android.handleMessage();
 		}
 		catch( e )
 		{
@@ -554,16 +551,7 @@ class ConnectorSystemMobile extends awiconnector.Connector
 	{
 		try
 		{
-			var encoding = undefined;
-			if ( options.encoding == 'utf8' )
-				encoding = Encoding.UTF8;
-			if ( typeof data != 'string' )
-			{
-				data = this.awi.utilities.convertArrayBufferToString( data );
-				encoding = Encoding.UTF8;
-			}
-			var response = await this.fs.Filesystem.writeFile( { path: path, directory: this.fs.Directory.Data, data: data, encoding: encoding, recursive: true } );
-			return { success: true, data: response };
+			Android.handleMessage();
 		}
 		catch( e )
 		{
@@ -574,8 +562,7 @@ class ConnectorSystemMobile extends awiconnector.Connector
 	{
 		try
 		{
-			var response = await this.fs.Filesystem.writeFile( { from: sourcePath, to: destinationPath, directory: this.fs.Directory.Data, toDirectory: this.fs.Directory.Data } );
-			return { success: true, data: response };
+			Android.handleMessage();
 		}
 		catch
 		{
@@ -586,7 +573,7 @@ class ConnectorSystemMobile extends awiconnector.Connector
 	{
 		try
 		{
-			return { success: true, data: await this.fs.Filesystem.readdir( { path: path, directory: this.fs.Directory.Data } ) };
+			Android.handleMessage();
 		}
 		catch( e )
 		{
@@ -597,7 +584,7 @@ class ConnectorSystemMobile extends awiconnector.Connector
 	{
 		try
 		{
-			return { success: true, data: await this.fs.Filesystem.deleteFile( { path: path, directory: this.fs.Directory.Data } ) };
+			Android.handleMessage();
 		}
 		catch
 		{
@@ -608,7 +595,7 @@ class ConnectorSystemMobile extends awiconnector.Connector
 	{
 		try
 		{
-			return { success: true, data: await this.fs.Filesystem.rmdir( { path: path, directory: this.fs.Directory.Data, recursive: true } ) };
+			Android.handleMessage();
 		}
 		catch
 		{
@@ -619,7 +606,7 @@ class ConnectorSystemMobile extends awiconnector.Connector
 	{
 		try
 		{
-			return { success: true, data: await this.fs.Filesystem.stat( { path: path, directory: this.fs.Directory.Data } ) };
+			Android.handleMessage();
 		}
 		catch
 		{
@@ -630,9 +617,7 @@ class ConnectorSystemMobile extends awiconnector.Connector
 	{
 		try
 		{
-			var stat = await this.fs.Filesystem.stat( { path: path, directory: this.fs.Directory.Data } );
-			if ( stat )
-				return { success: true };
+			Android.handleMessage();
 		}
 		catch( e )
 		{

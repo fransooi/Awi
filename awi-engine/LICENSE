@@ -8,9 +8,20 @@
 *
 ****************************************************************************@*/
 
-Awi-Engine Open Source License v1.0
+Awi-Engine Open Source License v0.5
 
 Copyright (c) 2023 Francois Lionet
+
+Until version 1.0 of AWI this software cannot be used for any commercial purpose.
+It can be installed and tested by non-profit organisations and schools and individuals.
+
+After v1.0, the licence will become real open-source, based on the prototype
+of licence that follows.
+
+
+---------------------------------------------------------------------------------
+
+Proposition of "Tree" Licence.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy 
 of this software and associated documentation files (the "Software"), 
@@ -64,4 +75,3 @@ A simple tree structure.
 
 If you are using this code for other purposes then it is subject to 
 royalties to be negociated, please contact me: fl@helloawi.com
-

@@ -1,4 +1,6 @@
-20230807 Going closed source
+20230817 Android application first version
+20230817 Debugging of server WebSocket services
+
 20230807 Work in progress phone application
 20230807 Post of previous versions on GIT
 

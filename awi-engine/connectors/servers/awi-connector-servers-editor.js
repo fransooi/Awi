@@ -45,11 +45,21 @@ class ConnectorServerEditor extends awiconnector.Connector
 			this.wsServer.on( 'connection', function( ws )
 			{
 				var connection = ws;
-				console.log( 'User connected.' );
 				connection.on( 'message',
 					function( json )
 					{
-						var message = JSON.parse( json );
+						var message = '';
+						if ( typeof json != 'string' )
+						{
+							for ( var c = 0; c < json.length; c++ )
+								message += String.fromCharCode( json[ c ] );
+							message = JSON.parse( message );
+						}
+						else
+						{
+							message = JSON.parse( json );
+						}
+
 						if ( message.command == 'connect' )
 						{
 							self.user_connect( connection, message );
@@ -105,7 +115,7 @@ class ConnectorServerEditor extends awiconnector.Connector
 		config.engine = typeof config.engine == 'undefined' ? this.awi.config.getEnginePath() : config.engine;
 		config.data = typeof config.data == 'undefined' ? this.awi.config.getDataPath() : config.data;
 		editor.awi = new awiawi.Awi( config );
-		var answer = await editor.awi.connect( { fromAwi: this.awi, preserveConnectors: [ 'servers-editor' ] } );
+		var answer = await editor.awi.connect( { fromAwi: this.awi, preserveConnectors: [ 'servers-editor' ], server: this.awi.editor } );
 		if ( answer.success )
 		{
 			setTimeout( async function()
@@ -117,6 +127,8 @@ class ConnectorServerEditor extends awiconnector.Connector
 						handle: handle,
 					} };
 				connection.send( JSON.stringify( response ) );
+				var userName = editor.awi.config.getConfig( 'user' ).firstName;
+				console.log( 'User ' + userName + ' connected.' );
 			}, 500 )
 		}
 	}
@@ -135,6 +147,8 @@ class ConnectorServerEditor extends awiconnector.Connector
 	{
 		editor.resultText = [];
 		editor.resultTextClean = [];
+		var userName = editor.awi.config.getConfig( 'user' ).firstName;
+		console.log( '.<' + userName + '<: ' + message.data.prompt );
 		if ( editor.inputDisabled == 0 )
 		{
 			if ( editor.reroute )
@@ -213,11 +227,12 @@ class ConnectorServerEditor extends awiconnector.Connector
 		{
 			for ( var l = 0; l < lines.length; l++ )
 			{
-				console.log( prompt + lines[ l ] );
 				if ( editor )
 				{
 					editor.resultText.push( prompt + lines[ l ] );
 					editor.resultTextClean.push( lines[ l ] );
+					var userName = editor.awi.config.getConfig( 'user' ).firstName;
+					console.log( '.>' + userName + '>: ' + lines[ l ] );
 				}
 			}
 		}

@@ -29,6 +29,7 @@ const regedit = require( 'regedit' );
 const os = require( 'os' );
 const he = require( 'he' );
 const extractaudio = require( 'ffmpeg-extract-audio' );
+const sha1 = require('sha1');
 
 class ConnectorSystemNode extends awiconnector.Connector
 {
@@ -670,6 +671,10 @@ class ConnectorSystemNode extends awiconnector.Connector
 				}
 				return list;
 		}
+	}
+	toSha1( object )
+	{
+		return sha1( object );
 	}
 }
 module.exports.Connector = ConnectorSystemNode;

@@ -30,7 +30,13 @@ async function startAwi( prompt, config )
 	}
 }
 var thispath = __dirname;
-startAwi( '', {
+function getArguments()
+{
+	var thispath = __dirname;
+	var answer =
+	{
+		config:
+		{
 	prompt: '',
 	configurations: thispath + '/configs',
 	engine: thispath + '/awi-engine',
@@ -38,9 +44,49 @@ startAwi( '', {
 	connectors:
 	[
 		{ name: 'systems.node', options: {}, default: true },
-		{ name: 'utilities.awi', options: {}, default: true },
+				{ name: 'utilities.utilities', options: {}, default: true },
+				{ name: 'utilities.time', options: {}, default: true },
+				{ name: 'utilities.parser', options: {}, default: true },
 		{ name: 'clients.openainode', options: {}, default: true },
 		{ name: 'servers.editor', options: {}, default: true },
 		{ name: 'languages.javascript', options: {}, default: true },
 		{ name: 'importers.*', options: {} },
-	], } );
+			],
+		},
+		prompt: ''
+	};
+
+	var error = false;
+	var quit = false;
+	for ( var a = 2; ( a < process.argv.length ) && !quit && !error; a++ )
+	{
+		var command = process.argv[ a ].toLowerCase();
+
+		var pos;
+		if( ( pos = command.indexOf( '--configurations=' ) ) >= 0 )
+		{
+			answer.config.configurations = command.substring( pos, command.length );
+		}
+		else if( ( pos = command.indexOf( '--engine=' ) ) >= 0 )
+		{
+			answer.config.engine = command.substring( pos, command.length );
+		}
+		else if( ( pos = command.indexOf( '--data=' ) ) >= 0 )
+		{
+			answer.config.data = command.substring( pos, command.length );
+		}
+		else if ( !error )
+		{
+			if ( answer.prompt.length > 0 )
+				answer.prompt += ' ';
+			answer.prompt += command;
+		}
+	}
+	return { success: !error, data: answer };
+};
+
+var answer = getArguments();
+if ( answer.success )
+{
+	startAwi( answer.data.prompt, answer.data.config );
+}

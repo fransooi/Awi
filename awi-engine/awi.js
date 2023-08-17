@@ -196,9 +196,24 @@ class Awi
 					var name = connector.name.substring( dot + 1 );
 					if ( name.indexOf( '*' ) >= 0 || name.indexOf( '?' ) >= 0 )
 						break;
+				if ( options.fromAwi )
+				{
+					var index = options.preserveConnectors.find(
+						function( e )
+						{
+							return classname + '-' + name == e;
+						} );
+					if ( index )
+						continue;
+				}
 					var exports = require( './connectors/' + classname + '/' + 'awi-connector-' + classname + '-' + name );
 					this.connectors[ classname ] = ( typeof this.connectors[ classname ] == 'undefined' ? {} : this.connectors[ classname ] );
+				if ( typeof exports != 'function' )
 					this.connectors[ classname ][ name ] = new exports.Connector( this, {} );
+				else if ( options.fromAwi )
+					this.connectors[ classname ][ name ] = new options.fromAwi.connectors[ classname ][ name ]( this, {} );
+				if ( this.connectors[ classname ][ name ] )
+				{
 					this.newConnectors[ classname ] = ( typeof this.newConnectors[ classname ] == 'undefined' ? {} : this.newConnectors[ classname ] );
 					this.newConnectors[ classname ][ name ] = exports.Connector;
 					if ( connector.default )
@@ -213,7 +228,7 @@ class Awi
 						}
 					}
 				}
-
+			}
 				// Now wildcards
 				for ( var c = 0; c < this.systemConfig.connectors.length; c++ )
 				{
@@ -232,6 +247,16 @@ class Awi
 							var classpos = name.lastIndexOf( '-', namepos - 1 );
 							var classname = name.substring( classpos + 1, namepos );
 							var cName = name.substring( namepos + 1 );
+						if ( options.fromAwi )
+						{
+							var index = options.preserveConnectors.find(
+								function( e )
+								{
+									return classname + '-' + name == e;
+								} );
+							if ( index )
+								continue;
+						}
 							var exports = require( './connectors/' + classname + '/' + name );
 							this.connectors[ classname ] = ( typeof this.connectors[ classname ] == 'undefined' ? {} : this.connectors[ classname ] );
 							this.newConnectors[ classname ] = ( typeof this.newConnectors[ classname ] == 'undefined' ? {} : this.newConnectors[ classname ] );
@@ -313,9 +338,6 @@ class Awi
 		// Create personality
 		this.personality = new awipersonality.Personality( this, {} );
 
-		// Finish initialization of utilities
-		await this.utilities.completeConnect();
-
 		// Is everyone connected?
 		this.connected = true;
 		for ( var d in answers )
@@ -374,7 +396,7 @@ class Awi
 		}
 		if ( this.connected )
 			prompt += 'Ready.\n'
-		if ( this.editor.connected )
+		if ( this.editor.connected && !options.fromAwi )
 			this.editor.print( this.editor.default, prompt.split( '\n' ), { user: 'awi' } );
 		return answer;
 	}

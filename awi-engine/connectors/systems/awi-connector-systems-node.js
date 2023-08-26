@@ -79,14 +79,14 @@ class ConnectorSystemNode extends awiconnector.Connector
 		{
 			var found = this.awi.parser.findWordDefinition( this.assetTypes.names, name, 'find' );;
 			if ( found )
-				return this.assetTypes[ name ];
+				return this.assetTypes[ names ];
 			for ( var s in this.assetTypes )
 			{
 				found = this.assetTypes[ s ].filters.findIndex(
 					function( element )
 					{
 						var filter = element.substring( element.lastIndexOf( '.' ) );
-						return ( name.indexOf( filter ) >= 0 );
+						return ( names.indexOf( filter ) >= 0 );
 					} );
 				if ( found >= 0 )
 					result.push( this.assetTypes[ found ] );
@@ -101,6 +101,9 @@ class ConnectorSystemNode extends awiconnector.Connector
 				var found = this.awi.parser.findWordDefinition( assetType.names, names[ n ], 'find' );;
 				if ( found )
 					return assetType;
+				var dot = names[ n ].lastIndexOf( '.' );
+				if ( dot >= 0 )
+				{
 				var ext = names[ n ].substring( names[ n ].lastIndexOf( '.' ) );
 				var found = assetType.filters.findIndex(
 					function( element )
@@ -108,10 +111,12 @@ class ConnectorSystemNode extends awiconnector.Connector
 						var filter = element.substring( element.lastIndexOf( '.' ) );
 						return ( filter.indexOf( ext ) >= 0 );
 					} );
+					if ( found >= 0 )
 				return assetType;
 			}
 		}
-		return result;
+		}
+		return null;
 	}
 	async getDirectory( path, options )
 	{
@@ -223,6 +228,9 @@ class ConnectorSystemNode extends awiconnector.Connector
 	async askForFilepaths( file, parameters, control )
 	{
 		var paths = await this.awi.config.getDefaultPaths( file );
+		this.awi.config.getConfig( 'user' ).paths = paths;
+		file.paths = paths[ this.awi.config.platform ][ file.names[ 0 ] ];
+		/*
 		var param = await this.awi.prompt.getParameters( [
 			{ choice: 'the different paths to the folder containing ' + file.names[ 0 ] + 's.', type: 'array.string', default: [ paths[ 0 ] ] },
 			], control );
@@ -231,6 +239,7 @@ class ConnectorSystemNode extends awiconnector.Connector
 			file.paths = param.data.choice;
 			this.awi.config.getConfig( 'user' ).paths[ this.awi.config.platform ][ file.names[ 0 ] ] = param.data.choice;
 		}
+		*/
 	}
 	async findFiles( line, parameters, control )
 	{

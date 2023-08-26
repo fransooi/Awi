@@ -13,8 +13,8 @@
 			"skipFiles": [
 				"<node_internals>/**"
 			],
-			//"program": "${workspaceFolder}/simple-node-prompt.js",
-			"program": "${workspaceFolder}/awi-aoz-server.js",
+			"program": "${workspaceFolder}/simple-node-prompt.js",
+			//"program": "${workspaceFolder}/awi-aoz-server.js",
             "args": [ ]
 		}
 	]

@@ -1,3 +1,7 @@
+20230823 Debugging of files
+20230823 Work on parser
+20230823 Cleaning/rewrite of awi.js initialization 
+
 20230817 Android application first version
 20230817 Debugging of server WebSocket services
 

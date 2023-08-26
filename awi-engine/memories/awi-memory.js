@@ -129,13 +129,13 @@ class Memory extends awibranch.Branch
 	}
 	addSouvenir( souvenir, control = {} )
 	{
-		var hash = this.awi.utilities.objectHash( souvenir.parameters );
-		if ( !this.bubbleHash[ hash ] )
-		{
-			this.bubbleHash[ hash ] = souvenir.key;
+		//var hash = this.awi.utilities.objectHash( souvenir.parameters );
+		//if ( !this.bubbleHash[ hash ] )
+		//{
+			//this.bubbleHash[ hash ] = souvenir.key;
 			return super.addBubble( souvenir, control );
-		}
-		return '';
+		//}
+		//return '';
 	}
 	addSouvenirs( commandList, parameters = {}, control = {} )
 	{

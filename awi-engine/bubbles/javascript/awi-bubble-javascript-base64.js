@@ -28,7 +28,7 @@ class BubbleProgrammingBase64 extends awibubble.Bubble
 		super( awi, options );
 		this.name = 'Base64';
 		this.token = 'base64';
-		this.classname = 'programming';
+		this.classname = 'javascript';
 		this.properties.action = 'converts an image to Base 64 Ascii code';
 		this.properties.inputs = [
 			{ file: 'the file to edit', type: 'string' },

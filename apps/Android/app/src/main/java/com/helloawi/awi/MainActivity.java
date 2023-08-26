@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity
     public boolean connected = false;
     public int connecting = 0;
     public String connectionHandle;
-    public static final String URL = "ws://192.168.0.68:1033";
+    public static final String URL = "ws://194.110.192.59:1033";
     public static final int WSTIMEOUT = 5000;
     public WebSocket ws = null;
     public String toAsk = "";

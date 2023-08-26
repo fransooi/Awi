@@ -90,39 +90,31 @@ class Bubble
 		for ( var p = 0; p < this.properties.inputs.length; p++ )
 		{
 			var parameter = this.awi.utilities.getBubbleParams( this.properties.inputs[ p ] );
-			if ( typeof parameters[ parameter.name ] != 'undefined' && parameters[ parameter.name ] != '' )
+			if ( typeof lineDatas[ parameter.name ] != 'undefined' )
+				parameters[ parameter.name ] = lineDatas[ parameter.name ];
+			else
 			{
-				if ( parameter.clear )
-					parameters[ parameter.name ] = parameters[ parameter.name ].default;
-			}
-		}
-		for ( var p = 0; p < this.properties.inputs.length; p++ )
+				if ( !parameter.optional )
 		{
-			var parameter = this.awi.utilities.getBubbleParams( this.properties.inputs[ p ] );
-			if ( typeof parameters[ parameter.name ] == 'undefined' )
+					if ( typeof parameters[ parameter.name ] == 'undefined'
+						|| ( typeof parameters[ parameter.name ] != 'undefined' && this.awi.utilities.isArray( parameters[ parameter.name ] ) && parameters[ parameter.name ].length == 0 ) )
 			{
-				if ( parameters[ parameter.name ] === '' )
-				{
-					if ( typeof lineDatas[ parameter.name ] == 'undefined' )
-					{
-						if ( !parameter.optional )
-							todo.push( { token: 'input', classname: 'generic', parameters: [ parameter ], options: {} } );
-						else
+						if ( typeof parameter.default != 'undefined' )
 							parameters[ parameter.name ] = parameter.default;
-					}
 					else
-					{
-						parameters[ parameter.name ] = lineDatas[ parameter.name ];
+							todo.push( { token: 'input', classname: 'generic', parameters: [ parameter ], options: {} } );
 					}
 				}
 			}
-			else if ( this.awi.utilities.isArray( parameters[ parameter.name ] ) && parameters[ parameter.name ].length == 0 )
+			/*
+			if ( parameters[ parameter.name ] && this.awi.utilities.isArray( parameters[ parameter.name ] ) && parameters[ parameter.name ].length == 0 )
 			{
 				if ( !parameter.optional )
 					todo.push( { token: 'input', classname: 'generic', parameters: [ parameter ], options: {} } );
 				else
 					parameters[ parameter.name ] = parameter.default;
 			}
+			*/
 		}
 		if ( todo.length > 0 )
 		{

@@ -45,17 +45,21 @@ function getArguments()
 			configurations: thispath + '/configs',
 			engine: thispath + '/awi-engine',
 			data: thispath + '/data',
-	connectors:
+			elements:
 	[
-		{ name: 'systems.node', options: {}, default: true },
-		{ name: 'utilities.utilities', options: {}, default: true },
-		{ name: 'utilities.time', options: {}, default: true },
-		{ name: 'utilities.parser', options: {}, default: true },
-		{ name: 'clients.openainode', options: {}, default: true },
-		{ name: 'editors.commandline', options: {}, default: true },
-		{ name: 'languages.javascript', options: {}, default: true },
-		{ name: 'importers.*', options: {} },
-	],
+				{ name: 'connectors.systems.node', options: {}, default: true },
+				{ name: 'connectors.utilities.utilities', options: {}, default: true },
+				{ name: 'connectors.utilities.time', options: {}, default: true },
+				{ name: 'connectors.utilities.parser', options: {}, default: true },
+				{ name: 'connectors.clients.openainode', options: {}, default: true },
+				{ name: 'connectors.editors.commandline', options: {}, default: true },
+				{ name: 'connectors.languages.javascript', options: {}, default: true },
+				{ name: 'connectors.importers.*', options: {} },
+				{ name: 'bubbles.generic.*', options: {} },
+				{ name: 'bubbles.javascript.*', options: {} },
+				{ name: 'memories.generic.*', options: {} },
+				{ name: 'souvenirs.generic.*', options: {} },
+			]
 		},
 		prompt: ''
 	};

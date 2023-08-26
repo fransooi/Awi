@@ -109,7 +109,7 @@ class BubbleGenericChat extends awibubble.Bubble
 		var takenote = '';
 		if ( this.awi.getConfig( 'user' ).firstName != '' )
 		{
-			conversation = this.awi.personality.getMemoryPrompt( memories, this.awi.getConfig( 'user' ).firstName, this.awi.getPersonality().name, 5 );
+			conversation = this.awi.personality.getMemoryPrompt( memories, this.awi.getConfig( 'user' ).firstName, this.awi.getPersonality().name, 10 );
 			takenote = this.awi.getConfig( 'user' ).takeNote;
 		}
 		control.answerCount = this.useCount;

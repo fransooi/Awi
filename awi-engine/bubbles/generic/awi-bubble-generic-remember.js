@@ -31,10 +31,10 @@ class BubbleGenericRemember extends awibubble.Bubble
 		this.classname = 'generic';
 		this.properties.action = 'recall all memories about a subject';
 		this.properties.inputs = [
-			{ what: 'the subject to remember', type: 'string', optional: true, default: 'any' },
+			{ what: 'the subject to remember', type: 'string', default: 'any' },
 			{ person: 'the name of someone to remember', type: 'string', optional: true, default: 'any' },
 			{ date: 'interval of time to consider', type: 'string', optional: true, default: 'any' },
-			{ scanLevel: 'depth of the search, 1: direct souvenirs only, 2: indirect souvenirs, 3: deep search', type: 'number', interval: { start: 1, end: 3 }, optional: true, default: '2' }	];
+			{ scanLevel: 'depth of the search, 1: direct souvenirs only, 2: indirect souvenirs, 3: deep search', type: 'number', interval: { start: 1, end: 3 }, optional: true, default: '2', clear: true }	];
 		this.properties.outputs = [
 			{ directSouvenirs: 'the direct souvenirs found', type: 'souvenirInfo.object.array' },
 			{ indirectSouvenirs: 'the indirect souvenirs found', type: 'souvenirInfo.object.array' } ];

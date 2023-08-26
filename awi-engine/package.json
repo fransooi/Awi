@@ -1,7 +1,7 @@
 {
   "name": "awi-engine",
-  "version": "0.2.0",
-  "description": "Programmable personal assistant",
+  "version": "0.5.0",
+  "description": "",
   "main": "awi.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,20 +10,16 @@
   "license": "ISC",
   "dependencies": {
     "child_process": "^1.0.2",
-    "fetch-installed-software": "0.0.7",
+    "fetch-installed-software": "^0.0.7",
     "ffmpeg-extract-audio": "^1.0.2",
-    "fs": "0.0.1-security",
+    "fs": "^0.0.1-security",
     "he": "^1.2.0",
-    "hebcal": "^2.3.2",
     "hjson": "^3.2.2",
-    "mkdirp": "^3.0.1",
-    "openai": "^3.2.1",
+    "openai": "^4.0.0",
     "os": "^0.1.2",
     "path": "^0.12.7",
     "regedit": "^5.1.2",
     "sha1": "^1.1.1",
-    "tempfile": "^5.0.0",
-    "util": "^0.12.5",
-    "ws": "^8.13.0"
+    "util": "^0.12.5"
   }
 }

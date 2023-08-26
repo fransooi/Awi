@@ -252,6 +252,7 @@ class BubbleGenericDigest extends awibubble.Bubble
 			valid: valid
 		}
 	}
+
 	async play( line, parameters, control )
 	{
 		if ( typeof parameters.senderName == 'undefined' )

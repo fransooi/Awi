@@ -21,8 +21,7 @@
 */
 var awiconnector = require( '../awi-connector' );
 const fs = require( 'fs' );
-const { Configuration, OpenAIApi } = require( 'openai' );
-
+const OpenAI = require( 'openai' );
 class ConnectorClientOpenAiNode extends awiconnector.Connector
 {
 	constructor( awi, options = {} )
@@ -46,11 +45,7 @@ class ConnectorClientOpenAiNode extends awiconnector.Connector
 			var key = this.awi.config.getUserKey();
 			if ( key != '' )
 			{
-				this.configuration = new Configuration(
-				{
-					apiKey: key,
-				} );
-				this.openai = new OpenAIApi( this.configuration );
+				this.openai = new OpenAI( { apiKey: key } );
 			}
 		}
 		this.connectAnswer.data.token = this.classname;
@@ -83,7 +78,7 @@ language: {language}`, parameters );
 			var response;
 			try
 			{
-				response = await this.openai.createTranscription
+				response = await this.openai.audio.transcriptions.create
 				(
 					fs.createReadStream( path ),
 					"whisper-1",
@@ -120,7 +115,7 @@ language: {language}`, parameters );
 	async sendCompletion( prompt, stream, control )
 	{
 		var answer = {};
-		if ( this.configuration )
+		if ( this.openai )
 		{
 			prompt = prompt.trim();
 			var parameters = this.awi.utilities.getControlParameters( control,
@@ -129,7 +124,7 @@ language: {language}`, parameters );
 				max_tokens: 1000,
 				temperature: 1,
 				top_p: 1,
-				n: 2
+				n: 1
 			 } );
 			parameters.prompt = prompt;
 			if ( this.awi.connectors.editors.current )
@@ -145,7 +140,7 @@ n: {n}`, parameters );
 			var response;
 			try
 			{
-				response = await this.openai.createCompletion(
+				response = await this.openai.completions.create(
 				{
 					prompt: prompt,
 					model: "text-davinci-003",
@@ -165,7 +160,7 @@ n: {n}`, parameters );
 			if ( !response.error )
 			{
 				answer.success = true;
-				answer.data = response.data.choices[ 0 ];
+				answer.data = response.choices[ 0 ];
 			}
 			else
 			{

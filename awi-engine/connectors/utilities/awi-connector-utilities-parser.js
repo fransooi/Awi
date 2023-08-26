@@ -258,6 +258,7 @@ class ConnectorUtilitiesParser extends awiconnector.Connector
 	{
 		var self = this;
 		var toRemove = [];
+		var toAdd = [];
 		var tagsMap = {};
 		var doc = nlp( line );
 		var command;
@@ -289,7 +290,11 @@ class ConnectorUtilitiesParser extends awiconnector.Connector
 					switch ( tagName )
 					{
 						case '#Noun':
+							var newArr = [];
 							arr = rootDoc.nouns().toSingular().out( 'array' );
+							for ( var a = 0; a < arr.length; a++ )
+								newArr.push( ...arr[ a ].split( ' ' ) );
+							arr = newArr;
 							break;
 						default:
 							arr = rootDoc.match( tagName ).out( 'array' );
@@ -407,10 +412,13 @@ class ConnectorUtilitiesParser extends awiconnector.Connector
 							command.parameters.file.filters.push( ...assetType.filters );
 							command.parameters.file.names.push( ...assetType.names );
 						}
-						else if ( self.awi.utilities.isPath( nouns[ n ][ 0 ] ) )
+					}
+					for ( var n = 0; n < nouns.length; n++ )
+					{
+						if ( self.awi.utilities.isPath( nouns[ n ] ) )
 						{
-							command.parameters.file.paths.push( nouns[ n ][ 0 ] );
 							toRemove.push( nouns[ n ] );
+							toAdd.push( nouns[ n ] );
 						}
 					}
 					if ( command.parameters.file.names.length > 0 )
@@ -596,8 +604,11 @@ class ConnectorUtilitiesParser extends awiconnector.Connector
 					command.classname = classname;
 					await getParameters( this.awi.bubbles[ classname ][ word ], command );
 					if ( command.token )
+					{
+						toRemove.push( word );
 						break;
 				}
+			}
 			}
 			if ( !command.token )
 			{
@@ -660,6 +671,8 @@ class ConnectorUtilitiesParser extends awiconnector.Connector
 				if ( found < 0 )
 					newline += terms[ t ] + ' ';
 			}
+			for ( var t = 0; t < toAdd.length; t++ )
+				newline += toAdd[ t ] + ' ';
 			line = newline.trim();
 		}
 		command.parameters.userInput = line;

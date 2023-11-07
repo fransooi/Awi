@@ -43,31 +43,43 @@ class SouvenirGenericMessage extends awisouvenir.Souvenir
 	}
 	async extractContent( line, parameters, control )
 	{
-		var info = this.awi.utilities.compareTwoStrings( this.parameters.senderText + this.parameters.receiverText, line, control );
+		var content = await this.getContent( line, parameters, control );
+		var info = this.awi.utilities.matchTwoStrings( content, line, control );
 		if ( info.result > 0 )
 		{
-			var content = await this.getContent( line, parameters, control );
-			return { success: 'found', data: { result: info.result, match: info, content: content.data.messageInfo } };
+			return { success: 'found', data: { result: info.result, match: info, content: content } };
 		}
 		return { success: 'notfound' };
 	}
 	async getContent( line, parameters, control )
 	{
-		this.awi.editor.print( control.editor, this.parameters.senderName + ' said: ' + this.parameters.senderText, { user: 'memory3' } );
-		this.awi.editor.print( control.editor, this.parameters.receiverName + ' said: ' + this.parameters.receiverText, { user: 'memory3' } );
-		this.awi.editor.print( control.editor, '------------------------------------------------------------', { user: 'memory3' } );
-		return {
-			success: 'found',
-			data: {	messageInfo: this.parameters } };
-	}
-	async findSouvenirs( line, parameters, control )
-	{
-		var found = this.awi.utilities.matchTwoStrings( this.parameters.senderText + this.parameters.receiverText, line, { caseInsensitive: true } );
-		if ( found.result > 0 )
+		var texts = [];
+		for ( var c = 0; c < this.parameters.conversation.length; c++ )
 		{
-			return await this.getContent( line, parameters, control );
+			var message = this.parameters.conversation[ c ];
+			var text = '';
+			if ( message.name == this.parameters.senderName )
+				text += 's:';
+			else 
+				text += 'r:';
+			text += message.content;
+			texts.push( text );
 		}
-		return { success: 'notfound' };
+		return texts;
+	}
+	async findIndirectSouvenirs( line, parameters, control )
+	{
+		var content = await this.getContent( line, parameters, control );
+		var foundContent = [];
+		for ( var c = 0; c < content.length; c++ )
+		{
+			var found = this.awi.utilities.matchTwoStrings( content[ c ].substring( 2 ), line, { caseInsensitive: true } );
+			if ( found.result > 0 )
+			{
+				foundContent.push( content[ c ].substring( 2 ) );
+			}	
+		}
+		return { success: foundContent.length > 0 ? 'found' : 'notfound', content: foundContent };
 	}
 	async transpile( line, parameter, control )
 	{

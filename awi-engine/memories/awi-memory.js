@@ -80,35 +80,29 @@ class Memory extends awibranch.Branch
 		while( souvenir )
 		{
 			var info1 = this.awi.utilities.matchTwoStrings( souvenir.parameters.receiverName, line, { caseInsensitive: true } );
-			if ( info1.result >= 0.5 )
+			if ( info1.result == 1 )
 			{
-				if ( parameters.senderName )
-				{
-					var info2 = this.awi.utilities.matchTwoStrings( souvenir.parameters.senderName, parameters.senderName, { caseInsensitive: true } );
-					if ( info2.result == 1 )
-						directSouvenirs.push( souvenir );
-				}
-				else
-				{
-					directSouvenirs.push( souvenir );
-				}
+				directSouvenirs.push( souvenir );
 			}
-			var answer = await souvenir.findSouvenirs( line, parameters, control );
-			if ( answer.success == 'found' )
-				indirectSouvenirs.push( souvenir );
+			else
+			{
+				var answer = await souvenir.findIndirectSouvenirs( line, parameters, control );
+				if ( answer.success == 'found' )
+					indirectSouvenirs.push( souvenir );	
+			}
 			souvenir = this.getBubble( souvenir.properties.exits[ 'success' ] );
 		} while ( souvenir );
 		var directContent = [];
 		var indirectContent = [];
 		for ( var s = 0; s < directSouvenirs.length; s++ )
 		{
-			var answer = await directSouvenirs[ s ].getContent( line, parameters, control );
-			directContent.push( answer.data );
+			var content = await directSouvenirs[ s ].getContent( line, parameters, control );
+			directContent.push( content );
 		}
 		for ( var s = 0; s < indirectSouvenirs.length; s++ )
 		{
-			var answer = await indirectSouvenirs[ s ].getContent( line, parameters, control );
-			indirectContent.push( answer.data );
+			var content = await indirectSouvenirs[ s ].getContent( line, parameters, control );
+			indirectContent.push( content );
 		}
 		if ( directSouvenirs.length > 0 || indirectSouvenirs.length > 0 )
 			return {

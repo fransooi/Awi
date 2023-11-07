@@ -52,6 +52,8 @@ class BubbleGenericRemember extends awibubble.Bubble
 			scanLevel: parameters.scanLevel
 		};
 		parameters.senderName = typeof parameters.senderName == 'undefined' ? this.awi.config.getConfig( 'user' ).fullName : parameters.senderName;
+		if ( parameters.person.length > 0 )
+			line += parameters.person[ 0 ];
 
 		var answer = await this.awi.personality.remember( line, parameters, control );
 		if ( answer.success == 'found' )

@@ -129,7 +129,8 @@ class ConnectorEditorCommandline extends awiconnector.Connector
 			return;
 
 		var self = this;
-		var justify = this.awi.getConfig( 'user' ).justify;
+		//var justify = this.awi.getConfig( 'user' ).justify;
+		var justify = 80;
 		if ( typeof text == 'string' )
 			text = text.split( '\n' );
 		function printLinesDown( lines )

@@ -139,8 +139,6 @@ It returns `
 			direct: { souvenirs: [], content: [] },
 			indirect: { souvenirs: [], content: [] }
 		};
-		if ( parameters.person.length > 0 )
-			line = parameters.person[ 0 ];
 		if ( parameters.what == 'any' )
 		{
 			for ( var k in this.memories )

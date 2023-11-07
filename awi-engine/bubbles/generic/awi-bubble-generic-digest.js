@@ -29,7 +29,7 @@ class BubbleGenericDigest extends awibubble.Bubble
 		this.name = 'Digest';
 		this.token = 'digest';
 		this.classname = 'generic';
-		this.properties.action = 'read the files in the input buffer and memorize them';
+		this.properties.action = 'read the files in the data folder and memorize them';
 		this.properties.inputs = [
 			{ noun: 'the topic of data to process, example "Friend Name"', type: 'string', optional: true, default: '' },
 		];
@@ -38,9 +38,26 @@ class BubbleGenericDigest extends awibubble.Bubble
 			{ souvenirs: 'list of souvenirs associated to the receiver', type: 'array.string.souvenir' }
 		]
 		this.properties.parser = {
-			noun: [ 'audio', 'sound', 'video', 'document', 'messenger', 'image', 'photo' ],
+			noun: [ 'audio', 'sound', 'video', 'document', 'facebook', 'image', 'photo' ],
 			verb: [ 'digest' ] };
 		this.properties.select = [ [ 'verb' ] ];
+	}
+	async facebook( path, parameters, control )
+	{
+		var result= 
+		{
+			valid: [],
+			invalid: []
+		}
+		path = this.awi.utilities.normalize( path + '/messages' );
+		var exist = await this.awi.system.exists( path );
+		if ( exist )
+		{
+			var info = await this.messenger( path, parameters, control );
+			result.valid.push( ...info.valid );
+			result.invalid.push( ...info.invalid );
+		}
+		return result;
 	}
 	async messenger( path, parameters, control )
 	{
@@ -51,7 +68,7 @@ class BubbleGenericDigest extends awibubble.Bubble
 		{
 			var importer = self.awi.getConnector( 'importers', 'messenger', {} );
 			control.from = todo.from;
-			var answer = await importer.import( todo.htmlPath, parameters.senderName, todo.receiverNameCompressed, control );
+			var answer = await importer.import( todo.path, parameters.senderName, todo.receiverNameCompressed, control );
 			if ( answer.success )
 			{
 				todo.done = true;
@@ -69,15 +86,15 @@ class BubbleGenericDigest extends awibubble.Bubble
 		var todo = [];
 		var directoriesToScan =
 		[
+			'inbox',
 			'archived_threads',
-			'filtered_threads',
-			'inbox'
+			'filtered_threads'
 		];
 		for ( var d = 0; d < directoriesToScan.length; d++ )
 		{
-			var dirPath = this.awi.utilities.normalize( path + '/messages/' + directoriesToScan[ d ] );
-			var answer = await this.awi.system.getDirectory( dirPath, { recursive: true } );
-			if ( answer )
+			var dirPath = this.awi.utilities.normalize( path + '/' + directoriesToScan[ d ] );
+			var answer = await this.awi.system.getDirectory( dirPath, { recursive: false } );
+			if ( answer.success )
 			{
 				var files = answer.data;
 				if ( !parameters.receiverName )
@@ -91,23 +108,14 @@ class BubbleGenericDigest extends awibubble.Bubble
 							if ( pos >= 0 )
 							{
 								var receiverNameCompressed = dirContact.name.substring( 0, pos );
-								for ( var ff = 0; ff < dirContact.files.length; ff++ )
+								todo.push(
 								{
-									var file = dirContact.files[ ff ];
-									if ( file.name.indexOf( 'message_' ) == 0 )
-									{
-										todo.push(
-										{
-											senderName: parameters.senderName,
-											receiverNameCompressed: receiverNameCompressed,
-											receiverName: '',
-											htmlPath: file.path,
-											dirPath: dirContact.path,
-											from: 'from ' + directoriesToScan[ d ],
-											done: false
-										} );
-									}
-								}
+									senderName: parameters.senderName,
+									receiverNameCompressed: receiverNameCompressed,
+									receiverName: '',
+									path: dirContact.path,
+									done: false
+								} );
 							}
 						}
 					}
@@ -120,21 +128,14 @@ class BubbleGenericDigest extends awibubble.Bubble
 						var dirContact = files[ f ];
 						if ( dirContact.isDirectory && dirContact.name.indexOf( receiverNameCompressed ) == 0 )
 						{
-							for ( var ff = 0; ff < dirContact.files.length; ff++ )
+							todo.push(
 							{
-								if ( dirContact.files[ ff ].name.indexOf( 'message_' ) == 0 )
-								{
-									todo.push(
-									{
-										receiverNameCompressed: receiverNameCompressed,
-										receiverName: '',
-										htmlPath: dirContact.files[ ff ].path,
-										dirPath: dirContact.path,
-										from: 'from folder ' + directoriesToScan[ d ],
-										done: false
-									} );
-								}
-							}
+								senderName: parameters.senderName,
+								receiverNameCompressed: receiverNameCompressed,
+								receiverName: '',
+								path: dirContact.path,
+								done: false
+							} );
 						}
 					}
 				}

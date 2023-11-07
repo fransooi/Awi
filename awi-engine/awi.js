@@ -57,7 +57,7 @@ class Awi
 		var self = this;
 		var answers = {};
 		var files =
-			{
+		{
 			bubbles: {},
 			connectors: {},
 			memories: {},
@@ -71,17 +71,17 @@ class Awi
 			self.connectors[ classname ][ name ] = new exports.Connector( self, options );
 			self.newConnectors[ classname ][ name ] = exports.Connector;
 			if ( def )
-				{
+			{
 				var answer = await self.connectors[ classname ][ name ].connect( options );
 				answers[ answer.data.classname ] = [ { success: answer.success, nonFatal: answer.nonFatal, data: answer.data } ];
 				self[ answer.data.token ] = self.connectors[ classname ][ name ];
 				self.connectors[ classname ].current = self.connectors[ classname ][ name ];
-					if ( classname == 'utilities' && name == 'utilities'  )
+				if ( classname == 'utilities' && name == 'utilities' )
 					await self.config.init();
-						}
-					}
+			}
+		}
 		async function createBubble( classname, name, options = {} )
-				{
+		{
 			self.bubbles[ classname ] = ( typeof self.bubbles[ classname ] == 'undefined' ? {} : self.bubbles[ classname ] );
 			options.key = self.utilities.getUniqueIdentifier( {}, name, f );
 			options.parent = '';
@@ -128,14 +128,14 @@ class Awi
 			var elementname = element.name.substring( 0, dot );
 			var classname = element.name.substring( dot + 1, dot2 );
 			var name = element.name.substring( dot2 + 1 );
-					if ( name.indexOf( '*' ) >= 0 || name.indexOf( '?' ) >= 0 )
-					{
+			if ( name.indexOf( '*' ) >= 0 || name.indexOf( '?' ) >= 0 )
+			{
 				name += '.js';
 				if ( files[ elementname ][ classname ] == null )
-						{
+				{
 					var answer = await this.system.getDirectory( this.config.getEnginePath() + '/' + elementname + '/' + classname, { recursive: true, filters: [ name ] } );
 					files[ elementname ][ classname ] = this.utilities.getFileArrayFromTree( answer.data );
-					}
+				}
 				for ( var f = 0; f < files[ elementname ][ classname ].length; f++ )
 				{
 					var file = files[ elementname ][ classname ][ f ];
@@ -147,8 +147,8 @@ class Awi
 			else
 			{
 				await createIt( element, elementname, classname, name );
-				}
 			}
+		}
 
 		// Create messages
 		this.messages = new awimessages.Messages( this, {} );
@@ -400,12 +400,8 @@ class Awi
 					if ( n < direct.length )
 					{
 						var extract = direct[ n ];
-						if ( extract.content.text )
-							directExtracted += 'Someone said: ' + extract.text + '\n';
-						if ( extract.content.senderText )
-							directExtracted += extract.content.senderName + ' said: ' + extract.content.senderText + '\n';
-						if ( extract.content.receiverText )
-							directExtracted += extract.content.receiverName + ' said: ' + extract.content.receiverText + '\n';
+						if ( extract.content )
+							directExtracted += extract.content;
 					}
 				}
 				for ( var n = 0; n < options.nIndirectExtracts; n++ )
@@ -413,12 +409,8 @@ class Awi
 					if ( n < indirect.length )
 					{
 						var extract = indirect[ n ];
-						if ( extract.content.text )
-							indirectExtracted += 'Someone said: ' + extract.text + '\n';
-						if ( extract.content.senderText )
-							indirectExtracted += extract.content.senderName + ' said: ' + extract.content.senderText + '\n';
-						if ( extract.content.receiverText )
-							indirectExtracted += extract.content.receiverName + ' said: ' + extract.content.receiverText + '\n';
+						if ( extract.content )
+							indirectExtracted += extract.content;
 					}
 				}
 				break;

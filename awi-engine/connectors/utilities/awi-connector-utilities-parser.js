@@ -248,11 +248,66 @@ class ConnectorUtilitiesParser extends awiconnector.Connector
 						}
 						return false;
 					} );
-				if ( found >= 0 )
+				if ( found >= 0 ) 
 					result.push( source[ s ] );
 			}
 		}
 		return result;
+	}
+	async removeUnimportantWords( line )
+	{
+		var toRemove = [];
+		var tagsMap = {};
+		var doc = nlp( line );
+		var rootDoc = doc.normalize( {
+			whitespace: true,			// remove hyphens, newlines, and force one space between words
+			case: true,					// keep only first-word, and 'entity' titlecasing
+			punctuation: true,			// remove commas, semicolons - but keep sentence-ending punctuation
+			unicode: true,				// visually romanize/anglicize 'Björk' into 'Bjork'.
+			contractions: true,			// turn "isn't" to "is not"
+			acronyms:true,				// remove periods from acronyms, like 'F.B.I.'
+			//---these ones don't run unless you want them to---
+			parentheses: true,			//remove words inside brackets (like these)
+			possessives: true,			// turn "Google's tax return" to "Google tax return"
+			plurals: true,				// turn "batmobiles" into "batmobile"
+			verbs: true,				// turn all verbs into Infinitive form - "I walked" → "I walk"
+			honorifics: true,			//turn 'Vice Admiral John Smith' to 'John Smith'
+		} );
+		function getTags( tags, text )
+		{
+			var text = '';
+			for ( var tag in tags )
+			{
+				if ( tag != 'data' )
+				{
+					var arr = [];
+					var str = text + ( text == '' ? '' : '.' ) + tag;
+					getTags( tags[ tag ], str );
+					var tagName = '#' + tag.charAt( 0 ).toUpperCase() + tag.substring( 1 );
+					switch ( tagName )
+					{
+						case '#Noun':
+							var newArr = [];
+							arr = rootDoc.nouns().toSingular().out( 'array' );
+							for ( var a = 0; a < arr.length; a++ )
+								newArr.push( ...arr[ a ].split( ' ' ) );
+							arr = newArr;
+							break;
+						default:
+							arr = rootDoc.match( tagName ).out( 'array' );
+							break;
+					}
+					if ( arr.length > 0 )
+					{
+						tagsMap[ tag ] = arr;
+						text += str + ': ' + tagsMap[ tag ] + '\n';
+					}
+				}
+			}
+		}
+		var myTags = this.awi.utilities.copyObject( this.tags );
+		getTags( myTags, '' );
+
 	}
 	async extractCommandFromLine( line, control )
 	{
@@ -413,14 +468,14 @@ class ConnectorUtilitiesParser extends awiconnector.Connector
 							command.parameters.file.names.push( ...assetType.names );
 						}
 					}
-					for ( var n = 0; n < nouns.length; n++ )
-					{
-						if ( self.awi.utilities.isPath( nouns[ n ] ) )
+						for ( var n = 0; n < nouns.length; n++ )
 						{
-							toRemove.push( nouns[ n ] );
-							toAdd.push( nouns[ n ] );
+							if ( self.awi.utilities.isPath( nouns[ n ] ) )
+							{
+								toRemove.push( nouns[ n ] );
+								toAdd.push( nouns[ n ] );
+							}
 						}
-					}
 					if ( command.parameters.file.names.length > 0 )
 					{
 						var name =  command.parameters.file.names[ 0 ];
@@ -454,6 +509,23 @@ class ConnectorUtilitiesParser extends awiconnector.Connector
 								person += ' ' + self.awi.utilities.capitalize( tagsMap[ 'lastName' ][ f ] );
 								toRemove.push( tagsMap[ 'lastName' ][ f ] );
 							}
+							else
+							{
+								var next = tagsMap.noun.findIndex(
+									function( element )
+									{
+										return ( person.toLowerCase() == element.toLowerCase() );
+									} );
+								if ( next >= 0 && next + 1 < tagsMap.noun.length )
+								{
+									var l = person + ' ' + tagsMap.noun[ next + 1 ];
+									if ( line.toLowerCase().indexOf( l.toLowerCase() ) >= 0 )
+									{
+										person += ' ' + self.awi.utilities.capitalize( tagsMap.noun[ next + 1 ] );
+										toRemove.push( tagsMap.noun[ next + 1 ] );
+									}
+								}
+							}							
 							command.parameters.person.push( person );
 						}
 					}
@@ -607,8 +679,8 @@ class ConnectorUtilitiesParser extends awiconnector.Connector
 					{
 						toRemove.push( word );
 						break;
+					}
 				}
-			}
 			}
 			if ( !command.token )
 			{

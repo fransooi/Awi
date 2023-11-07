@@ -135,6 +135,11 @@ class ConnectorUtilitiesTime extends awiconnector.Connector
 		var t = text.indexOf( 'T' );
 		return { time: time.getTime(), text: text.substring( t + 1 ) };
 	};
+	getTimestampFromMS( stamp )
+	{
+		var date = new Date( ms );
+		return { time: ms, text: date.toISOString() };
+	}
 	getDatestampFromMatches( matches, monthReplacement = 1 )
 	{
 		var [ _, month, day, year, hours, minutes, seconds, ampm ] = matches;

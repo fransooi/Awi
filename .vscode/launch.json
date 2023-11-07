@@ -15,7 +15,7 @@
 			],
 			"program": "${workspaceFolder}/simple-node-prompt.js",
 			//"program": "${workspaceFolder}/awi-aoz-server.js",
-            "args": [ ]
+            "args": [ "francois" ]
 		}
 	]
 }

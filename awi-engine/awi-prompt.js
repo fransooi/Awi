@@ -98,7 +98,8 @@ class Prompt
 						if ( answer.success )
 						{
 							logged = true;
-							line = 'Hello Awi... Could you first say hello to the user ' + userName + ' then invent a funny joke about programming chores?';
+							//line = 'Hello Awi... Could you first say hello to the user ' + userName + ' then invent a funny joke about programming chores?';
+							line = '';
 							this.awi.editor.print( control.editor, 'User changed to ' + userName + '\n', { user: 'information' } );
 						}
 						else
